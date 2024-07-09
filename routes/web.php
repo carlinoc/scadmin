@@ -1,0 +1,158 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CompanyPosController;
+use App\Http\Controllers\CompanySerialController;
+use App\Http\Controllers\ExpenseProviderController;
+use App\Http\Controllers\ExpenseServiceController;
+use App\Http\Controllers\ExpenseStaffController;
+use App\Http\Controllers\IncomeController;
+use App\Http\Controllers\PayBoxController;
+use App\Http\Controllers\PlaceController;
+use App\Http\Controllers\TableController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SalesDetailController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProviderController;
+use App\Http\Controllers\SaleSplitController;
+use App\Http\Controllers\StaffController;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/home', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::resource('/categories', CategoryController::class)->names('categories');    
+
+    Route::resource('/places', PlaceController::class)->names('places');    
+
+    Route::resource('/tables', TableController::class)->names('tables');    
+
+    Route::resource('/products', ProductController::class)->names('products');    
+
+    Route::resource('/sales', SaleController::class)->names('sales');    
+
+    Route::get('/sale/{saleId}', [SaleController::class, 'show'])->name('sales.show');
+    Route::get('/sale/pdf/{sale}/{discount}', [SaleController::class, 'pdf'])->name('sales.pdf');
+    Route::get('/sale/print/{sale}/{discount}/{withcash}', [SaleController::class, 'print'])->name('sales.print');
+    Route::get('/sale/change/{sale}/{discount}/{withcash}', [SaleController::class, 'change'])->name('sales.change');
+    Route::get('/sale/order/{sale}', [SaleController::class, 'order'])->name('sales.order');
+    Route::post('/sale/changetable', [SaleController::class, 'changetable'])->name('sales.changetable');
+    Route::post('/sale/sendticket', [SaleController::class, 'sendticket'])->name('sales.sendticket');
+    Route::post('/sale/update', [SaleController::class, 'update'])->name('sales.update');
+    Route::post('/sale/sendboleta', [SaleController::class, 'sendboleta'])->name('sales.sendboleta');
+    Route::post('/sale/sendfactura', [SaleController::class, 'sendfactura'])->name('sales.sendfactura');
+
+    Route::post('/salesdetail/add', [SalesDetailController::class, 'add'])->name('salesdetail.add');
+    Route::post('/salesdetail/edit', [SalesDetailController::class, 'edit'])->name('salesdetail.edit');
+    Route::post('/salesdetail/remove/{saleDetailId}', [SalesDetailController::class, 'remove'])->name('salesdetail.remove');
+    Route::post('/salesdetail/remove/{saleDetailId}/{saveHistory}', [SalesDetailController::class, 'remove'])->name('salesdetail.remove');
+
+    Route::get('/salelist', [SaleController::class, 'list'])->name('salelist.list');
+    
+    Route::get('/detail/{saleId}', [SaleController::class, 'detail'])->name('salelist.detail');
+    Route::get('/report/detail/{saleId}', [SaleController::class, 'detailorder'])->name('reports.detail');
+    Route::get('/report/split/{saleId}', [SaleController::class, 'split'])->name('reports.split');
+    Route::get('/report/history/{saleId}', [SaleController::class, 'history'])->name('reports.history');
+
+    Route::get('/sale/nullify/{saleId}', [SaleController::class, 'nullify'])->name('sales.nullify');
+    Route::post('/sale/cancelsale/{saleId}', [SaleController::class, 'cancelsale'])->name('sales.cancelsale');
+
+    Route::get('/report/sales', [ReportController::class, 'sales'])->name('report.sales');
+    Route::post('/report/saleslist', [ReportController::class, 'saleslist'])->name('report.saleslist');
+    Route::get('/report/lastorders', [ReportController::class, 'lastorders'])->name('report.lastorders');
+    Route::post('/report/lastorderslist', [ReportController::class, 'lastorderslist'])->name('report.lastorderslist');
+    Route::get('/report/payboxsales', [ReportController::class, 'payboxsales'])->name('report.payboxsales');
+    
+    Route::get('/user', [UserController::class, 'index'])->name('user.index');
+    Route::get('/user/list', [UserController::class, 'list'])->name('user.list');
+    Route::post('/user/add', [UserController::class, 'add'])->name('user.add');
+    Route::post('/user/edit', [UserController::class, 'edit'])->name('user.edit');
+    Route::post('/user/remove/{userId}', [UserController::class, 'remove'])->name('user.remove');
+
+    Route::get('/provider', [ProviderController::class, 'index'])->name('provider.index');
+    Route::post('/provider/add', [ProviderController::class, 'add'])->name('provider.add');
+    Route::post('/provider/edit', [ProviderController::class, 'edit'])->name('provider.edit');
+    Route::post('/provider/remove/{providerId}', [ProviderController::class, 'remove'])->name('provider.remove');
+    Route::get('/provider/list', [ProviderController::class, 'list'])->name('provider.list');
+
+    Route::get('/paybox', [PayBoxController::class, 'index'])->name('paybox.index');
+    Route::post('/paybox/add', [PayboxController::class, 'add'])->name('paybox.add');
+    Route::post('/paybox/edit', [PayboxController::class, 'edit'])->name('paybox.edit');
+    Route::get('/paybox/initbox', [PayboxController::class, 'initbox'])->name('paybox.initbox');
+    Route::get('/paybox/list', [PayboxController::class, 'list'])->name('paybox.list');
+    Route::get('/paybox/detail/{payboxId}', [PayboxController::class, 'detail'])->name('paybox.detail');
+    Route::post('/paybox/close', [PayboxController::class, 'close'])->name('paybox.close');
+    Route::get('/paybox/verifyopen', [PayboxController::class, 'verifyopen'])->name('paybox.verifyopen');
+
+    Route::get('/clients', [ClientController::class, 'index'])->name('client.index');
+    Route::post('/clients/add', [ClientController::class, 'add'])->name('client.add');
+    Route::post('/clients/edit', [ClientController::class, 'edit'])->name('client.edit');
+    Route::post('/clients/remove/{clientId}', [ClientController::class, 'remove'])->name('client.remove');
+    Route::get('/clients/list', [ClientController::class, 'list'])->name('client.list');
+
+    Route::post('/split/add/{saleId}', [SaleSplitController::class, 'add'])->name('salesplit.add');
+
+    Route::get('/income/{payboxId}', [IncomeController::class, 'index'])->name('income.index');
+    Route::post('/income/add', [IncomeController::class, 'add'])->name('income.add');
+    Route::get('/income/list/{payboxId}', [IncomeController::class, 'list'])->name('income.list');
+    Route::post('/income/remove/{incomeId}', [IncomeController::class, 'remove'])->name('income.remove');
+
+    Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
+    Route::post('/staff/add', [StaffController::class, 'add'])->name('staff.add');
+    Route::post('/staff/edit', [StaffController::class, 'edit'])->name('staff.edit');
+    Route::post('/staff/remove/{staffId}', [StaffController::class, 'remove'])->name('staff.remove');
+    Route::get('/staff/list', [StaffController::class, 'list'])->name('staff.list');
+
+    Route::post('/expenseprovider/add', [ExpenseProviderController::class, 'add'])->name('expenseprovider.add');
+    Route::get('/expenseprovider/list/{payboxId}', [ExpenseProviderController::class, 'list'])->name('expenseprovider.list');
+    Route::post('/expenseprovider/remove/{expenseProviderId}', [ExpenseProviderController::class, 'remove'])->name('expenseprovider.remove');
+    Route::post('/expensestaff/add', [ExpenseStaffController::class, 'add'])->name('expensestaff.add');
+    Route::get('/expensestaff/list/{payboxId}', [ExpenseStaffController::class, 'list'])->name('expensestaff.list');
+    Route::post('/expensestaff/remove/{expenseStaffId}', [ExpenseStaffController::class, 'remove'])->name('expensestaff.remove');
+    Route::post('/expenseservice/add', [ExpenseServiceController::class, 'add'])->name('expenseservice.add');
+    Route::get('/expenseservice/list/{payboxId}', [ExpenseServiceController::class, 'list'])->name('expenseservice.list');
+    Route::post('/expenseservice/remove/{expenseServiceId}', [ExpenseServiceController::class, 'remove'])->name('expenseservice.remove');
+
+    Route::get('/company', [CompanyController::class, 'index'])->name('company.index');
+    Route::post('/company/add', [CompanyController::class, 'add'])->name('company.add');
+    Route::post('/company/store', [CompanyController::class, 'store'])->name('company.store');
+    
+    Route::get('/companyserial/list/{serietype}', [CompanySerialController::class, 'list'])->name('companyserial.list');
+    Route::post('/companyserial/store', [CompanySerialController::class, 'store'])->name('companyserial.store');
+
+    Route::get('/companypos', [CompanyPosController::class, 'index'])->name('companypos.index');
+    Route::post('/companypos/add', [CompanyPosController::class, 'add'])->name('companypos.add');
+    Route::post('/companypos/edit', [CompanyPosController::class, 'edit'])->name('companypos.edit');
+    Route::post('/companypos/remove/{companyPosId}', [CompanyPosController::class, 'remove'])->name('companypos.remove');
+    Route::get('/companypos/list', [CompanyPosController::class, 'list'])->name('companypos.list');
+});
+
+require __DIR__.'/auth.php';
+
+Auth::routes();

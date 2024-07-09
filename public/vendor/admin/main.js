@@ -1,0 +1,109 @@
+function formatCurrency(val){
+    let currencyVal = val.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); 
+    return currencyVal;
+}
+
+function showErrorMsg(message){
+    Swal.fire({
+        title: "Atención",
+        html: message,
+        icon: "error",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar"
+    });
+}
+
+function showSuccessMsg(message){
+    Swal.fire({
+        title: "Muy bien",
+        html: message,
+        icon: "success",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar"
+    });
+}
+
+function getFormParams(formId){
+    const data = new URLSearchParams();
+    const myform = document.getElementById(formId);
+    for (const pair of new FormData(myform)) {
+      data.append(pair[0], pair[1]);
+    }
+    return data;  
+}
+
+function emptyfy(elements) {
+    let message='';
+    let _element=null;
+    for (i=0; i<elements.length; i++) {
+        if(document.getElementById(elements[i][0]).value==''){
+            message += '- ' + elements[i][1] + '<br>';  
+            if(_element==null){
+                _element = document.getElementById(elements[i][0]);         
+            }
+        }
+    }
+    if(_element != null){
+      _element.focus();
+      Swal.fire({
+        title: "Atención",
+        html: message,
+        icon: "warning",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "Aceptar"
+      });
+      return false;  
+    } 
+    return true;
+}
+
+function getPayType($paymentType) {
+  switch ($paymentType) {
+      case 0:
+          return '<small class="badge badge-success">Efectivo</small>';
+      case 1:
+          return '<small class="badge badge-secondary">Tarjeta</small>';
+      case 2:
+          return '<small class="badge badge-primary">Yape/Plin</small>';    
+      default:
+          return '<small class="badge badge-success">Efectivo</small>';
+  }
+}
+
+function getVoucherType($paymentType) {
+  switch ($paymentType) {
+      case 1:
+          return '<small class="badge badge-info">Boleta</small>';
+      case 2:
+          return '<small class="badge badge-danger">Factura</small>';
+      default:
+          return '';
+  }
+}
+
+(function($) {
+    $.fn.inputFilter = function(callback, errMsg) {
+      return this.on("input keydown keyup mousedown mouseup select contextmenu drop focusout", function(e) {
+        if (callback(this.value)) {
+          // Accepted value
+          if (["keydown","mousedown","focusout"].indexOf(e.type) >= 0){
+            $(this).removeClass("input-error");
+            this.setCustomValidity("");
+          }
+          this.oldValue = this.value;
+          this.oldSelectionStart = this.selectionStart;
+          this.oldSelectionEnd = this.selectionEnd;
+        } else if (this.hasOwnProperty("oldValue")) {
+          // Rejected value - restore the previous one
+          $(this).addClass("input-error");
+          this.setCustomValidity(errMsg);
+          this.reportValidity();
+          this.value = this.oldValue;
+          this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+        } else {
+          // Rejected value - nothing to restore
+          this.value = "";
+        }
+      });
+    };
+}(jQuery));
