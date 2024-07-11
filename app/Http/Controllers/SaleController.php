@@ -112,6 +112,20 @@ class SaleController extends Controller
         return view('reports.history', ['historys' => $historys]);
     }
 
+    public function addtips(Request $request): JsonResponse 
+    {
+        $sale = Sale::find($request->saleId);
+        $sale->tips = $request->tips;
+        $tipsType = $request->tipsType;
+        if($request->tips==0){
+            $tipsType=0; 
+        }
+        $sale->tipsType = $tipsType;
+        $sale->update();
+
+        return response()->json(['status'=>'success', 'message'=>'La propina fue actualizada']);    
+    }
+
     public function pdf(Sale $sale, Int $discount)
     {
         $salesDetails = SalesDetail::select('sales_detail.id','sales_detail.price', 'quantity', 'total', 'products.name as product', 'products.id as productId')

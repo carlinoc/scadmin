@@ -67,6 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/sale/update', [SaleController::class, 'update'])->name('sales.update');
     Route::post('/sale/sendboleta', [SaleController::class, 'sendboleta'])->name('sales.sendboleta');
     Route::post('/sale/sendfactura', [SaleController::class, 'sendfactura'])->name('sales.sendfactura');
+    Route::post('/sale/addtips', [SaleController::class, 'addtips'])->name('sales.addtips');
 
     Route::post('/salesdetail/add', [SalesDetailController::class, 'add'])->name('salesdetail.add');
     Route::post('/salesdetail/edit', [SalesDetailController::class, 'edit'])->name('salesdetail.edit');

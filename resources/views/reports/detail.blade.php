@@ -28,26 +28,32 @@
                     <input type="hidden" id="backUrl" name="backUrl" value="{{$back}}">
                     <input type="hidden" id="payBoxState" name="payBoxState" value="{{$sale->payboxState}}">
                     <div class="row">
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                             <p class="h5 text-success">Numero: <b>{{$sale->saleId}}</b></p>
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                             <label class="h5 text-info mr-2" id="tableName">Mesa: <b>{{$sale->table}}</b></label>
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                             <input type="hidden" name="saleId" id="saleId" value="{{$sale->saleId}}">
                             <button type="button" id="addProduct" class="btn btn-success " style="font-weight: bold;">+ Agregar Producto</button>
                         </div>
+                        <div class="col-sm-3">
+                            <button type="button" id="newTips" class="btn btn-info " style="font-weight: bold;"> + Propina</button>
+                        </div>
                     </div>
                     <div class="row mt-2">
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                             <p class="h5 text-warning"><b>{{date_format($sale->updated_at,"d-m-Y g:i A")}}</b></p>
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                             <p class="h5 text-danger" id="pTotal">Total: S/ <b>0.00</b></p>
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                             <p class="text-muted">Atendio: {{ $sale->user }}</p>
+                        </div>
+                        <div class="col-sm-3">
+                            
                         </div>
                     </div>
                     <div class="row">
@@ -169,6 +175,7 @@
 
     @include('sales.add-modal')
     @include('sales.client')
+    @include('reports.add-tips')
 @stop
 
 @section('css')
@@ -210,10 +217,52 @@
     let _phone = $("#phone");
     let _withCash = $("#withCash");
     let _posList = $("#posList");
+
+    let _newTips = $("#newTips");
+    let _addTips = $("#addTips");
+    let _modalTips = $("#addModalTips");
+    let _tips = $("#tips");
+    let _tipsType = $("#tipsType");
     
     $(document).ready(function(){
         let sumTotal = parseFloat($('#sumTotal').val());
         $('#pTotal').html('Total: S/ ' + formatCurrency(sumTotal));
+
+        _newTips.on('click', function(e){
+            e.preventDefault();
+            _tips.val("");
+            _tipsType.val(1).change();
+            _modalTips.modal('show');
+            setTimeout(function(){
+                _tips.focus();
+            }, 300);
+        });
+
+        _addTips.on('click', function(e){
+            e.preventDefault();
+            let elements = [
+                ['tips', 'Ingrese la propina']
+            ];
+
+            if(emptyfy(elements)) {
+                let route = "{{ route('sales.addtips') }}";
+                let data = getFormParams('frmAddTips');
+                fetch(route, {
+                    method: 'post',
+                    body: data,
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if(result.status=="success"){
+                        _modalTips.modal('hide');
+                        showSuccessMsg(result.message);
+                    }
+                    if(result.status=="error"){
+                        showErrorMsg(result.message);
+                    }
+                });
+            }
+        });
 
         _withCash.on('change', function(e){
             let value = $(this).val();

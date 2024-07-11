@@ -35,6 +35,7 @@ class ReportController extends Controller
         $query = Sale::select('sales.id', 'sales.subtotal', 'sales.discount', 'sales.total', 'sales.status', 'sales.withCash', 
             DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'tables.name as table', 'tables.placeId as placeId', 
             'places.place as place', 'places.place as pay', 'companypos.pos', 'sales.voucherType',
+            'sales.tips', 'sales.tipsType',
             DB::raw('(SELECT COUNT(*) FROM saleshistory WHERE saleshistory.saleId = sales.id) AS history_count'),)
             ->join('tables', 'tables.id','=','sales.tableId')
             ->join('places', 'places.id','=','tables.placeId')

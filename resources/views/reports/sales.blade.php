@@ -85,6 +85,11 @@
         <div class="col">
             <label id="lTotal" class="col-form-label col-md-6" style="color:#dc3545!important;"></label>        
         </div>
+        {{-- <div class="col">
+            <blockquote>
+            <small>Someone famous in <cite title="Source Title">Source Title</cite></small>
+            </blockquote>
+        </div> --}}
     </div>
 
     <div class="row">
@@ -95,15 +100,16 @@
                     <table id="dtSales" class="table table-striped" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Nro</th>
+                                <th style="width: 80px;">Nro</th>
                                 <th>Fecha y Hora</th>
                                 <th>Mesa</th>
                                 <th>SubTotal</th>
-                                <th>Descuento</th>
+                                <th style="width: 100px;">Desc.</th>
                                 <th>Total</th>
                                 <th>Pago</th>
                                 <th>POS</th>
                                 <th style="width: 100px;">Comprobante</th>
+                                <th style="width: 100px;">Propina</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
@@ -180,7 +186,11 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return `${row.discount}%`;
+                                if(row.discount > 0) {
+                                    return '<span class="text-danger">' + row.discount + '%</span>';
+                                }else{
+                                    return `${row.discount}%`;
+                                }
                             }
                         },
                         {
@@ -201,6 +211,20 @@
                         {
                             "render": function(data, type, row, meta) {
                                 return getVoucherType(row.voucherType);
+                            }
+                        },
+                        {
+                            "render": function(data, type, row, meta) {
+                                if(row.tips > 0){
+                                    if(row.tipsType == 1){
+                                        return '<span class="text-success"><i class="fas fa-coins"></i> ' + row.tips +'</span>';
+                                    }else{
+                                        return '<span class="text-secondary"><i class="fas fa-coins"></i> ' + row.tips +'</span>';
+                                    }
+                                    
+                                }else{
+                                    return row.tips;
+                                }
                             }
                         },
                         {
