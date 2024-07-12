@@ -84,11 +84,19 @@ class ReportController extends Controller
         }  
         $sales = $query->get();    
         $query2 = $query; 
+        $query3 = $query;
+
+        $totalTips = $query3->sum('sales.tips');
+        $tipsCard = 0; //$query3->where('sales.tipsType','=', 2)->sum('sales.tips');
+        
+        $tipsCash = 0; //$query3->sum('sales.tips');
+        
+
         $totalSales = $query2->sum('sales.total');
         $withCash = $query2->where('sales.withCash','=', 0)->sum('sales.total');
         $withCard = round(($totalSales - $withCash), 2);
         
-        return response()->json(['status'=>'success', 'sales' => $sales, 'totalSales' => $totalSales, 'withCard' => $withCard, 'withCash' => $withCash]);    
+        return response()->json(['status'=>'success', 'sales' => $sales, 'totalSales' => $totalSales, 'withCard' => $withCard, 'withCash' => $withCash, 'tipsCash' => $tipsCash, 'tipsCard' => $tipsCard]);    
     }
 
     public function lastorders(): View

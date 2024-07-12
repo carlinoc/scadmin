@@ -16,7 +16,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col">
-                                <x-adminlte-select name="dateRange" id="dateRange" required>
+                                <select class="form-control" name="dateRange" id="dateRange" required>
                                     <x-slot name="prependSlot">
                                         <div class="input-group-text bg-gradient-info">
                                             <i class="fas fa-location-arrow"></i>
@@ -30,7 +30,7 @@
                                     <option value="last_month">El Mes Pasado</option>
                                     <option value="this_year">Este año</option>
                                     <option value="custom">Seleccionar Fechas</option>
-                                </x-adminlte-select>
+                                </select>
                             </div>
                             <div class="col-auto">
                                 <select class="form-control" name="withCash" id="withCash">
@@ -85,11 +85,16 @@
         <div class="col">
             <label id="lTotal" class="col-form-label col-md-6" style="color:#dc3545!important;"></label>        
         </div>
-        {{-- <div class="col">
-            <blockquote>
-            <small>Someone famous in <cite title="Source Title">Source Title</cite></small>
-            </blockquote>
-        </div> --}}
+        <div class="col">
+            <ul class="list-unstyled">
+                <li>
+                    <i class="far fa-fw fa-file-word"></i> <span id="sTipsCash">Efectivo: 0.00</span>
+                </li>
+                <li>
+                    <i class="far fa-fw fa-file-pdf"></i> <span id="sTipsCard">Tarjeta: 0.00</span>
+                </li>
+            </ul>
+        </div>
     </div>
 
     <div class="row">
@@ -136,7 +141,9 @@
 <script>
     const _token = document.head.querySelector("[name~=csrf-token][content]").content;
 
-    let _dtSales = $("#dtSales");    
+    let _dtSales = $("#dtSales");
+    let _sTipsCash = $("#sTipsCash");
+    let _sTipsCard = $("#sTipsCard");    
 
     $(function() {
         $("#start_date").datepicker({
@@ -243,6 +250,8 @@
                 $('#lTotal').html('<h5>Total S/' + result.totalSales + '</h5>');
                 $('#lCash').html('<h5>En Efectivo S/' + result.withCash + '</h5>');
                 $('#lCard').html('<h5>En Tarjeta S/' + result.withCard + '</h5>');
+                _sTipsCash.html('Efectivo: S/' + result.tipsCash);
+                _sTipsCard.html('Tarjeta: S/' + result.tipsCard);
             }
         });
     }    

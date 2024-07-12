@@ -664,7 +664,7 @@ class SaleController extends Controller
         ->join('products', 'products.id','=','sales_detail.productId')
         ->where('sales_detail.saleId', $saleId)->get();
         
-        $print_name = "POS-80C";
+        $print_name = env('DATA_COMPANY_POS','POS-80C');
         $connector = new WindowsPrintConnector($print_name);
         $printer = new Printer($connector);
 
@@ -720,7 +720,7 @@ class SaleController extends Controller
         ->where('products.inCharge', $inCharge)->get();
 
         if(count($list)){
-            $print_name = "POS-80C";
+            $print_name = env('DATA_COMPANY_POS','POS-80C');
             $connector = new WindowsPrintConnector($print_name);
             $printer = new Printer($connector);
 
@@ -756,7 +756,7 @@ class SaleController extends Controller
         $company = Company::all()->where('ruc', $RUC)->first();
         $IGV = $company->igv;
 
-        $print_name = "POS-80C";
+        $print_name = env('DATA_COMPANY_POS','POS-80C');
         $connector = new WindowsPrintConnector($print_name);
         $printer = new Printer($connector);
 
@@ -832,7 +832,7 @@ class SaleController extends Controller
         $company = Company::all()->where('ruc', $RUC)->first();
         $IGV = $company->igv;
 
-        $print_name = "POS-80C";
+        $print_name = env('DATA_COMPANY_POS','POS-80C');
         $connector = new WindowsPrintConnector($print_name);
         $printer = new Printer($connector);
 
