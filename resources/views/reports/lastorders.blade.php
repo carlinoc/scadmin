@@ -163,7 +163,8 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return '<a href="/report/detail/' + row.id + '" class="btn btn-sm btn-info"><i class="far fa-eye"></i></a> <a href="/report/split/' + row.id + '" class="btn btn-sm btn-warning"><i class="far fa-edit"></i></a>';
+                                return '<a href="/report/detail/' + row.id + '" class="btn btn-sm btn-info"><i class="far fa-eye"></i></a>';
+                                //return '<a href="/report/detail/' + row.id + '" class="btn btn-sm btn-info"><i class="far fa-eye"></i></a> <a href="/report/split/' + row.id + '" class="btn btn-sm btn-warning"><i class="far fa-edit"></i></a>';
                             }
                         }
                     ]

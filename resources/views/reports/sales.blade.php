@@ -51,7 +51,7 @@
                                 <x-adminlte-button class=".btn-sm" id="showReport" type="submit" label=" Ver Reporte" theme="primary" icon="fas fa-save"/>
                             </div>
                         </div>
-                        <div id="rowDates" class="row" style="display:none;">
+                        <div id="rowDates" class="row mt-2" style="display:none;">
                             <div class="col-6">
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
@@ -88,10 +88,10 @@
         <div class="col">
             <ul class="list-unstyled">
                 <li>
-                    <i class="far fa-fw fa-file-word"></i> <span id="sTipsCash">Efectivo: 0.00</span>
+                    <span class="text-success"><i class="fas fa-coins"></i> <span id="sTipsCash">Efectivo: 0.00</span></span>
                 </li>
                 <li>
-                    <i class="far fa-fw fa-file-pdf"></i> <span id="sTipsCard">Tarjeta: 0.00</span>
+                    <span class="text-secondary"><i class="fas fa-coins"></i> <span id="sTipsCard">Tarjeta: 0.00</span></span>
                 </li>
             </ul>
         </div>
@@ -143,7 +143,8 @@
 
     let _dtSales = $("#dtSales");
     let _sTipsCash = $("#sTipsCash");
-    let _sTipsCard = $("#sTipsCard");    
+    let _sTipsCard = $("#sTipsCard");
+    let _ds = null;    
 
     $(function() {
         $("#start_date").datepicker({
@@ -165,6 +166,7 @@
         .then(response => response.json())
         .then(result => {
             if(result.status=="success"){
+                _ds = result.sales;
                 _dtSales.DataTable().destroy();    
                 _dtSales.DataTable({
                     "data": result.sales,
@@ -250,8 +252,19 @@
                 $('#lTotal').html('<h5>Total S/' + result.totalSales + '</h5>');
                 $('#lCash').html('<h5>En Efectivo S/' + result.withCash + '</h5>');
                 $('#lCard').html('<h5>En Tarjeta S/' + result.withCard + '</h5>');
-                _sTipsCash.html('Efectivo: S/' + result.tipsCash);
-                _sTipsCard.html('Tarjeta: S/' + result.tipsCard);
+                
+                let _cashTips = 0.0;
+                let _cardTips = 0.0;
+                for($i = 0; $i < _ds.length; $i++) {
+                    if(_ds[$i].tipsType == 1) {
+                        _cashTips += parseFloat(_ds[$i].tips);
+                    }
+                    if(_ds[$i].tipsType == 2) {
+                        _cardTips += parseFloat(_ds[$i].tips);
+                    }
+                }
+                _sTipsCash.html('Efectivo: S/' + _cashTips);
+                _sTipsCard.html('Tarjeta: S/' + _cardTips);
             }
         });
     }    

@@ -22,6 +22,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\SaleSplitController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\TipsPercentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -152,6 +153,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/companypos/edit', [CompanyPosController::class, 'edit'])->name('companypos.edit');
     Route::post('/companypos/remove/{companyPosId}', [CompanyPosController::class, 'remove'])->name('companypos.remove');
     Route::get('/companypos/list', [CompanyPosController::class, 'list'])->name('companypos.list');
+
+    Route::post('/tipspercent/add', [TipsPercentController::class, 'add'])->name('tipspercent.add');
+    Route::post('/tipspercent/edit', [TipsPercentController::class, 'edit'])->name('tipspercent.edit');
+    Route::post('/tipspercent/remove/{tipsPercentId}', [TipsPercentController::class, 'remove'])->name('tipspercent.remove');
+    Route::get('/tipspercent/list', [TipsPercentController::class, 'list'])->name('tipspercent.list');
 });
 
 require __DIR__.'/auth.php';

@@ -109,8 +109,6 @@
                     </table>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
             <div class="card card-danger card-outline">
                 <div class="card-body">
                     <strong style="color:#dc3545;"><i class="fas fa-arrow-circle-up mr-1"></i> Gastos S/</strong>
@@ -133,9 +131,31 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="card card-warning card-outline">
+                <div class="card-body">
+                    <strong><span class="text-secondary"><i class="fas fa-coins mr-1"></i> Propinas S/</span></strong>
+                    <table class="table table-sm mt-2">
+                        <tbody>
+                            <tr>
+                                <td>Pago Proveedores</td>
+                                <td id="tdExpenseProvider">0.00</td>
+                            </tr>
+                            <tr>
+                                <td>Sueldos y Adelantos</td>
+                                <td id="tdExpenseStaff">0.00</td>
+                            </tr>
+                            <tr>
+                                <td>Pago de Servicios</td>
+                                <td id="tdExpenseService">0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>    
     <div class="row">
-        <div class="col-md-2"></div>
         <div class="col-md-4">
             <div id="cardIncome" class="card card-success">
                 <div class="card-header">
@@ -273,6 +293,7 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4"></div>
     </div>
 @stop
 

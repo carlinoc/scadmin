@@ -22,6 +22,11 @@
                                 href="#custom-tabs-four-serial" role="tab"
                                 aria-controls="custom-tabs-four-serial" aria-selected="false">Comprobantes</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-serial-tab" data-toggle="pill"
+                                href="#custom-tabs-four-tips" role="tab"
+                                aria-controls="custom-tabs-four-tips" aria-selected="false">Propinas</a>
+                        </li>
                     </ul>
                 </div>
                 <div class="card-body">
@@ -135,15 +140,38 @@
                                 </div>
                             </form>
                         </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-tips" role="tabpanel"
+                            aria-labelledby="custom-tabs-four-tips-tab">
+                            <div class="row justify-content-end mb-2">
+                                <button type="button" id="newTipsPercent" class="btn btn-success">+ Nuevo</button>
+                            </div>
+                            <div class="row">
+                                <table id="dtTipsPercent" style="width: 100%!important;">
+                                    <thead>
+                                        <tr>
+                                            <td>Id</td>
+                                            <td>Concepto</td>
+                                            <td>Porcentaje %</td>
+                                            <th>Opciones</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div> 
     </div>
+
+    @include('company.add-tipspercent')
 @stop
 
 @section('css')
 <link rel="stylesheet" href="/vendor/admin/main.css">
+<style>
+    div.dataTables_wrapper {width: 100%;} 
+</style>    
 @stop
 
 @section('js')
@@ -158,10 +186,66 @@
     let _number = $("#number");
     let _description = $("#description2");
     let _saveSerial = $("#saveSerial");
+
+    let _dtTipsPercent = $("#dtTipsPercent");
+    let _newTipsPercent = $("#newTipsPercent");
+    let _modalTipsPercent = $("#tipsPercentModal");
+    let _tipsPercentId = $("#tipsPercentId");
+    let _employ = $("#employ");
+    let _percent = $("#percent");
+    let _addTipsPercent = $("#addTipsPercent");
+    let _ds=null;
     
     $(document).ready(function() {
 
-        
+        fetchTipsPercent();
+
+        _newTipsPercent.on("click", function(e){
+            e.preventDefault();
+            _tipsPercentId.val("");
+            _employ.val("");
+            _percent.val("");
+            _modalTipsPercent.modal("show");
+
+            setTimeout(function(){
+                _employ.focus();
+            }, 300);
+        });
+
+        _addTipsPercent.on("click", function(e){
+            e.preventDefault();
+            let elements = [
+                ['employ', 'Ingrese el puesto o cargo'],
+                ['percent', 'Ingrese el porcentaje']
+            ];
+
+            if(emptyfy(elements)) {
+                let tipsPercentId = _tipsPercentId.val();
+                
+                let route = "{{ route('tipspercent.add') }}";
+                if(tipsPercentId!="") {
+                    route = "{{ route('tipspercent.edit') }}";
+                }
+
+                let data = getFormParams('frmAddTipsPercent');
+                fetch(route, {
+                    method: 'post',
+                    body: data,
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if(result.status=="success"){
+                        _modalTipsPercent.modal('hide');
+                        showSuccessMsg(result.message);
+                        fetchTipsPercent();
+                    }
+                    if(result.status=="error"){
+                        showErrorMsg(result.message);
+                    }
+                })
+            }
+
+        });   
 
         _serieType.on("change", function(e){
             e.preventDefault();
@@ -227,6 +311,53 @@
         });
 
         _serieType.val(1).change();
+
+        _dtTipsPercent.on('click', '.editTipsPercent', function (e) {
+            e.preventDefault();
+            let index = $(this).data('index');
+            let rw = _ds[index];
+            with (rw) {
+                _tipsPercentId.val(id);
+                _employ.val(employ);
+                _percent.val(percent);
+            }
+            //_modalLabel.text("Editar Porcentaje");
+            _modalTipsPercent.modal('show');
+        });
+
+        _dtTipsPercent.on('click', '.removeProvider', function (e) {
+            e.preventDefault();
+            let providerId = $(this).data('id');
+            Swal.fire({
+                title: "Atención",
+                text: "Deseas eliminar el proveedor?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Aceptar"
+                }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch("/provider/remove/" + providerId, {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            "X-CSRF-Token": _token
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if(result.status=="success"){
+                            showSuccessMsg(result.message);
+                            fetchProviders();
+                        }
+                        if(result.status=="error"){
+                            showErrorMsg(result.message);
+                        }
+                    });
+                }
+            });
+        });
     });
 
     async function fetchSeriales(companySerialId) {
@@ -243,6 +374,47 @@
 
             _serieType.val(serieType);
         }        
+    }
+
+    async function fetchTipsPercent() {
+        const response = await fetch("/tipspercent/list", {method: 'GET'});
+        if(!response.ok){
+            throw new Error("Error fetch tipsPercent");       
+        }                    
+        const data = await response.json();
+        _ds = data.list;
+        _dtTipsPercent.DataTable().destroy();
+        _dtTipsPercent.DataTable({
+            "paging": false,
+            "ordering": false,
+            "info": false,
+            "searching": false,
+            "data": data.list,
+            "responsive": true,
+            order: [[0, 'desc']],
+            "columns": [
+                {
+                    "render": function(data, type, row, meta) {
+                        return row.id;
+                    }
+                },
+                {
+                    "render": function(data, type, row, meta) {
+                        return row.employ;
+                    }
+                },
+                {
+                    "render": function(data, type, row, meta) {
+                        return row.percent + "%";
+                    }
+                },
+                {
+                    "render": function(data, type, row, meta) {
+                        return '<a href="#" data-index="'+meta.row+'" class="btn btn-xs btn-info editTipsPercent"><i class="far fa-edit"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-xs btn-danger removeTipsPercent"><i class="fas fa-trash"></i></a>';
+                    }
+                }
+            ]
+        });   
     }
 </script>        
 @stop
