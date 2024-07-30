@@ -6,7 +6,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Agregar Porcentaje</h4>
+                    <h4 class="modal-title" id="titlemodal">Agregar Porcentaje</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>

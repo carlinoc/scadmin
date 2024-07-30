@@ -6,6 +6,7 @@ use App\Models\PayBox;
 use App\Models\Provider;
 use App\Models\Staff;
 use App\Models\Service;
+use App\Models\OtherPay;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -85,7 +86,46 @@ class PayBoxController extends Controller
     {
         $payBox = PayBox::find($request->payboxId);
 
-        return view('paybox.detail', ['paybox' => $payBox]);
+        $sales = Sale::select('id', 'tips', 'tipsType')->where('payboxId', $request->payboxId);
+        $query = $sales;
+        $totalTips = $sales->sum('tips');
+        $query = $query->where('tipsType', '1');
+        $totalCash = $query->sum('tips');
+        $totalCard = round(($totalTips - $totalCash), 2);
+        $posPercent = env('DATA_COMPANY_POS_PERCENT', 4.09);
+        $desc = $totalCard * $posPercent / 100;
+        $totalCard = $totalCard - $desc;
+        //$totalCard = number_format(47, 2);
+        $totalCard = number_format($totalCard, 2);
+        $totalTips = $totalCash + $totalCard;        
+
+        return view('paybox.detail', ['paybox' => $payBox, 'totalCash' => $totalCash, 'totalTips' => $totalTips, 'totalCard' => $totalCard]);
+    }
+
+    public function show(Request $request): View
+    {
+        $incomeConcepts = DB::table('incomeconcept')->get();
+        $providers = Provider::all();
+        $staffs = Staff::all();
+        $services = Service::all();
+        $otherpays = OtherPay::all();
+        
+        $payBox = PayBox::find($request->payboxId);
+
+        $sales = Sale::select('id', 'tips', 'tipsType')->where('payboxId', $request->payboxId);
+        $query = $sales;
+        $totalTips = $sales->sum('tips');
+        $query = $query->where('tipsType', '1');
+        $totalCash = $query->sum('tips');
+        $totalCard = round(($totalTips - $totalCash), 2);
+        $posPercent = env('DATA_COMPANY_POS_PERCENT', 4.09);
+        $desc = $totalCard * $posPercent / 100;
+        $totalCard = $totalCard - $desc;
+        $totalCard = number_format($totalCard, 2);
+        $totalTips = $totalCash + $totalCard;        
+
+        return view('paybox.show', ['paybox' => $payBox, 'totalCash' => $totalCash, 'totalTips' => $totalTips, 
+            'totalCard' => $totalCard, 'incomeConcepts' => $incomeConcepts, 'providers' => $providers, 'staffs' => $staffs, 'services' => $services, 'otherpays' => $otherpays]);
     }
 
     public function close(Request $request)

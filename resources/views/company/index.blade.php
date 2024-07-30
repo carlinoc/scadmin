@@ -142,8 +142,13 @@
                         </div>
                         <div class="tab-pane fade" id="custom-tabs-four-tips" role="tabpanel"
                             aria-labelledby="custom-tabs-four-tips-tab">
-                            <div class="row justify-content-end mb-2">
-                                <button type="button" id="newTipsPercent" class="btn btn-success">+ Nuevo</button>
+                            <div class="row mb-2">
+                                <div class="col">
+                                    <span id="totalPercent" class="text-success">Total Porcentajes: 0%</span>
+                                </div>
+                                <div class="col">
+                                    <button type="button" id="newTipsPercent" class="btn btn-success float-right">+ Nuevo</button>
+                                </div>
                             </div>
                             <div class="row">
                                 <table id="dtTipsPercent" style="width: 100%!important;">
@@ -195,6 +200,8 @@
     let _percent = $("#percent");
     let _addTipsPercent = $("#addTipsPercent");
     let _ds=null;
+    let _totalPercent = $("#totalPercent");
+    let _titlemodal = $("#titlemodal");
     
     $(document).ready(function() {
 
@@ -205,6 +212,7 @@
             _tipsPercentId.val("");
             _employ.val("");
             _percent.val("");
+            _titlemodal.text("Agregar Porcentaje");
             _modalTipsPercent.modal("show");
 
             setTimeout(function(){
@@ -242,7 +250,7 @@
                     if(result.status=="error"){
                         showErrorMsg(result.message);
                     }
-                })
+                });
             }
 
         });   
@@ -321,16 +329,16 @@
                 _employ.val(employ);
                 _percent.val(percent);
             }
-            //_modalLabel.text("Editar Porcentaje");
+            _titlemodal.text("Editar Porcentaje");
             _modalTipsPercent.modal('show');
         });
 
-        _dtTipsPercent.on('click', '.removeProvider', function (e) {
+        _dtTipsPercent.on('click', '.removeTipsPercent', function (e) {
             e.preventDefault();
-            let providerId = $(this).data('id');
+            let tipsPercentId = $(this).data('id');
             Swal.fire({
                 title: "Atención",
-                text: "Deseas eliminar el proveedor?",
+                text: "Deseas eliminar el porcentaje?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -338,7 +346,7 @@
                 confirmButtonText: "Aceptar"
                 }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch("/provider/remove/" + providerId, {
+                    fetch("/tipspercent/remove/" + tipsPercentId, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json',
@@ -349,7 +357,7 @@
                     .then(result => {
                         if(result.status=="success"){
                             showSuccessMsg(result.message);
-                            fetchProviders();
+                            fetchTipsPercent();
                         }
                         if(result.status=="error"){
                             showErrorMsg(result.message);
@@ -414,7 +422,13 @@
                     }
                 }
             ]
-        });   
+        });
+        
+        let _total = 0.0;
+        for($i = 0; $i < _ds.length; $i++) {
+            _total += parseFloat(_ds[$i].percent);
+        }
+        _totalPercent.html('Total Procentaje: ' + _total + '%');
     }
 </script>        
 @stop

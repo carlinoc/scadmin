@@ -48,7 +48,7 @@
                                 </select>
                             </div>    
                             <div class="col">
-                                <x-adminlte-button class=".btn-sm" id="showReport" type="submit" label=" Ver Reporte" theme="primary" icon="fas fa-save"/>
+                                <button id="showReport" type="submit" class="btn btn-primary">Ver Reporte</button>
                             </div>
                         </div>
                         <div id="rowDates" class="row mt-2" style="display:none;">
@@ -75,25 +75,47 @@
         </div> 
     </div>
 
-    <div class="row">        
+    <div class="row">
         <div class="col">
-            <label id="lCash" class="col-form-label" style="color:#17a2b8!important;">En Efectivo: 00</label>
+            <div class="info-box bg-gradient-success">
+                <div class="info-box-content">
+                    <span class="info-box-text text-center">En Efectivo</span>
+                    <span id="lCash" class="info-box-number text-center">s/ 0.00</span>
+                </div>
+            </div>
         </div>
         <div class="col">
-            <label id="lCard" class="col-form-label" style="color:#28a745!important;">En Tarjeta: 00</label>
+            <div class="info-box bg-gradient-secondary">
+                <div class="info-box-content">
+                    <span class="info-box-text text-center">En Tarjeta</span>
+                    <span id="lCard" class="info-box-number text-center">s/ 0.00</span>
+                </div>
+            </div>
         </div>
         <div class="col">
-            <label id="lTotal" class="col-form-label col-md-6" style="color:#dc3545!important;"></label>        
+            <div class="info-box bg-gradient-danger">
+                <div class="info-box-content">
+                    <span class="info-box-text text-center">Total</span>
+                    <span id="lTotal" class="info-box-number text-center">s/ 0.00</span>
+                </div>
+            </div>
         </div>
         <div class="col">
-            <ul class="list-unstyled">
-                <li>
-                    <span class="text-success"><i class="fas fa-coins"></i> <span id="sTipsCash">Efectivo: 0.00</span></span>
-                </li>
-                <li>
-                    <span class="text-secondary"><i class="fas fa-coins"></i> <span id="sTipsCard">Tarjeta: 0.00</span></span>
-                </li>
-            </ul>
+            <div class="info-box bg-light">
+                <div class="info-box-content">
+                    <div class="row">
+                        <div class="col col-vercent">
+                            <span id="sTipsTotal" class="text-muted">Tips: S/ 0.00</span>    
+                        </div>
+                        <div class="col">
+                            <span id="sTipsCash" class="info-box-number2 text-success">Efectivo: 0.00</span>
+                            <span id="sTipsCard" class="info-box-number2 text-muted">Tarjeta: 0.00</span>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+            </div>
         </div>
     </div>
 
@@ -132,6 +154,30 @@
 
 @section('css')
 <link href="/vendor/datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet"/>
+<style>
+    .info-box{
+        min-height: 60px!important;
+        padding: .2rem!important;
+    }
+    .info-box-text{
+        padding: 0px!important;
+        margin: 0px!important;
+        line-height: 18px!important;
+    }
+    .info-box-number{
+        margin-top: 0px!important;
+    }
+    .info-box-number2{
+        margin-top: 0px!important;
+        display: block!important;
+        font-weight: 500!important;
+    }
+    .col-vercent{
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+</style>
 @stop
 
 
@@ -144,7 +190,8 @@
     let _dtSales = $("#dtSales");
     let _sTipsCash = $("#sTipsCash");
     let _sTipsCard = $("#sTipsCard");
-    let _ds = null;    
+    let _ds = null;
+    let _sTipsTotal = $("#sTipsTotal");    
 
     $(function() {
         $("#start_date").datepicker({
@@ -249,13 +296,15 @@
                     ]
                 });
 
-                $('#lTotal').html('<h5>Total S/' + result.totalSales + '</h5>');
-                $('#lCash').html('<h5>En Efectivo S/' + result.withCash + '</h5>');
-                $('#lCard').html('<h5>En Tarjeta S/' + result.withCard + '</h5>');
+                $('#lTotal').html('S/ ' + result.totalSales);
+                $('#lCash').html('S/ ' + result.withCash);
+                $('#lCard').html('S/' + result.withCard);
                 
                 let _cashTips = 0.0;
                 let _cardTips = 0.0;
+                let _totalTips = 0.0;
                 for($i = 0; $i < _ds.length; $i++) {
+                    _totalTips += parseFloat(_ds[$i].tips);
                     if(_ds[$i].tipsType == 1) {
                         _cashTips += parseFloat(_ds[$i].tips);
                     }
@@ -263,8 +312,9 @@
                         _cardTips += parseFloat(_ds[$i].tips);
                     }
                 }
-                _sTipsCash.html('Efectivo: S/' + _cashTips);
-                _sTipsCard.html('Tarjeta: S/' + _cardTips);
+                _sTipsCash.html('Efectivo: ' + _cashTips);
+                _sTipsCard.html('Tarjeta: ' + _cardTips);
+                _sTipsTotal.html('Tips: S/' + _totalTips);
             }
         });
     }    

@@ -110,7 +110,7 @@
                                                         <option value=""> - Seleccione - </option>
                                                         <option value="1">Adelanto de Sueldo</option>
                                                         <option value="2">Sueldo</option>
-                                                        <option value="3">Completar Sueldo</option>
+                                                        <option value="3">Horas Extras</option>
                                                     </select>
                                                 </div>            
                                             </div>

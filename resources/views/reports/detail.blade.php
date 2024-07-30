@@ -230,6 +230,11 @@
 
         _newTips.on('click', function(e){
             e.preventDefault();
+            if(_payboxState.val() == 2){
+                showErrorMsg("La venta se encuentra cerrada");
+                return;
+            }
+            
             _tips.val("");
             _tipsType.val(1).change();
             _modalTips.modal('show');
@@ -240,6 +245,7 @@
 
         _addTips.on('click', function(e){
             e.preventDefault();
+
             let elements = [
                 ['tips', 'Ingrese la propina']
             ];
@@ -445,40 +451,42 @@
         
         $('#sendBoleta').on('click', function(e) {
             e.preventDefault();
-            let route = "{{ route('sales.sendboleta') }}";
-            let data = getFormParams('frmSendTicket');
-            fetch(route, {
-                method: 'post',
-                body: data,
-            })
-            .then(response => response.json())
-            .then(result => {
-                if(result.status=="success"){
-                    showSuccessMsg(result.message);
-                }
-                if(result.status=="error"){
-                    showErrorMsg(result.message);
-                }
-            });
+            alert("por terminar");
+            // let route = "{{ route('sales.sendboleta') }}";
+            // let data = getFormParams('frmSendTicket');
+            // fetch(route, {
+            //     method: 'post',
+            //     body: data,
+            // })
+            // .then(response => response.json())
+            // .then(result => {
+            //     if(result.status=="success"){
+            //         showSuccessMsg(result.message);
+            //     }
+            //     if(result.status=="error"){
+            //         showErrorMsg(result.message);
+            //     }
+            // });
         });
 
         $('#sendFactura').on('click', function(e) {
             e.preventDefault();
-            let route = "{{ route('sales.sendfactura') }}";
-            let data = getFormParams('frmSendTicket');
-            fetch(route, {
-                method: 'post',
-                body: data,
-            })
-            .then(response => response.json())
-            .then(result => {
-                if(result.status=="success"){
-                    showSuccessMsg(result.message);
-                }
-                if(result.status=="error"){
-                    showErrorMsg(result.message);
-                }
-            });
+            alert("por terminar");
+            // let route = "{{ route('sales.sendfactura') }}";
+            // let data = getFormParams('frmSendTicket');
+            // fetch(route, {
+            //     method: 'post',
+            //     body: data,
+            // })
+            // .then(response => response.json())
+            // .then(result => {
+            //     if(result.status=="success"){
+            //         showSuccessMsg(result.message);
+            //     }
+            //     if(result.status=="error"){
+            //         showErrorMsg(result.message);
+            //     }
+            // });
         });
 
         $('#productId').on('select2:select', function (e) {
@@ -536,7 +544,7 @@
 
         $(document).on('click', '.remove_product', function(e){
             e.preventDefault();
-            if(_payboxState == 2){
+            if(_payboxState.val() == 2){
                 showErrorMsg("La venta se encuentra cerrada");
                 return;
             }
@@ -559,7 +567,7 @@
 
         $(document).on('click', '.edit_product', function(e){
             e.preventDefault();
-            if(_payboxState == 2){
+            if(_payboxState.val() == 2){
                 showErrorMsg("La venta se encuentra cerrada");
                 return;
             }

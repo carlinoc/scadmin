@@ -357,6 +357,11 @@ return [
                     'url'  => '#',
                     'icon' => 'fas fa-fw fas fa-chart-line',
                 ],
+                [
+                    'text' => 'Reporte de Propinas',
+                    'url'  => '/report/tips',
+                    'icon' => 'fas fa-fw fas fa-coins',
+                ],
             ],
         ],
         [
@@ -393,6 +398,11 @@ return [
                     'text' => 'Empresa',
                     'url'  => '/company',
                     'icon' => 'fas fa-fw fas fa-building',
+                ],
+                [
+                    'text' => 'Otros Pagos',
+                    'url'  => '/otherpay',
+                    'icon' => 'fas fa-fw fas fa-money-bill',
                 ],
             ],
         ],

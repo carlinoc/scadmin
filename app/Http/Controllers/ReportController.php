@@ -6,6 +6,7 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Sale;
+use App\Models\TipsPercent;
 use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,12 @@ class ReportController extends Controller
         ];
 
         return view('reports.sales', ['heads' => $heads]);
+    }
+
+    public function tips(): View
+    {
+        $tipsPercent = TipsPercent::all();
+        return view('reports.tips', ['tipsPercent' => $tipsPercent]);
     }
 
     public function saleslist(Request $request)
@@ -82,22 +89,9 @@ class ReportController extends Controller
                 }           
                 break;           
         }  
-
         
         $sales = $query->get();    
         $query2 = $query;
-
-        // $data = $query->get(array(
-        //         DB::raw("SUM('tips') as tips"),
-        //         DB::raw("SUM('total') as total")
-        //         ));
-
-        $query3 = $query;
-        $totalTips = 0;
-        $tipsCard = 0; //$query3->where('sales.tipsType','=', 2)->sum('sales.tips');
-        
-        $tipsCash = 0; //$query3->sum('sales.tips');
-        
 
         $totalSales = $query2->sum('sales.total');
         $withCash = $query2->where('sales.withCash','=', 0)->sum('sales.total');
@@ -162,5 +156,64 @@ class ReportController extends Controller
         $totalSales = $query2->sum('sales.total');
 
         return response()->json(['sales' => $sales, 'totalSales' => $totalSales]);
+    }
+
+    public function tipslist(Request $request)
+    {
+        $dateFilter = $request->dateRange;
+        $tipsType = $request->tipsType;
+
+        $query = Sale::select('sales.id', 'sales.subtotal', 'sales.discount', 'sales.total', 'sales.status', 'sales.withCash', 
+            DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'companypos.pos', 'sales.tips', 'sales.tipsType')
+            ->leftjoin('companypos', 'companypos.id','=','sales.companyPosId')
+            ->where('sales.status', '=', 1)
+            ->where('sales.tips', '>', 0);
+
+        if($tipsType<3) {
+            $query->where('sales.tipsType','=', $tipsType);
+        }    
+
+        switch($dateFilter){
+            case 'today':
+                $query->whereDate('sales.created_at',Carbon::today());
+                break;
+            case 'yesterday':
+                $query->wheredate('sales.created_at',Carbon::yesterday());
+                break;
+            case 'this_week':
+                $query->whereBetween('sales.created_at',[Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()]);
+                break;
+            case 'last_week':
+                $query->whereBetween('sales.created_at',[Carbon::now()->subWeek(),Carbon::now()]);
+                break;
+            case 'this_month':
+                $query->whereMonth('sales.created_at',Carbon::now()->month)->whereYear('sales.created_at', Carbon::now()->year);
+                break;
+            case 'last_month':
+                $query->whereMonth('sales.created_at',Carbon::now()->subMonth()->month)->whereYear('sales.created_at',Carbon::now()->year);
+                break;
+            case 'this_year':
+                $query->whereYear('sales.created_at',Carbon::now()->year);
+                break;
+            case 'custom':
+                $start_date = Carbon::parse($request->startDate);
+                $end_date = Carbon::parse($request->endDate);
+                
+                if ($end_date->greaterThan($start_date)) {
+                    $query->whereBetween('sales.created_at', [$start_date, $end_date]);
+                } else {
+                    $query->whereDate('sales.created_at',Carbon::today());
+                }           
+                break;           
+        }  
+        
+        $sales = $query->get();    
+        $query2 = $query;
+
+        $totalTips = $query2->sum('sales.tips');
+        $tipsCash = $query2->where('sales.tipsType','=', 1)->sum('sales.tips');
+        $tipsCard = round(($totalTips - $tipsCash), 2);
+
+        return response()->json(['status'=>'success', 'sales' => $sales, 'totalTips' => $totalTips, 'tipsCash' => $tipsCash, 'tipsCard' => $tipsCard]);    
     }
 }

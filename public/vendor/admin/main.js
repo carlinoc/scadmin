@@ -23,6 +23,16 @@ function showSuccessMsg(message){
     });
 }
 
+function showWarningMsg(message){
+  Swal.fire({
+      title: "Atención",
+      html: message,
+      icon: "warning",
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "Aceptar"
+  });
+}
+
 function getFormParams(formId){
     const data = new URLSearchParams();
     const myform = document.getElementById(formId);
@@ -57,6 +67,17 @@ function emptyfy(elements) {
     return true;
 }
 
+function getTipsType($paymentType) {
+  switch ($paymentType) {
+      case 1:
+          return '<small class="badge badge-success">Efectivo</small>';
+      case 2:
+          return '<small class="badge badge-secondary">Tarjeta</small>';
+      default:
+          return '<small class="badge badge-success">Efectivo</small>';
+  }
+}
+
 function getPayType($paymentType) {
   switch ($paymentType) {
       case 0:
@@ -79,6 +100,42 @@ function getVoucherType($paymentType) {
       default:
           return '';
   }
+}
+
+function getExpenseType($expenseType) {
+  switch ($expenseType) {
+      case 1:
+          return '<small class="badge badge-info">Proveedor</small>';
+      case 2:
+          return '<small class="badge badge-warning">Servicio</small>';
+      case 3:
+          return '<small class="badge badge-success">Personal</small>';
+      case 4:
+          return '<small class="badge badge-secondary">Otros</small>';
+      default:
+          return '';
+  }
+}
+
+function getStaffPayType($staffPayType) {
+  switch ($staffPayType) {
+      case 1:
+          return ' <small class="badge badge-light">Adelanto</small>';
+      case 2:
+          return ' <small class="badge badge-light">Sueldo</small>';
+      case 3:
+          return ' <small class="badge badge-light">Extras</small>';
+      default:
+          return '';
+  }
+}
+
+function getOnlytDate(currenDate) {
+  return currenDate.substring(0, 10);  
+}
+
+function getOnlytHour(currenDate) {
+  return currenDate.substring(0, 16);  
 }
 
 (function($) {

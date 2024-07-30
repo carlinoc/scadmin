@@ -134,21 +134,11 @@
         <div class="col-md-4">
             <div class="card card-warning card-outline">
                 <div class="card-body">
-                    <strong><span class="text-secondary"><i class="fas fa-coins mr-1"></i> Propinas S/</span></strong>
+                    <input type="hidden" value="{{$totalTips}}" id="totalTips" />
+                    <strong><span class="text-secondary" style="display: block"><i class="fas fa-coins mr-1"></i> Propinas S/ {{$totalTips}}</span></strong>
+                    <span class="text-secondary">Efectivo: {{$totalCash}}</span> --- <span class="text-secondary">Tarjeta: {{$totalCard}}</span>
                     <table class="table table-sm mt-2">
-                        <tbody>
-                            <tr>
-                                <td>Pago Proveedores</td>
-                                <td id="tdExpenseProvider">0.00</td>
-                            </tr>
-                            <tr>
-                                <td>Sueldos y Adelantos</td>
-                                <td id="tdExpenseStaff">0.00</td>
-                            </tr>
-                            <tr>
-                                <td>Pago de Servicios</td>
-                                <td id="tdExpenseService">0.00</td>
-                            </tr>
+                        <tbody id="tableBody">
                         </tbody>
                     </table>
                 </div>
@@ -299,6 +289,9 @@
 
 @section('css')
     <link rel="stylesheet" href="/vendor/admin/main.css">
+    <style>
+        div.dataTables_wrapper {width: 100%;} 
+    </style>    
 @stop
 
 @section('js')
@@ -354,6 +347,8 @@
         let _cashRegister = $("#cashRegister");
         let _missingBalance = $("#missingBalance");
         let _leftoverBalance = $("#leftoverBalance");
+        let _ds=null;
+        let _totalTips = $("#totalTips");
         
         $(document).ready(function(e){
 
@@ -588,6 +583,7 @@
             _cardSalesCash.CardWidget('toggle');
             _cardSalesCard.CardWidget('toggle');
 
+            fetchTips();
         });
 
         async function fetchExpenseStaff(){
@@ -857,6 +853,39 @@
                     }
                 ]
             });  
+        }
+
+        async function fetchTips(){
+            const response = await fetch("/tipspercent/list", {method: 'GET'});
+            if(!response.ok){
+                throw new Error("Error fetch tips");       
+            }                    
+            const data = await response.json();
+            _ds = data.list;
+            
+            totalTips = _totalTips.val();
+
+            for($i = 0; $i < _ds.length; $i++) {
+                percent = (totalTips * _ds[$i].percent) / 100
+                addRow(_ds[$i].employ, percent);
+            }
+
+        }
+
+        function addRow(employ, percent) {
+            let table = document.getElementById("tableBody");
+            let row = document.createElement("tr");
+            
+            let c1 = document.createElement("td");
+            let c2 = document.createElement("td");
+            
+            c1.innerText = employ;
+            c2.innerText = percent.toFixed(2);
+                        
+            row.appendChild(c1);
+            row.appendChild(c2);
+            
+            table.appendChild(row);
         }
         
         function setTotalIncome(data) {

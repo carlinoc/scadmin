@@ -359,11 +359,12 @@
                 },
                 {
                     "render": function(data, type, row, meta) {
-                        if(row.state==1){
-                            return '<a href="#" data-id="'+row.id+'" class="btn btn-sm btn-success addIncome"><i class="fas fa-plus"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-sm btn-danger addExpense"><i class="fas fa-minus"></i></a> <a href="/paybox/detail/'+row.id+'" class="btn btn-sm btn-warning"><i class="fas fa-eye"></i></a>';
-                        }else{
-                            return '<a href="/paybox/detail/'+row.id+'" class="btn btn-sm btn-warning"><i class="fas fa-eye"></i></a>';
-                        }
+                        // if(row.state==1){
+                        //     return '<a href="#" data-id="'+row.id+'" class="btn-sm btn-success addIncome"><i class="fas fa-plus"></i></a> <a href="#" data-id="'+row.id+'" class="btn-sm btn-danger addExpense"><i class="fas fa-minus"></i></a> <a href="/paybox/detail/'+row.id+'" class="btn-sm btn-warning"><i class="fas fa-eye"></i></a>';
+                        // }else{
+                        //     return '<a href="/paybox/show/'+row.id+'" class="btn-sm btn-info"><i class="fas fa-eye"></i></a>';
+                        // }
+                        return '<a href="/paybox/show/'+row.id+'" class="btn-sm btn-info"><i class="fas fa-eye"></i></a>';
                     }
                 }
             ]

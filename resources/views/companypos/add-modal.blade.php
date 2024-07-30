@@ -22,7 +22,45 @@
                         <div class="col-sm">
                             <div class="form-group">
                                 <label>Comisión %</label>
-                                <input type="text" class="form-control" id="commission" name="commission" placeholder="Comisión del POS">
+                                <input type="text" class="form-control" id="commission" name="commission" placeholder="0">
+                            </div>            
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label>Titular:</label>
+                                <x-adminlte-select2 name="staffId" id="staffId" label-class="text-lightblue" data-placeholder="Seleccione" required>
+                                    <option value=""></option>
+                                    @foreach($list as $staff)
+                                        <option value="{{$staff->id}}">{{$staff->name}}</option>
+                                    @endforeach
+                                </x-adminlte-select2>
+                            </div>            
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label>RUC</label>
+                                <input type="text" class="form-control" id="ruc" name="ruc">
+                            </div>            
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label>Banco</label>
+                                <select class="form-control" name="bank" id="bank">
+                                    <option value="BCP">BCP</option>
+                                    <option value="Interbank">Interbank</option>
+                                    <option value="BBVA">BBVA</option>
+                                    <option value="ScotiaBank">ScotiaBank</option>
+                                </select>
+                            </div>            
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label>Nro. de Cuenta</label>
+                                <input type="text" class="form-control" id="accountNumber" name="accountNumber">
                             </div>            
                         </div>
                     </div>
@@ -30,13 +68,13 @@
                         <div class="col-sm">
                             <div class="form-group">
                                 <label>Nombre del contacto</label>
-                                <input type="text" class="form-control" id="contactName" name="contactName" placeholder="Nombre del contacto">
+                                <input type="text" class="form-control" id="contactName" name="contactName">
                             </div>            
                         </div>
                         <div class="col-sm">
                             <div class="form-group">
                                 <label>Telefono</label>
-                                <input type="text" class="form-control" id="contactPhone" name="contactPhone" placeholder="Teléfono del contacto">
+                                <input type="text" class="form-control" id="contactPhone" name="contactPhone">
                             </div>            
                         </div>
                     </div>

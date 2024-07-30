@@ -11,8 +11,13 @@ use App\Http\Controllers\ExpenseProviderController;
 use App\Http\Controllers\ExpenseServiceController;
 use App\Http\Controllers\ExpenseStaffController;
 use App\Http\Controllers\IncomeController;
+use App\Http\Controllers\OtherPayController;
 use App\Http\Controllers\PayBoxController;
+use App\Http\Controllers\PayBoxExpenseController;
+use App\Http\Controllers\PayBoxIncomeController;
 use App\Http\Controllers\PlaceController;
+use App\Http\Controllers\PosExpenseController;
+use App\Http\Controllers\PosIncomeController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
@@ -90,6 +95,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/report/lastorders', [ReportController::class, 'lastorders'])->name('report.lastorders');
     Route::post('/report/lastorderslist', [ReportController::class, 'lastorderslist'])->name('report.lastorderslist');
     Route::get('/report/payboxsales', [ReportController::class, 'payboxsales'])->name('report.payboxsales');
+    Route::get('/report/tips', [ReportController::class, 'tips'])->name('report.tips');
+    Route::post('/report/tipslist', [ReportController::class, 'tipslist'])->name('report.tipslist');
     
     Route::get('/user', [UserController::class, 'index'])->name('user.index');
     Route::get('/user/list', [UserController::class, 'list'])->name('user.list');
@@ -111,6 +118,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/paybox/detail/{payboxId}', [PayboxController::class, 'detail'])->name('paybox.detail');
     Route::post('/paybox/close', [PayboxController::class, 'close'])->name('paybox.close');
     Route::get('/paybox/verifyopen', [PayboxController::class, 'verifyopen'])->name('paybox.verifyopen');
+    Route::get('/paybox/show/{payboxId}', [PayboxController::class, 'show'])->name('paybox.show');
 
     Route::get('/clients', [ClientController::class, 'index'])->name('client.index');
     Route::post('/clients/add', [ClientController::class, 'add'])->name('client.add');
@@ -153,11 +161,38 @@ Route::middleware('auth')->group(function () {
     Route::post('/companypos/edit', [CompanyPosController::class, 'edit'])->name('companypos.edit');
     Route::post('/companypos/remove/{companyPosId}', [CompanyPosController::class, 'remove'])->name('companypos.remove');
     Route::get('/companypos/list', [CompanyPosController::class, 'list'])->name('companypos.list');
+    Route::get('/companypos/detail/{companyPosId}', [CompanyPosController::class, 'detail'])->name('companypos.detail');
 
     Route::post('/tipspercent/add', [TipsPercentController::class, 'add'])->name('tipspercent.add');
     Route::post('/tipspercent/edit', [TipsPercentController::class, 'edit'])->name('tipspercent.edit');
     Route::post('/tipspercent/remove/{tipsPercentId}', [TipsPercentController::class, 'remove'])->name('tipspercent.remove');
     Route::get('/tipspercent/list', [TipsPercentController::class, 'list'])->name('tipspercent.list');
+
+    Route::post('/posincome/add', [PosIncomeController::class, 'add'])->name('posincome.add');
+    Route::post('/posincome/edit', [PosIncomeController::class, 'edit'])->name('posincome.edit');
+    Route::post('/posincome/remove/{posIncomeId}', [PosIncomeController::class, 'remove'])->name('posincome.remove');
+    Route::post('/posincome/list', [PosIncomeController::class, 'list'])->name('posincome.list');
+
+    Route::post('/posexpense/add', [PosExpenseController::class, 'add'])->name('posexpense.add');
+    Route::post('/posexpense/edit', [PosExpenseController::class, 'edit'])->name('posexpense.edit');
+    Route::post('/posexpense/remove/{posExpenseId}', [PosExpenseController::class, 'remove'])->name('posexpense.remove');
+    Route::post('/posexpense/list', [PosExpenseController::class, 'list'])->name('posexpense.list');
+
+    Route::get('/otherpay', [OtherPayController::class, 'index'])->name('otherpay.index');
+    Route::post('/otherpay/add', [OtherPayController::class, 'add'])->name('otherpay.add');
+    Route::post('/otherpay/edit', [OtherPayController::class, 'edit'])->name('otherpay.edit');
+    Route::post('/otherpay/remove/{otherpayId}', [OtherPayController::class, 'remove'])->name('otherpay.remove');
+    Route::get('/otherpay/list', [OtherPayController::class, 'list'])->name('otherpay.list');
+
+    Route::post('/payboxincome/add', [PayBoxIncomeController::class, 'add'])->name('payboxincome.add');
+    Route::post('/payboxincome/edit', [PayBoxIncomeController::class, 'edit'])->name('payboxincome.edit');
+    Route::post('/payboxincome/remove/{payboxIncomeId}', [PayBoxIncomeController::class, 'remove'])->name('payboxincome.remove');
+    Route::get('/payboxincome/list/{payboxId}', [PayBoxIncomeController::class, 'list'])->name('payboxincome.list');
+
+    Route::post('/payboxexpense/add', [PayBoxExpenseController::class, 'add'])->name('payboxexpense.add');
+    Route::post('/payboxexpense/edit', [PayBoxExpenseController::class, 'edit'])->name('payboxexpense.edit');
+    Route::post('/payboxexpense/remove/{payboxExpenseId}', [PayBoxExpenseController::class, 'remove'])->name('payboxexpense.remove');
+    Route::get('/payboxexpense/list/{payboxId}', [PayBoxExpenseController::class, 'list'])->name('payboxexpense.list');
 });
 
 require __DIR__.'/auth.php';
