@@ -27,14 +27,27 @@ class ClientController extends Controller
 
     public function add(Request $request)
     {
-        //todo: verificar que ya existe el ruc y el dni
+        $clientType = $request->clientType;
+        if($clientType==1) {
+            $rows = Client::select('id')->where('dni','=', $request->dni)->count();
+            if($rows > 0) {
+                return response()->json(['status'=>'error', 'message'=>'Ya existe un cliente con ese DNI']);
+            }
+        }
+        if($clientType==2) {
+            $rows = Client::select('id')->where('ruc','=', $request->ruc)->count();
+            if($rows > 0) {
+                return response()->json(['status'=>'error', 'message'=>'Ya existe un cliente con ese RUC']);
+            }
+        }
+        
         $client = new Client();
         $client->name = $request->name;
         $client->dni = $request->dni;
         $client->phone = $request->phone;
         $client->address = $request->address;
         $client->email = $request->email;
-        $client->level = $request->level;
+        $client->discount = $request->discount;
         $client->description = $request->description;
         $client->clientType = $request->clientType;
         $client->ruc = $request->ruc;
@@ -51,7 +64,7 @@ class ClientController extends Controller
         $client->phone = $request->phone;
         $client->address = $request->address;
         $client->email = $request->email;
-        $client->level = $request->level;
+        $client->discount = $request->discount;
         $client->description = $request->description;
         $client->update();
 

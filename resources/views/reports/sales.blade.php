@@ -34,10 +34,11 @@
                             </div>
                             <div class="col-auto">
                                 <select class="form-control" name="withCash" id="withCash">
-                                    <option value="3">Todo tipo de pago</option>
+                                    <option value="4">Todo tipo de pago</option>
                                     <option value="0">En Efectivo</option>
                                     <option value="1">Con Tarjeta</option>
                                     <option value="2">Yape - Plin</option>
+                                    <option value="3">Por Pagar</option>
                                 </select>
                             </div>    
                             <div class="col-auto">
@@ -46,6 +47,12 @@
                                     <option value="2">Ventas Anuladas</option>
                                     <option value="3">Efectivas + Anuladas</option>
                                 </select>
+                            </div>
+                            <div class="col-auto">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="currentPayBox" name="currentPayBox" checked>
+                                    <label class="custom-control-label" for="currentPayBox">Caja Activa</label>
+                                </div>
                             </div>    
                             <div class="col">
                                 <button id="showReport" type="submit" class="btn btn-primary">Ver Reporte</button>
@@ -93,6 +100,14 @@
             </div>
         </div>
         <div class="col">
+            <div class="info-box bg-gradient-primary">
+                <div class="info-box-content">
+                    <span class="info-box-text text-center">En Yape/Plin</span>
+                    <span id="lYape" class="info-box-number text-center">s/ 0.00</span>
+                </div>
+            </div>
+        </div>
+        <div class="col">
             <div class="info-box bg-gradient-danger">
                 <div class="info-box-content">
                     <span class="info-box-text text-center">Total</span>
@@ -111,9 +126,7 @@
                             <span id="sTipsCash" class="info-box-number2 text-success">Efectivo: 0.00</span>
                             <span id="sTipsCard" class="info-box-number2 text-muted">Tarjeta: 0.00</span>
                         </div>
-                    </div>
-                    
-                    
+                    </div>            
                 </div>
             </div>
         </div>
@@ -122,21 +135,21 @@
     <div class="row">
         <div class="col-12">
             <div class="table-responsive">
-                
                 <x-adminlte-card>
                     <table id="dtSales" class="table table-striped" style="width:100%">
                         <thead>
                             <tr>
                                 <th style="width: 80px;">Nro</th>
-                                <th>Fecha y Hora</th>
-                                <th>Mesa</th>
-                                <th>SubTotal</th>
-                                <th style="width: 100px;">Desc.</th>
-                                <th>Total</th>
-                                <th>Pago</th>
-                                <th>POS</th>
+                                <th style="width: 100px;">Fecha y Hora</th>
+                                <th style="width: 80px;">Mesa</th>
+                                <th style="width: 80px;">SubTotal</th>
+                                <th style="width: 80px;">Desc.</th>
+                                <th style="width: 80px;">Total</th>
+                                <th style="width: 80px;">Pago</th>
+                                <th style="width: 80px;">POS</th>
                                 <th style="width: 100px;">Comprobante</th>
-                                <th style="width: 100px;">Propina</th>
+                                <th style="width: 80px;">Propina</th>
+                                <th style="width: 80px;">Sunat</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
@@ -194,10 +207,10 @@
     let _sTipsTotal = $("#sTipsTotal");    
 
     $(function() {
-        $("#start_date").datepicker({
+        $("#startDate").datepicker({
             "dateFormat": "yy-mm-dd"
         });
-        $("#end_date").datepicker({
+        $("#endDate").datepicker({
             "dateFormat": "yy-mm-dd"
         });
     });
@@ -285,6 +298,16 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
+                                if(row.sunat==0){
+                                    return '<input type="checkbox" data-index="'+meta.row+'" value="0" class="itemsunat" />';
+                                }else{
+                                    return '<input type="checkbox" data-index="'+meta.row+'" value="0" class="itemsunat" checked />';
+                                }
+                                
+                            }
+                        },
+                        {
+                            "render": function(data, type, row, meta) {
                                 if(row.history_count == 0){
                                     return '<a href="/report/detail/'+row.id+'" class="btn btn-sm btn-info edit_product"><i class="fas fa-edit"></i></a>';
                                 }else{
@@ -299,6 +322,7 @@
                 $('#lTotal').html('S/ ' + result.totalSales);
                 $('#lCash').html('S/ ' + result.withCash);
                 $('#lCard').html('S/' + result.withCard);
+                $('#lYape').html('S/' + result.withYape);
                 
                 let _cashTips = 0.0;
                 let _cardTips = 0.0;
@@ -323,6 +347,14 @@
 
         fetchReport();
 
+        $("#startDate").on('changeDate', function(ev){
+            $(this).datepicker('hide');
+        });
+
+        $("#endDate").on('changeDate', function(ev){
+            $(this).datepicker('hide');
+        });
+
         $('#dateRange').on('change', function(e) {
             e.preventDefault();
             var range = this.value;
@@ -337,8 +369,8 @@
             e.preventDefault();
             var range = $("#dateRange").val();
             if(range=="custom"){
-                var start_date = $("#start_date").val();
-                var end_date = $("#end_date").val();
+                var start_date = $("#startDate").val();
+                var end_date = $("#endDate").val();
                 if (start_date == "" || end_date == "") {
                     alert("Las fechas son requeridas");
                 } else {
@@ -349,6 +381,34 @@
                 $('#dtsales').DataTable().destroy();
                 fetchReport();
             }
+        });
+
+        _dtSales.on('click', '.itemsunat', function (e) {
+            let isChecked = $(this).is(':checked');
+            let sunat = 0;
+            if(isChecked){
+                sunat = 1;
+            }
+            
+            let index = $(this).data('index');
+            let saleId = _ds[index].id;
+            
+            fetch("/report/sunat/" + saleId + "/" + sunat, {
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "X-CSRF-Token": _token
+                }
+            })
+            .then(response => response.json())
+            .then(result => {
+                if(result.status=="success"){
+                    showSuccessMsg(result.message);
+                }
+                if(result.status=="error"){
+                    showErrorMsg(result.message);
+                }
+            });      
         });
     });
 </script>    

@@ -44,6 +44,16 @@
                                 href="#custom-tabs-four-card" role="tab"
                                 aria-controls="custom-tabs-four-card" aria-selected="false">Ventas con tarjeta</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-yape-tab" data-toggle="pill"
+                                href="#custom-tabs-four-yape" role="tab"
+                                aria-controls="custom-tabs-four-yape" aria-selected="false">Ventas con Yape/Plin</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-porcobrar-tab" data-toggle="pill"
+                                href="#custom-tabs-four-porcobrar" role="tab"
+                                aria-controls="custom-tabs-four-porcobrar" aria-selected="false">Ventas por cobrar</a>
+                        </li>
                     </ul>
                 </div>
                 <div class="card-body">
@@ -143,6 +153,10 @@
                                                     <tr>
                                                         <td>Ventas con Tarjeta</td>
                                                         <td id="tdCard" style="color:#dc3545">0.00</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Ventas con Yape/Plin</td>
+                                                        <td id="tdYape" style="color:#dc3545">0.00</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -320,6 +334,68 @@
                             </div>
 
                         </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-yape" role="tabpanel"
+                            aria-labelledby="custom-tabs-four-yape-tab">
+
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="card">
+                                        <div class="card-header border-0">
+                                            <h3 class="card-title">Ventas con Yape/Plin</h3>
+                                            <div class="card-tools">
+                                                <label id="ltotalYape">Total S/ 0.00</label>
+                                            </div>
+                                        </div>
+                                        <div class="card-body table-responsive p-0">
+                                            <table id="dtYape" class="table table-striped table-valign-middle">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:80px">Nro</th>
+                                                        <th style="width:120px">Fecha</th>
+                                                        <th style="width:80px">Mesa</th>
+                                                        <th style="width:80px">S/</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbYape">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-porcobrar" role="tabpanel"
+                            aria-labelledby="custom-tabs-four-porcobrar-tab">
+
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="card">
+                                        <div class="card-header border-0">
+                                            <h3 class="card-title">Ventas por cobrar</h3>
+                                            <div class="card-tools">
+                                                <label id="ltotalPorCobrar">Total S/ 0.00</label>
+                                            </div>
+                                        </div>
+                                        <div class="card-body table-responsive p-0">
+                                            <table id="dtPorCobrar" class="table table-striped table-valign-middle">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:80px">Nro</th>
+                                                        <th style="width:120px">Fecha</th>
+                                                        <th style="width:80px">Mesa</th>
+                                                        <th style="width:80px">S/</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbPorCobrar">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -415,6 +491,10 @@
             fetchSalesCash();
 
             fetchSalesCard();
+
+            fetchSalesYape();
+
+            fetchSalesPorCobrar();
 
             fetchTips();
 
@@ -993,6 +1073,83 @@
             row.appendChild(c1);
             row.appendChild(c2);
             
+            table.appendChild(row);
+        }
+
+        async function fetchSalesYape() {
+            let payBoxId = $("#payboxId").val();
+            const response = await fetch("/report/payboxsales?payboxid=" + payBoxId + "&withcash=2", {method: 'GET'});
+            if(!response.ok){
+                throw new Error("Error fetch sales yape");       
+            }                    
+            const data = await response.json();
+            $('#tdYape').html(data.totalSales);
+            $('#ltotalYape').html('S/ ' + data.totalSales);
+            let _ds = data.sales;
+            $("#tbYape tbody").empty();
+            for($i = 0; $i < _ds.length; $i++) {
+                dr = _ds[$i]; 
+                addRowYape(dr.dateUpdate, dr.total, dr.id, $i, dr.table);
+            }
+        }
+
+        function addRowYape(vdate, vamount, vid, vindex, vtable) {
+            let table = document.getElementById("tbYape");
+            let row = document.createElement("tr");
+            
+            let c1 = document.createElement("td");
+            let c2 = document.createElement("td");
+            let c3 = document.createElement("td");
+            let c4 = document.createElement("td");
+            
+            c1.innerText = vid;
+            c2.innerText = getOnlytHour(vdate);
+            c3.innerText = vtable;
+            c4.innerHTML = vamount;
+                        
+            row.appendChild(c1);
+            row.appendChild(c2);
+            row.appendChild(c3);
+            row.appendChild(c4);
+                        
+            table.appendChild(row);
+        }
+
+        async function fetchSalesPorCobrar() {
+            let payBoxId = $("#payboxId").val();
+            const response = await fetch("/report/payboxsales?payboxid=" + payBoxId + "&withcash=3", {method: 'GET'});
+            if(!response.ok){
+                throw new Error("Error fetch sales por cobrar");       
+            }                    
+            const data = await response.json();
+            $('#ltotalPorCobrar').html('S/ ' + data.totalSales);
+            let _ds = data.sales;
+            $("#tbPorCobrar tbody").empty();
+            for($i = 0; $i < _ds.length; $i++) {
+                dr = _ds[$i]; 
+                addRowPorCobrar(dr.dateUpdate, dr.total, dr.id, $i, dr.table);
+            }
+        }
+
+        function addRowPorCobrar(vdate, vamount, vid, vindex, vtable) {
+            let table = document.getElementById("tbPorCobrar");
+            let row = document.createElement("tr");
+            
+            let c1 = document.createElement("td");
+            let c2 = document.createElement("td");
+            let c3 = document.createElement("td");
+            let c4 = document.createElement("td");
+            
+            c1.innerText = vid;
+            c2.innerText = getOnlytHour(vdate);
+            c3.innerText = vtable;
+            c4.innerHTML = vamount;
+                        
+            row.appendChild(c1);
+            row.appendChild(c2);
+            row.appendChild(c3);
+            row.appendChild(c4);
+                        
             table.appendChild(row);
         }
 

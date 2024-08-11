@@ -105,9 +105,9 @@
                                 <option value=""></option>
                                 @foreach($clients as $client)
                                     @if($client->id == $sale->clientId)
-                                        <option value="{{$client->id}}" selected data-level="{{$client->level}}" >{{$client->name}}</option>
+                                        <option value="{{$client->id}}" selected data-discount="{{$client->discount}}" >{{$client->name}}</option>
                                     @else
-                                        <option value="{{$client->id}}" data-level="{{$client->level}}" >{{$client->name}}</option>
+                                        <option value="{{$client->id}}" data-discount="{{$client->discount}}" >{{$client->name}}</option>
                                     @endif
                                 @endforeach
                             </x-adminlte-select2>
@@ -131,6 +131,7 @@
                                 <option value="0" @selected("0"==$sale->withCash)>Efectivo</option>
                                 <option value="1" @selected("1"==$sale->withCash)>Tarjeta</option>
                                 <option value="2" @selected("2"==$sale->withCash)>Yape-Plin</option>
+                                <option value="3" @selected("3"==$sale->withCash)>Por Pagar</option>
                             </select>
                             <div id="posList" class="text-center" style="display: none">
                                 <select id="companyPosId" name="companyPosId">
@@ -326,11 +327,11 @@
                         showSuccessMsg(result.message);
 
                         let name = $('#name').val();
-                        let level = $('#level').val();
+                        let discount = $('#discount1').val();
                         let id = result.clientId;
-                        _clientId.append('<option value="' + id + '" data-level="' + level + '">' + name + '</option>');
+                        _clientId.append('<option value="' + id + '" data-discount="' + discount + '">' + name + '</option>');
                         _clientId.val(id).change();
-                        $('#discount').val(level).change();
+                        $('#discount').val(discount).change();
                     }
                     if(result.status=="error"){
                         showErrorMsg(result.message);
@@ -341,7 +342,7 @@
 
         _clientId.on('change', function(e){
             e.preventDefault();
-            let level = $(this).find(':selected').data('level');
+            let level = $(this).find(':selected').data('discount');
             $('#discount').val(level).change();
         });
 
@@ -432,6 +433,10 @@
         
         $('#generateTicket').on('click', function(e) {
             e.preventDefault();
+            if(_payboxState.val() == 2){
+                showErrorMsg("La venta se encuentra cerrada");
+                return;
+            }
             let route = "{{ route('sales.sendticket') }}";
             let data = getFormParams('frmSendTicket');
             fetch(route, {

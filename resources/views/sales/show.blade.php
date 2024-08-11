@@ -87,10 +87,10 @@
                     <input type="hidden" id="saleId" name="saleId" value="{{$sale->saleId}}">
                     <div class="row">
                         <div class="col">
-                            <x-adminlte-select2 id="clientId" name="clientId" label-class="text-lightblue" data-placeholder="Cliente">
+                            <x-adminlte-select2 id="clientId" name="clientId" label-class="text-lightblue" data-placeholder="Seleccione un Cliente">
                                 <option value=""></option>
                                 @foreach($clients as $client)
-                                    <option value="{{$client->id}}" data-level="{{$client->level}}" >{{$client->name}}</option>
+                                    <option value="{{$client->id}}" data-discount="{{$client->discount}}" >{{$client->name}}</option>
                                 @endforeach
                             </x-adminlte-select2>
                         </div>
@@ -113,6 +113,7 @@
                                 <option value="0">Efectivo</option>
                                 <option value="1">Tarjeta</option>
                                 <option value="2">Yape - Plin</option>
+                                <option value="3">Por Pagar</option>
                             </select>
                         </div>
                     </div>
@@ -169,17 +170,62 @@
     let _newClient = $("#newClient");
     let _addClient = $("#addClient");
 
+    let _clientType = $("#clientType");
+    let _lruc = $("#lruc");
+    let _ruc = $("#ruc");
+    let _name = $("#name");
+    let _ldni = $("#ldni");
+    let _dni = $("#dni");
+    let _address = $("#address");
+    let _phone = $("#phone");
+    let _discount = $("#discount1");
+
     $(document).ready(function(){
         let sumTotal = parseFloat($('#sumTotal').val());
         $('#pTotal').html('Total: S/ ' + formatCurrency(sumTotal));
 
+        _clientType.on('change', function(e){
+            e.preventDefault();
+            let type = _clientType.val();
+            if(type == 1){
+                _lruc.hide();
+                _ruc.hide();
+                _ldni.html('DNI');
+                _dni.show();
+                _address.hide();
+                setTimeout(function(){
+                    $('#name').focus();
+                }, 300);
+            }else{
+                _lruc.show();
+                _ruc.show();
+                _dni.hide();    
+                _ldni.html('Dirección');
+                _address.show();
+                setTimeout(function(){
+                    $('#ruc').focus();
+                }, 300);
+            }
+        })
+
         _addClient.on('click', function(e){
             e.preventDefault();
+            let _t = this;
+            let type = _clientType.val();
+            if(type==1 && _dni.val().length == 0){
+                showWarningMsg('Ingrese el DNI del cliente');
+                return;
+            }
+            if(type==2 && _ruc.val().length == 0){
+                showWarningMsg('Ingrese el RUC del cliente');
+                return;
+            }
             let elements = [
                 ['name', 'Ingrese el nombre del cliente']
             ];
 
             if(emptyfy(elements)) {
+                _t.disabled = true;
                 let route = "{{ route('client.add') }}";
                 let data = getFormParams('frmAddClient');
                 fetch(route, {
@@ -189,6 +235,7 @@
                 .then(response => response.json())
                 .then(result => {
                     if(result.status=="success"){
+                        _t.disabled = false;
                         _modalClient.modal('hide');
                         showSuccessMsg(result.message);
 
@@ -198,10 +245,11 @@
                         _clientId.append(newOption);
                         _clientId.val(id).change();
 
-                        let level = $('#level').val();
-                        $('#discount').val(level).change();
+                        let discount = $('#discount1').val();
+                        $('#discount').val(discount).change();
                     }
                     if(result.status=="error"){
+                        _t.disabled = false;
                         showErrorMsg(result.message);
                     }
                 });
@@ -211,15 +259,14 @@
         _newClient.on('click', function(e){
             e.preventDefault();
             _modalClient.modal('show');
-            setTimeout(function(){
-                $('#name').focus();
-            }, 300);
+            clearFormClient();
+            
         });
 
         _clientId.on('change', function(e){
             e.preventDefault();
-            let level = $(this).find(':selected').data('level');
-            $('#discount').val(level).change();
+            let discount = $(this).find(':selected').data('discount');
+            $('#discount').val(discount).change();
         });
 
         _changeTable.on('click', function(e) {
@@ -267,6 +314,8 @@
         
         $('#generateTicket').on('click', function(e) {
             e.preventDefault();
+            let _t = this;
+            _t.disabled = true;
             let route = "{{ route('sales.sendticket') }}";
             let data = getFormParams('frmSendTicket');
             fetch(route, {
@@ -276,9 +325,11 @@
             .then(response => response.json())
             .then(result => {
                 if(result.status=="success"){
+                    _t.disabled = false;
                     window.location = "/sales";
                 }
                 if(result.status=="error"){
+                    _t.disabled = false;
                     showErrorMsg(result.message);
                 }
             });
@@ -303,6 +354,8 @@
 
         $('#addNewProduct').on('click', function(e) {
             e.preventDefault();
+            let _t = this;
+            _t.disabled = true;
             let elements = [
                 ['productId', 'Seleccione un producto'],
                 ['price', 'Ingrese el precio'],
@@ -327,6 +380,7 @@
                 .then(result => {
                     if(result.status=="success"){
                         _modal.modal('hide');
+                        _t.disabled = false;
                         window.location = "/sale/"+saleId;
                     }
                     if(result.status=="error"){
@@ -383,6 +437,17 @@
         _price.val('');
         _quantity.val('1').change();
         _total.val('');
+    }
+
+    function clearFormClient(){
+        _clientType.val(1).change();
+        _ruc.val('');
+        _name.val('');
+        _address.val('');
+        _dni.val('');
+        _phone.val('');
+        _discount.val(0).change();
+
     }
 </script>    
 @stop

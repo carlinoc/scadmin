@@ -361,10 +361,7 @@ class SaleController extends Controller
     public function order(Sale $sale)
     {
         try {
-            // $table = Sale::select('sales.id', 'tables.name as table')
-            //  ->join('tables', 'tables.id','=','sales.tableId')
-            //  ->where('sales.id', $sale->id)->first();
-
+            
             $table = Table::find($sale->tableId);
             $user = User::find($sale->userId);
 
@@ -454,7 +451,7 @@ class SaleController extends Controller
 
             $sale = Sale::find($saleId);
             if(($request->saveHistory==1) && ($sale->discount != $discount)){
-                $this->saveSalesHistory($saleId, 'Decuento Actualizado', $sale->discount, $discount, $total2 , $sale->total);
+                $this->saveSalesHistory($saleId, 'Descuento Actualizado', $sale->discount, $discount, $total2 , $sale->total);
             }
             if(($request->saveHistory==1) && ($sale->total != $total)){
                 $this->saveSalesHistory($saleId, 'VENTA Actualizada', $sale->discount, $discount, $total2 , $sale->total);
@@ -564,7 +561,7 @@ class SaleController extends Controller
 
     public function detailorder(Request $request): View
     {
-        $sale = Sale::select('sales.id as saleId', 'subtotal', 'discount', 'total', 'status', 'withCash', 'sales.created_at', 'sales.clientId', 'sales.updated_at','tables.name as table', 'clients.name as client', 'users.name as user', 'paybox.state as payboxState', 'sales.companyPosId')
+        $sale = Sale::select('sales.id as saleId', 'subtotal', 'sales.discount', 'total', 'status', 'withCash', 'sales.created_at', 'sales.clientId', 'sales.updated_at','tables.name as table', 'clients.name as client', 'users.name as user', 'paybox.state as payboxState', 'sales.companyPosId')
              ->join('tables', 'tables.id','=','sales.tableId')
              ->join('clients', 'clients.id','=','sales.clientId')
              ->join('users', 'users.id','=','sales.userId')

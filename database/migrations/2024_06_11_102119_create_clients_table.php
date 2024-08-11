@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('address', 500)->nullable();
             $table->string('email', 500)->nullable();
-            $table->tinyInteger('level')->nullable(); 
+            $table->integer('discount')->default(0); 
             $table->text('description')->nullable();
         });
     }

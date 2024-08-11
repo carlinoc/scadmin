@@ -54,7 +54,7 @@
     let _dni = $("#dni");
     let _address = $("#address");
     let _description = $("#description");
-    let _level = $("#level");
+    let _discount = $("#discount");
     
     let _dtClient = $("#dtClient");
     let _modal = $("#addModal");
@@ -149,7 +149,7 @@
                 _dni.val(dni);
                 _email.val(email);
                 _address.val(address);
-                _level.val(level).change();
+                _discount.val(discount).change();
                 _description.val(description);
 
                 _clientType.val(clientType).change();
@@ -232,7 +232,7 @@
                 },
                 {
                     "render": function(data, type, row, meta) {
-                        return row.level;
+                        return row.discount;
                     }
                 },
                 {
@@ -256,7 +256,7 @@
         _address.val("");
         _dni.val("");
         _email.val("");
-        _level.val(0).change();
+        _discount.val(0).change();
         _description.val("");
 
         _clientType.val(1).change();

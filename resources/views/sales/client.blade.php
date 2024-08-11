@@ -17,7 +17,7 @@
                                 <label>Tipo de cliente</label>
                                 <select class="form-control" name="clientType" id="clientType">
                                     <option value="1">Persona Natural</option>
-                                    <option value="2">Persona Juridica</option>
+                                    <option value="2">Persona Juridica (Empresa)</option>
                                 </select>
                             </div>            
                         </div>
@@ -38,8 +38,8 @@
                         <div class="col-sm">
                             <div class="form-group">
                                 <label id="ldni">DNI</label>
-                                <input type="text" class="form-control" id="dni" name="dni" placeholder="Documento de Indentidad">
-                                <input type="text" class="form-control" id="address" name="address">
+                                <input type="text" class="form-control" id="dni" name="dni" placeholder="Documento de indentidad">
+                                <input type="text" class="form-control" id="address" name="address" placeholder="Ingresar dirección">
                             </div>            
                         </div>
                     </div>
@@ -53,7 +53,7 @@
                         <div class="col-sm">
                             <div class="form-group">
                                 <label>Descuento %</label>
-                                <select class="form-control" name="level" id="level">
+                                <select class="form-control" name="discount" id="discount1">
                                     <option value="0">0</option>
                                     <option value="10">10</option>
                                     <option value="20">20</option>

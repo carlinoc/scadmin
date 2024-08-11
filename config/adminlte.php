@@ -352,15 +352,20 @@ return [
                     'url'  => '/report/sales',
                     'icon' => 'fas fa-fw fas fa-chart-bar',
                 ],
-                [
-                    'text' => 'Reporte de Productos',
-                    'url'  => '#',
-                    'icon' => 'fas fa-fw fas fa-chart-line',
-                ],
+                // [
+                //     'text' => 'Reporte de Productos',
+                //     'url'  => '#',
+                //     'icon' => 'fas fa-fw fas fa-chart-line',
+                // ],
                 [
                     'text' => 'Reporte de Propinas',
                     'url'  => '/report/tips',
                     'icon' => 'fas fa-fw fas fa-coins',
+                ],
+                [
+                    'text' => 'Ventas por Cobrar',
+                    'url'  => '/report/receivable',
+                    'icon' => 'fas fa-fw fas fa-money-bill',
                 ],
             ],
         ],

@@ -85,7 +85,9 @@ function getPayType($paymentType) {
       case 1:
           return '<small class="badge badge-secondary">Tarjeta</small>';
       case 2:
-          return '<small class="badge badge-primary">Yape/Plin</small>';    
+          return '<small class="badge badge-primary">Yape/Plin</small>';
+      case 3:
+        return '<small class="badge badge-danger">Por Pagar</small>';        
       default:
           return '<small class="badge badge-success">Efectivo</small>';
   }
@@ -120,11 +122,11 @@ function getExpenseType($expenseType) {
 function getStaffPayType($staffPayType) {
   switch ($staffPayType) {
       case 1:
-          return ' <small class="badge badge-light">Adelanto</small>';
+          return ' <small class="badge badge-info">Adelanto</small>';
       case 2:
-          return ' <small class="badge badge-light">Sueldo</small>';
+          return ' <small class="badge badge-danger">Sueldo</small>';
       case 3:
-          return ' <small class="badge badge-light">Extras</small>';
+          return ' <small class="badge badge-primary">Extras</small>';
       default:
           return '';
   }

@@ -7,6 +7,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Sale;
 use App\Models\TipsPercent;
+use App\Models\Client;
+use App\Models\CompanyPos;
+use App\Models\PayBox;
+use App\Models\PayBoxExpense;
 use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -42,18 +46,27 @@ class ReportController extends Controller
         $query = Sale::select('sales.id', 'sales.subtotal', 'sales.discount', 'sales.total', 'sales.status', 'sales.withCash', 
             DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'tables.name as table', 'tables.placeId as placeId', 
             'places.place as place', 'places.place as pay', 'companypos.pos', 'sales.voucherType',
-            'sales.tips', 'sales.tipsType',
+            'sales.tips', 'sales.tipsType', 'sales.sunat',
             DB::raw('(SELECT COUNT(*) FROM saleshistory WHERE saleshistory.saleId = sales.id) AS history_count'),)
             ->join('tables', 'tables.id','=','sales.tableId')
             ->join('places', 'places.id','=','tables.placeId')
             ->leftjoin('companypos', 'companypos.id','=','sales.companyPosId');
 
-        if($withCash<3){
+        if($withCash<4){
             $query->where('sales.withCash','=', $withCash);
         }    
 
         if($filterpay<3){
             $query->where('sales.status','=', $filterpay);
+        }
+
+        $payboxId = 0;
+        if($request->currentPayBox!=""){
+            $paybox = PayBox::select('id')->where('state','=', 1);
+            if($paybox->count() > 0){
+                $payboxId = $paybox->first()->id;
+                $query->where('sales.payboxId','=', $payboxId);
+            }
         }
         
         switch($dateFilter){
@@ -91,13 +104,69 @@ class ReportController extends Controller
         }  
         
         $sales = $query->get();    
-        $query2 = $query;
+        $query2 = clone $query;
+        $query3 = clone $query;
 
-        $totalSales = $query2->sum('sales.total');
+        $withYape = $query->where('sales.withCash','=', 2)->sum('sales.total');
+        $totalSales = $query2->where('sales.withCash','!=', 3)->sum('sales.total');
         $withCash = $query2->where('sales.withCash','=', 0)->sum('sales.total');
-        $withCard = round(($totalSales - $withCash), 2);
+        $withCard = $query3->where('sales.withCash','=', 1)->sum('sales.total');
         
-        return response()->json(['status'=>'success', 'sales' => $sales, 'totalSales' => $totalSales, 'withCard' => $withCard, 'withCash' => $withCash]);    
+        return response()->json(['status'=>'success', 'sales' => $sales, 'totalSales' => $totalSales, 'withCard' => $withCard, 'withCash' => $withCash, 'withYape' => $withYape]);    
+    }
+
+    public function receivablelist(Request $request)
+    {
+        $dateFilter = $request->dateRange;
+        $clientId = $request->clientId;
+
+        $query = Sale::select('sales.id', 'sales.subtotal', 'sales.discount', 'sales.total', 'sales.status', 'sales.withCash', 
+            DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'tables.name as table', 'clients.name as client')
+            ->join('tables', 'tables.id','=','sales.tableId')
+            ->join('clients', 'clients.id', '=', 'sales.clientId')
+            ->where('sales.withCash','=', 3);
+
+        if($clientId!=0){
+            $query->where('sales.clientId','=', $clientId);
+        }    
+        
+        switch($dateFilter){
+            case 'today':
+                $query->whereDate('sales.created_at',Carbon::today());
+                break;
+            case 'yesterday':
+                $query->wheredate('sales.created_at',Carbon::yesterday());
+                break;
+            case 'this_week':
+                $query->whereBetween('sales.created_at',[Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()]);
+                break;
+            case 'last_week':
+                $query->whereBetween('sales.created_at',[Carbon::now()->subWeek(),Carbon::now()]);
+                break;
+            case 'this_month':
+                $query->whereMonth('sales.created_at',Carbon::now()->month)->whereYear('sales.created_at', Carbon::now()->year);
+                break;
+            case 'last_month':
+                $query->whereMonth('sales.created_at',Carbon::now()->subMonth()->month)->whereYear('sales.created_at',Carbon::now()->year);
+                break;
+            case 'this_year':
+                $query->whereYear('sales.created_at',Carbon::now()->year);
+                break;
+            case 'custom':
+                $start_date = Carbon::parse($request->startDate);
+                $end_date = Carbon::parse($request->endDate);
+                
+                if ($end_date->greaterThan($start_date)) {
+                    $query->whereBetween('sales.created_at', [$start_date, $end_date]);
+                } else {
+                    $query->whereDate('sales.created_at',Carbon::today());
+                }           
+                break;           
+        }  
+        
+        $sales = $query->get();    
+        
+        return response()->json(['status'=>'success', 'sales' => $sales]);    
     }
 
     public function lastorders(): View
@@ -113,8 +182,12 @@ class ReportController extends Controller
         $query = Sale::select('sales.id', 'subtotal', 'discount', 'total', 'status', 'withCash', DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'tables.name as table', 'tables.placeId as placeId', 'places.place as place')
             ->join('tables', 'tables.id','=','sales.tableId')
             ->join('places', 'places.id','=','tables.placeId')
-            ->where('sales.status','=', 1)
-            ->where('sales.userId', $request->userId);
+            ->where('sales.status','=', 1);
+
+        $userId = $request->userId;    
+        if($userId!=0){
+            $query->where('sales.userId', $request->userId);
+        }   
 
         switch($dateRange){
             case 'today':
@@ -147,7 +220,7 @@ class ReportController extends Controller
             ->where('sales.payboxId', $request->payboxid); 
 
         $withCash = $request->withcash;    
-        if($withCash<2){
+        if($withCash<4){
             $query->where('sales.withCash','=', $withCash);
         }        
 
@@ -215,5 +288,63 @@ class ReportController extends Controller
         $tipsCard = round(($totalTips - $tipsCash), 2);
 
         return response()->json(['status'=>'success', 'sales' => $sales, 'totalTips' => $totalTips, 'tipsCash' => $tipsCash, 'tipsCard' => $tipsCard]);    
+    }
+
+    public function receivable(): View
+    {
+        $list = Client::all();
+        $companyPosList = CompanyPos::all();
+
+        return view('reports.receivable', ['list' => $list, 'companyPosList' => $companyPosList]);
+    }
+
+    public function receivableadd(Request $request)
+    {
+        $saleId = $request->saleId;
+        $withCash = $request->withCash;
+        $companyPosId = $request->companyPosId;
+        $nowDate = Carbon::now();
+
+        $paybox = PayBox::select('id')->where('state','=', 1)->where('startDate', '>=', Carbon::now()->subDays(1)->toDateTimeString());
+        $rows = $paybox->count();
+        if($rows==0){
+            return response()->json(['status'=>'error', 'message'=>'Es necesario aperturar la CAJA']);    
+        }else{
+            $payBoxId = $paybox->get()[0]["id"];
+
+            $sale = Sale::find($saleId);
+            $sale->withCash = $withCash;
+            $sale->updated_at = $nowDate;
+            $sale->created_at = $nowDate;
+            if($request->whitCash == 1){
+                $sale->companyPosId = $companyPosId;    
+            }
+            $sale->payboxId = $payBoxId;
+            $sale->update();
+
+            return response()->json(['status'=>'success', 'message'=>'El pago se realizo correctamente']);        
+        }
+    }
+
+    public function sunat(Request $request)
+    {
+        $saleId = $request->saleId;
+        
+        $sale = Sale::find($saleId);
+        $sale->sunat = $request->sunat;
+        $sale->update();
+
+        return response()->json(['status'=>'success', 'message'=>'Se actualizó sunat']);        
+    }
+
+    public function topfood(Request $request)
+    {
+        // $query = Sale::select('sales.id', 'sales.subtotal', 'sales.discount', 'sales.total', 'sales.status', 'sales.withCash', 
+        //     DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'companypos.pos', 'sales.tips', 'sales.tipsType')
+        //     ->leftjoin('companypos', 'companypos.id','=','sales.companyPosId')
+        //     ->where('sales.status', '=', 1)
+        //     ->where('sales.tips', '>', 0);
+
+        return response()->json(['status'=>'success']);    
     }
 }

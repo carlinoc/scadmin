@@ -184,10 +184,27 @@
     let _percentList = $("#percentList");
     let _commision = {{env('DATA_COMPANY_POS_PERCENT'), '4.00'}};
     let _total = 0.00;
+
+    $(function() {
+        $("#startDate").datepicker({
+            "dateFormat": "yy-mm-dd"
+        });
+        $("#endDate").datepicker({
+            "dateFormat": "yy-mm-dd"
+        });
+    });
     
     $(document).ready(function(){
 
         fetchTips();
+
+        $("#startDate").on('changeDate', function(ev){
+            $(this).datepicker('hide');
+        });
+
+        $("#endDate").on('changeDate', function(ev){
+            $(this).datepicker('hide');
+        });
 
         $('#dateRange').on('change', function(e) {
             e.preventDefault();
@@ -203,8 +220,8 @@
             e.preventDefault();
             var range = $("#dateRange").val();
             if(range=="custom"){
-                var start_date = $("#start_date").val();
-                var end_date = $("#end_date").val();
+                var start_date = $("#startDate").val();
+                var end_date = $("#endDate").val();
                 if (start_date == "" || end_date == "") {
                     alert("Las fechas son requeridas");
                 } else {

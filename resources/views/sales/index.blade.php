@@ -97,20 +97,6 @@
             }).then((result) => {
             if (result.isConfirmed) {
                 window.location = "/paybox";
-                // if($role == "Mozo"){
-                //     showErrorMsg("No tienes permiso para iniciar una caja");    
-                // }else{
-                //     let route = "{{ route('paybox.initbox') }}";
-                //     fetch(route, {
-                //         method: 'get'
-                //     })
-                //     .then(response => response.json())
-                //     .then(result => {
-                //         if(result.status=="success"){
-                //             showSuccessMsg(result.message + ", ahora ya puede realizar el pedido");
-                //         }
-                //     })
-                // }
             }
         });
     @endif

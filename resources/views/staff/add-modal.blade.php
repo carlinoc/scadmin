@@ -16,7 +16,7 @@
                         <div class="col-sm">
                             <div class="form-group">
                                 <label>Nombre</label>
-                                <input type="text" class="form-control" id="name" name="name" placeholder="Nombre del proveedor">
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Nombre del personal">
                             </div>            
                         </div>
                         <div class="col-sm">

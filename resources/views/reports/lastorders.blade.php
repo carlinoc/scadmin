@@ -22,7 +22,7 @@
                                             <i class="fas fa-location-arrow"></i>
                                         </div>
                                     </x-slot>
-                                    <option value=""></option>
+                                    <option value="0"> - Todos -</option>
                                     @foreach($users as $user)
                                         <option value="{{$user->id}}">{{$user->name}}</option>
                                     @endforeach
@@ -88,7 +88,8 @@
     let _userId = $("#userId");
 
     $(document).ready(function(){
-        _userId.val({{ Auth::user()->id }}).change();
+        //_userId.val({{ Auth::user()->id }}).change();
+        _userId.val(0).change();
 
         fetchReport();
 
@@ -101,7 +102,7 @@
             if(emptyfy(elements)) {
                 fetchReport();    
             }
-        });  
+        });
     });
 
     function fetchReport(){

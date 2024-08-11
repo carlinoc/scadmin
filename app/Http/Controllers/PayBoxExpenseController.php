@@ -105,7 +105,7 @@ class PayBoxExpenseController extends Controller
 
     public function remove(Request $request): JsonResponse
     {
-        PayBoxExpense::find($request->payboxExpenseId)->delete();      
+        PayBoxExpense::find($request->posExpenseId)->delete();      
 
         return response()->json(['status'=>'success', 'message'=>'El gasto fue eliminado']);     
     }

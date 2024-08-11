@@ -97,6 +97,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/report/payboxsales', [ReportController::class, 'payboxsales'])->name('report.payboxsales');
     Route::get('/report/tips', [ReportController::class, 'tips'])->name('report.tips');
     Route::post('/report/tipslist', [ReportController::class, 'tipslist'])->name('report.tipslist');
+    Route::get('/report/receivable', [ReportController::class, 'receivable'])->name('report.receivable');
+    Route::post('/report/receivablelist', [ReportController::class, 'receivablelist'])->name('report.receivablelist');
+    Route::post('/report/receivableadd', [ReportController::class, 'receivableadd'])->name('report.receivableadd');
+    Route::post('/report/sunat/{saleId}/{sunat}', [ReportController::class, 'sunat'])->name('report.sunat');
+    Route::get('/report/topfood', [ReportController::class, 'topfood'])->name('report.topfood');
     
     Route::get('/user', [UserController::class, 'index'])->name('user.index');
     Route::get('/user/list', [UserController::class, 'list'])->name('user.list');
@@ -138,6 +143,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/staff/edit', [StaffController::class, 'edit'])->name('staff.edit');
     Route::post('/staff/remove/{staffId}', [StaffController::class, 'remove'])->name('staff.remove');
     Route::get('/staff/list', [StaffController::class, 'list'])->name('staff.list');
+    Route::get('/staff/detail/{staffId}', [StaffController::class, 'detail'])->name('staff.detail');
+    Route::post('/staff/addexpense', [StaffController::class, 'addexpense'])->name('staff.addexpense');
+    Route::post('/staff/listexpense', [StaffController::class, 'listexpense'])->name('staff.listexpense');
+    Route::post('/staff/removeexpense/{posExpenseId}', [StaffController::class, 'removeexpense'])->name('staff.removeexpense');
+    Route::post('/staff/editexpense', [StaffController::class, 'editexpense'])->name('staff.editexpense');
 
     Route::post('/expenseprovider/add', [ExpenseProviderController::class, 'add'])->name('expenseprovider.add');
     Route::get('/expenseprovider/list/{payboxId}', [ExpenseProviderController::class, 'list'])->name('expenseprovider.list');

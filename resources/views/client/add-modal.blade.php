@@ -66,7 +66,7 @@
                         <div class="col-sm">
                             <div class="form-group">
                                 <label>Descuento %</label>
-                                <select class="form-control" name="level" id="level">
+                                <select class="form-control" name="discount" id="discount">
                                     <option value="0">0</option>
                                     <option value="10">10</option>
                                     <option value="20">20</option>
