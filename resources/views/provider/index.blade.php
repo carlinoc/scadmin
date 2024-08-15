@@ -258,7 +258,7 @@
                 },
                 {
                     "render": function(data, type, row, meta) {
-                        return '<a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-info editProvider"><i class="far fa-edit"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-sm btn-danger removeProvider"><i class="far fa-trash-alt"></i></a>';
+                        return '<a href="/provider/detail/'+row.id+'/" class="btn btn-sm btn-warning"><i class="far fa-eye"></i></a> <a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-info editProvider"><i class="far fa-edit"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-sm btn-danger removeProvider"><i class="far fa-trash-alt"></i></a>';
                     }
                 }
             ]

@@ -169,6 +169,11 @@
                             <button id="generateTicket" type="button" class="btn btn-primary" style="font-weight: bold;">Generar Ticket</button>
                         </div>
                     </div>
+                    <div class="row justify-content-center" id="rloading" style="display: none">
+                        <div class="spinner-border text-info" role="status">
+                            <span class="sr-only">Cargando...</span>
+                        </div>
+                    </div>
                 </div>    
             </div>
         </div> 
@@ -224,6 +229,7 @@
     let _modalTips = $("#addModalTips");
     let _tips = $("#tips");
     let _tipsType = $("#tipsType");
+    let _rloading = $("#rloading");
     
     $(document).ready(function(){
         let sumTotal = parseFloat($('#sumTotal').val());
@@ -456,42 +462,46 @@
         
         $('#sendBoleta').on('click', function(e) {
             e.preventDefault();
-            alert("por terminar");
-            // let route = "{{ route('sales.sendboleta') }}";
-            // let data = getFormParams('frmSendTicket');
-            // fetch(route, {
-            //     method: 'post',
-            //     body: data,
-            // })
-            // .then(response => response.json())
-            // .then(result => {
-            //     if(result.status=="success"){
-            //         showSuccessMsg(result.message);
-            //     }
-            //     if(result.status=="error"){
-            //         showErrorMsg(result.message);
-            //     }
-            // });
+            _rloading.show();
+            let route = "{{ route('sales.sendboleta') }}";
+            let data = getFormParams('frmSendTicket');
+            fetch(route, {
+                method: 'post',
+                body: data,
+            })
+            .then(response => response.json())
+            .then(result => {
+                if(result.status=="success"){
+                    showSuccessMsg(result.message);
+                    _rloading.hide();
+                }
+                if(result.status=="error"){
+                    showErrorMsg(result.message);
+                    _rloading.hide();
+                }
+            });
         });
 
         $('#sendFactura').on('click', function(e) {
             e.preventDefault();
-            alert("por terminar");
-            // let route = "{{ route('sales.sendfactura') }}";
-            // let data = getFormParams('frmSendTicket');
-            // fetch(route, {
-            //     method: 'post',
-            //     body: data,
-            // })
-            // .then(response => response.json())
-            // .then(result => {
-            //     if(result.status=="success"){
-            //         showSuccessMsg(result.message);
-            //     }
-            //     if(result.status=="error"){
-            //         showErrorMsg(result.message);
-            //     }
-            // });
+            _rloading.show();
+            let route = "{{ route('sales.sendfactura') }}";
+            let data = getFormParams('frmSendTicket');
+            fetch(route, {
+                method: 'post',
+                body: data,
+            })
+            .then(response => response.json())
+            .then(result => {
+                if(result.status=="success"){
+                    showSuccessMsg(result.message);
+                    _rloading.hide();
+                }
+                if(result.status=="error"){
+                    showErrorMsg(result.message);
+                    _rloading.hide();
+                }
+            });
         });
 
         $('#productId').on('select2:select', function (e) {

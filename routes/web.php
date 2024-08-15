@@ -102,6 +102,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/report/receivableadd', [ReportController::class, 'receivableadd'])->name('report.receivableadd');
     Route::post('/report/sunat/{saleId}/{sunat}', [ReportController::class, 'sunat'])->name('report.sunat');
     Route::get('/report/topfood', [ReportController::class, 'topfood'])->name('report.topfood');
+    Route::get('/report/salesporcobrar', [ReportController::class, 'salesporcobrar'])->name('report.salesporcobrar');
     
     Route::get('/user', [UserController::class, 'index'])->name('user.index');
     Route::get('/user/list', [UserController::class, 'list'])->name('user.list');
@@ -114,6 +115,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/provider/edit', [ProviderController::class, 'edit'])->name('provider.edit');
     Route::post('/provider/remove/{providerId}', [ProviderController::class, 'remove'])->name('provider.remove');
     Route::get('/provider/list', [ProviderController::class, 'list'])->name('provider.list');
+    Route::get('/provider/detail/{providerId}', [ProviderController::class, 'detail'])->name('provider.detail');
+    Route::post('/provider/listpayments', [ProviderController::class, 'listpayments'])->name('provider.listpayments');
 
     Route::get('/paybox', [PayBoxController::class, 'index'])->name('paybox.index');
     Route::post('/paybox/add', [PayboxController::class, 'add'])->name('paybox.add');

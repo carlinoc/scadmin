@@ -46,7 +46,7 @@ class ReportController extends Controller
         $query = Sale::select('sales.id', 'sales.subtotal', 'sales.discount', 'sales.total', 'sales.status', 'sales.withCash', 
             DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'tables.name as table', 'tables.placeId as placeId', 
             'places.place as place', 'places.place as pay', 'companypos.pos', 'sales.voucherType',
-            'sales.tips', 'sales.tipsType', 'sales.sunat',
+            'sales.tips', 'sales.tipsType', 'sales.sunat', 'sales.voucherSerie', 'sales.voucherNumber',
             DB::raw('(SELECT COUNT(*) FROM saleshistory WHERE saleshistory.saleId = sales.id) AS history_count'),)
             ->join('tables', 'tables.id','=','sales.tableId')
             ->join('places', 'places.id','=','tables.placeId')
@@ -216,6 +216,28 @@ class ReportController extends Controller
             ->join('tables', 'tables.id','=', 'sales.tableId')
             ->join('users', 'users.id','=','sales.userId')
             ->join('paybox', 'paybox.id','=','sales.payboxId') 
+            ->where('sales.status', 1)
+            ->where('sales.payboxId', $request->payboxid); 
+
+        $withCash = $request->withcash;    
+        if($withCash<4){
+            $query->where('sales.withCash','=', $withCash);
+        }        
+
+        $sales = $query->get();    
+        $query2 = $query; 
+        $totalSales = $query2->sum('sales.total');
+
+        return response()->json(['sales' => $sales, 'totalSales' => $totalSales]);
+    }
+
+    public function salesporcobrar(Request $request){
+        $query = Sale::select('sales.id', 'sales.total', DB::raw("DATE_FORMAT(sales.updated_at, '%d-%m-%Y %H:%i') as dateUpdate"), 'tables.name as table', 
+                 'users.name as user', 'paybox.state as payboxState', 'clients.name as client')
+            ->join('tables', 'tables.id','=', 'sales.tableId')
+            ->join('users', 'users.id','=','sales.userId')
+            ->join('paybox', 'paybox.id','=','sales.payboxId') 
+            ->join('clients', 'clients.id', '=', 'sales.clientId')
             ->where('sales.status', 1)
             ->where('sales.payboxId', $request->payboxid); 
 

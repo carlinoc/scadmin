@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Provider;
+use App\Models\PayBoxExpense;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
@@ -79,43 +80,19 @@ class ProviderController extends Controller
         return response()->json(['status'=>'success', 'message'=>'El proveedor fue eliminado']);     
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function detail(Request $request): View
     {
-        //
+        $provider = Provider::find($request->providerId);
+        return view('provider.detail', ['provider' => $provider]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function listpayments(Request $request): JsonResponse
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Provider $provider)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Provider $provider)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Provider $provider)
-    {
-        //
+        $list = PayBoxExpense::select('id', 'expenseDate', 'expense', 'description', 'voucherType', 'voucherNumber')
+            ->where('expenseType', 1)
+            ->where('providerId', $request->providerId)
+            ->get();
+            
+        return response()->json(['status'=>'success', 'list' => $list]);    
     }
 }

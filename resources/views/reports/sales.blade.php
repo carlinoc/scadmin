@@ -274,12 +274,20 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return row.pos;
+                                if(row.pos != null){
+                                    return "<small>" + row.pos + "</small>";    
+                                }else{
+                                    return "";
+                                } 
                             }
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return getVoucherType(row.voucherType);
+                                if(row.voucherType > 0){
+                                    return getVoucherType(row.voucherType) + " <small>" + row.voucherSerie + "-" + row.voucherNumber + "</small>";
+                                }else{
+                                    return '';
+                                }
                             }
                         },
                         {
@@ -313,7 +321,6 @@
                                 }else{
                                     return '<a href="/report/detail/'+row.id+'" class="btn btn-sm btn-info edit_product"><i class="fas fa-edit"></i></a> <a href="/report/history/'+row.id+'" class="btn btn-sm btn-success historysale"><i class="fas fa-history"></i></a>';
                                 }
-                                
                             }
                         }
                     ]

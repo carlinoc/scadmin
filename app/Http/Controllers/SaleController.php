@@ -173,6 +173,7 @@ class SaleController extends Controller
         }
         $totalgravada = $total / (1 + ($IGV / 100));
         $totaligv = $total - $totalgravada;
+        //echo(number_format((float)$total, 2, '.', '') . " - " . number_format((float)$totalgravada, 2, '.', '') . " - " . number_format((float)$totaligv, 2, '.', '') . "<br>");
 
         $data = array(
             "documento" => "boleta",
@@ -194,6 +195,7 @@ class SaleController extends Controller
 
         $items = array();
 
+        //echo("-----------------<br>");
         foreach ($salesDetails as $row) {
             $name = trim($row->product);
             $qty = $row->quantity;
@@ -204,6 +206,7 @@ class SaleController extends Controller
                 $priceTotal = $priceTotal - $desc;
             }            
             $priceBase = $priceTotal / (1 + ($IGV / 100));
+            //echo($qty . " = " . number_format((float)$priceTotal, 2, '.', '') . " - " . number_format((float)$priceBase, 2, '.', '') . "<br>");
 
             $subtitem = array(
                 "unidad_de_medida"          => "ZZ",
@@ -221,12 +224,15 @@ class SaleController extends Controller
         $data['items'] = $items;
         //return response()->json($data);
 
+        $autorization = env('DATA_COMPANY_BEARER', 'Bearer 6.pmhqb55lkNsyfGhUlKoUwJwi0CoWwmnAtwm3brYK1A');
         $response = Http::withBody(json_encode($data), 'application/json')
             ->withHeaders([
                 'User-Agent' => 'application/json',
-                'Authorization' => 'Bearer 6.pmhqb55lkNsyfGhUlKoUwJwi0CoWwmnAtwm3brYK1A'
+                'Authorization' => $autorization
             ])
             ->post('https://api.lucode.pe/api/v1/documents');
+
+        //echo($response->body());    
 
         if ($response->successful()) {
             $client = Client::find($request->clientId);
@@ -234,7 +240,7 @@ class SaleController extends Controller
             $clientDni = $client->dni;
 
             // Imprimir Boleta
-            $this->printBoleta($serie, $number, $clientName, $clientDni, $request->discount, $salesDetails);
+            $this->printBoleta($totaligv, $totalgravada, $total, $serie, $number, $clientName, $clientDni, $request->discount, $salesDetails);
 
             // Incrementar el número de Boleta
             $newNumber = $number + 1;
@@ -242,8 +248,9 @@ class SaleController extends Controller
                         
             // Actualizar el total, subtotal y el voucherType
             Sale::where('id', $request->saleId)
-                ->update(['subtotal' => $total2, 'total' => $total, 'discount' => $request->discount, 'status' => 1, 'withCash' => $request->withCash, 'clientId' => $request->clientId, 'voucherType' => 1]);
-
+                ->update(['subtotal' => $total2, 'total' => $total, 'discount' => $request->discount, 'status' => 1, 'withCash' => $request->withCash, 
+                    'clientId' => $request->clientId, 'voucherType' => 1, 'voucherSerie' => $serie, 'voucherNumber' => $number]);
+            
             return response()->json(['status'=>'success', 'message'=>'Se imprimio la boleta correctamente']);
         } else {
             $responseData = $response->json();
@@ -261,6 +268,10 @@ class SaleController extends Controller
         if($client->ruc==""){
             return response()->json(['status'=>'error', 'message'=>'Para emitir una FACTURA es necesario el RUC del cliente']);
         }
+
+        $clientRUC = $client->ruc;
+        $clientName = $client->name;
+        $clientAddress = (($client->address == "")?"s/n":$client->address);
 
         $IGV = $company->igv;
         $serie = $serial->serie;
@@ -284,6 +295,7 @@ class SaleController extends Controller
         }
         $totalgravada = $total / (1 + ($IGV / 100));
         $totaligv = $total - $totalgravada;
+        //echo(number_format((float)$total, 2, '.', '') . " - " . number_format((float)$totalgravada, 2, '.', '') . " - " . number_format((float)$totaligv, 2, '.', '') . "<br>");
 
         $data = array(
             "documento" => "factura",
@@ -295,9 +307,9 @@ class SaleController extends Controller
             "orden_compra_servicio" => "",
             "tipo_operacion" => "0101",
             "cliente_tipo_de_documento" => "6",
-            "cliente_numero_de_documento" => $client->ruc,
-            "cliente_denominacion" => $client->name,
-            "cliente_direccion" => $client->address,
+            "cliente_numero_de_documento" => $clientRUC,
+            "cliente_denominacion" => $clientName,
+            "cliente_direccion" => $clientAddress,
             "total_gravada" => number_format((float)$totalgravada, 2, '.', ''),
             "total_igv" => number_format((float)$totaligv, 2, '.', ''),
             "total" => number_format((float)$total, 2, '.', ''),
@@ -305,6 +317,7 @@ class SaleController extends Controller
 
         $items = array();
 
+        //echo("-----------------<br>");
         foreach ($salesDetails as $row) {
             $name = trim($row->product);
             $qty = $row->quantity;
@@ -315,6 +328,7 @@ class SaleController extends Controller
                 $priceTotal = $priceTotal - $desc;
             }            
             $priceBase = $priceTotal / (1 + ($IGV / 100));
+            //echo($qty . " = " . number_format((float)$priceTotal, 2, '.', '') . " - " . number_format((float)$priceBase, 2, '.', '') . "<br>");
 
             $subtitem = array(
                 "unidad_de_medida"          => "ZZ",
@@ -332,16 +346,17 @@ class SaleController extends Controller
         $data['items'] = $items;
         //return response()->json($data);
 
+        $autorization = env('DATA_COMPANY_BEARER', 'Bearer 6.pmhqb55lkNsyfGhUlKoUwJwi0CoWwmnAtwm3brYK1A');
         $response = Http::withBody(json_encode($data), 'application/json')
             ->withHeaders([
                 'User-Agent' => 'application/json',
-                'Authorization' => 'Bearer 6.pmhqb55lkNsyfGhUlKoUwJwi0CoWwmnAtwm3brYK1A'
+                'Authorization' => $autorization
             ])
             ->post('https://api.lucode.pe/api/v1/documents');
 
         if ($response->successful()) {
             // Imprimir Boleta
-            $this->printFactura($serie, $number, $client->name, $client->ruc, $client->address, $request->discount, $salesDetails);
+            $this->printFactura($totaligv, $totalgravada, $total ,$serie, $number, $clientName, $clientRUC, $clientAddress, $request->discount, $salesDetails);
 
             // Incrementar el número de Factura
             $newNumber = $number + 1;
@@ -349,7 +364,8 @@ class SaleController extends Controller
                         
             // Actualizar el total, subtotal y el voucherType
             Sale::where('id', $request->saleId)
-                ->update(['subtotal' => $total2, 'total' => $total, 'discount' => $request->discount, 'status' => 1, 'withCash' => $request->withCash, 'clientId' => $request->clientId, 'voucherType' => 2]);
+                ->update(['subtotal' => $total2, 'total' => $total, 'discount' => $request->discount, 'status' => 1, 'withCash' => $request->withCash, 
+                    'clientId' => $request->clientId, 'voucherType' => 2, 'voucherSerie' => $serie, 'voucherNumber' => $number]);
 
             return response()->json(['status'=>'success', 'message'=>'Se imprimio la factura correctamente']);
         } else {
@@ -583,18 +599,17 @@ class SaleController extends Controller
 
     public function cancelsale(Request $request): JsonResponse
     {
-        //try{
-            $sale = Sale::find($request->saleId);
-            
-            $this->saveSalesHistory($sale->id, 'VENTA Anulada', $sale->discount, $sale->discount, $sale->total, $sale->total);
-            
-            $sale->status = 2;
-            $sale->update();
+        $sale = Sale::find($request->saleId);
+        if($sale->voucherType > 0) {
+            return response()->json(['status'=>'error', 'message'=>'No se puede anular una venta con comprobantes de venta emitidos.']);
+        }
+        
+        $this->saveSalesHistory($sale->id, 'VENTA Anulada', $sale->discount, $sale->discount, $sale->total, $sale->total);
+        
+        $sale->status = 2;
+        $sale->update();
 
-            return response()->json(['status'=>'success', 'message'=>'La venta fue anulada']);
-        // } catch (\Throwable $th) {
-        //     return response()->json(['status'=>'error', 'message'=>'Error al anular la venta']);
-        // }
+        return response()->json(['status'=>'success', 'message'=>'La venta fue anulada']);
     }
 
     public function nullify(Request $request): RedirectResponse
@@ -744,7 +759,7 @@ class SaleController extends Controller
         }
     }
 
-    private function printBoleta(string $serie, int $snumber, string $client, string $dni, int $discount, \Illuminate\Database\Eloquent\Collection $salesDetails) {
+    private function printBoleta(float $tigv, float $tgravada, float $ttotal, string $serie, int $snumber, string $client, string $dni, int $discount, \Illuminate\Database\Eloquent\Collection $salesDetails) {
 
         $now = date('d/m/Y');
         $hour = date('H:i');
@@ -780,37 +795,37 @@ class SaleController extends Controller
 
         $printer->setJustification(Printer::JUSTIFY_LEFT);
         $printer->text("-----------------------------------------------\n");
-        $total1 = 0;
         foreach ($salesDetails as $row) {
             $name = trim($row->product);
             $qty = $row->quantity;
             $price = $row->price;
+
             if($discount > 0){
-                $price = $price * (1 - ($discount / 100));
-                $desc = $price * ($discount / 100);
+                $desc = $price * ($discount / 100); 
                 $price = $price - $desc;
             }
+            
             $total = $price * $qty;
-            $total1 += $total;
             $qty = $qty . " x";
 
             $mask = "%-40.40s\n";
             $line = sprintf($mask, $name);
             $line .= sprintf("%4s %15.2f %15.2f\n", $qty, $price, $total);
             $printer->text("$line");
+
+            //echo($line . "<br>");
         }
         $printer->text("-----------------------------------------------\n");
 
         $printer->setJustification(Printer::JUSTIFY_RIGHT);
-        $totalgravada = $total1 / 1 + ($IGV / 100);
-        $totaligv = $totalgravada * ($IGV / 100);
 
-        $printer->text("Op. Gravada: S/ ". $totalgravada ."\n");
-        $printer->text("IGV(" . $IGV . "%): S/ ". $totaligv ."\n");
-        $printer->text("TOTAL: S/ ". $total1 ."\n");
+        $printer->text("Op. Gravada: S/ ". $tgravada ."\n");
+        $printer->text("IGV(" . $IGV . "%): S/ ". $tigv ."\n");
+        $printer->text("TOTAL: S/ ". $ttotal ."\n");
         $printer->text("-----------------------------------------------\n");
+        //echo(number_format((float)$tgravada, 2, '.', '') . " - " . number_format((float)$tigv, 2, '.', '') . " - " . number_format((float)$ttotal, 2, '.', '') . "<br>");
 
-        $totalLetter = Myhelpers::numberToLetter($total1);
+        $totalLetter = Myhelpers::numberToLetter($ttotal);
         $printer->text("Son: ". $totalLetter ."\n");
         $printer->text("-----------------------------------------------\n");
 
@@ -820,7 +835,7 @@ class SaleController extends Controller
         $printer->close();
     }
 
-    private function printFactura(string $serie, int $snumber, string $client, string $ruc, string $address, int $discount, \Illuminate\Database\Eloquent\Collection $salesDetails) {
+    private function printFactura(float $tigv, float $tgravada, float $ttotal, string $serie, int $snumber, string $client, string $ruc, string $address, int $discount, \Illuminate\Database\Eloquent\Collection $salesDetails) {
 
         $now = date('d/m/Y');
         $hour = date('H:i');
@@ -859,18 +874,18 @@ class SaleController extends Controller
 
         $printer->setJustification(Printer::JUSTIFY_LEFT);
         $printer->text("-----------------------------------------------\n");
-        $total1 = 0;
+        
         foreach ($salesDetails as $row) {
             $name = trim($row->product);
             $qty = $row->quantity;
             $price = $row->price;
+
             if($discount > 0){
-                $price = $price * (1 - ($discount / 100));
-                $desc = $price * ($discount / 100);
+                $desc = $price * ($discount / 100); 
                 $price = $price - $desc;
             }
+
             $total = $price * $qty;
-            $total1 += $total;
             $qty = $qty . " x";
 
             $mask = "%-40.40s\n";
@@ -881,15 +896,13 @@ class SaleController extends Controller
         $printer->text("-----------------------------------------------\n");
 
         $printer->setJustification(Printer::JUSTIFY_RIGHT);
-        $totalgravada = $total1 / 1 + ($IGV / 100);
-        $totaligv = $totalgravada * ($IGV / 100);
-
-        $printer->text("Op. Gravada: S/ ". $totalgravada ."\n");
-        $printer->text("IGV(" . $IGV . "%): S/ ". $totaligv ."\n");
-        $printer->text("TOTAL: S/ ". $total1 ."\n");
+        
+        $printer->text("Op. Gravada: S/ ". $tgravada ."\n");
+        $printer->text("IGV(" . $IGV . "%): S/ ". $tigv ."\n");
+        $printer->text("TOTAL: S/ ". $ttotal ."\n");
         $printer->text("-----------------------------------------------\n");
 
-        $totalLetter = Myhelpers::numberToLetter($total1);
+        $totalLetter = Myhelpers::numberToLetter($ttotal);
         $printer->text("Son: ". $totalLetter ."\n");
         $printer->text("-----------------------------------------------\n");
 

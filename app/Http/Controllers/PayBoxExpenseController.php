@@ -108,5 +108,6 @@ class PayBoxExpenseController extends Controller
         PayBoxExpense::find($request->posExpenseId)->delete();      
 
         return response()->json(['status'=>'success', 'message'=>'El gasto fue eliminado']);     
-    }
+    }    
+
 }

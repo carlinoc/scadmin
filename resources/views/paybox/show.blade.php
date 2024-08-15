@@ -369,7 +369,7 @@
                             aria-labelledby="custom-tabs-four-porcobrar-tab">
 
                             <div class="row">
-                                <div class="col-4">
+                                <div class="col-6">
                                     <div class="card">
                                         <div class="card-header border-0">
                                             <h3 class="card-title">Ventas por cobrar</h3>
@@ -384,6 +384,7 @@
                                                         <th style="width:80px">Nro</th>
                                                         <th style="width:120px">Fecha</th>
                                                         <th style="width:80px">Mesa</th>
+                                                        <th style="width:100px">Cliente</th>
                                                         <th style="width:80px">S/</th>
                                                     </tr>
                                                 </thead>
@@ -1117,7 +1118,7 @@
 
         async function fetchSalesPorCobrar() {
             let payBoxId = $("#payboxId").val();
-            const response = await fetch("/report/payboxsales?payboxid=" + payBoxId + "&withcash=3", {method: 'GET'});
+            const response = await fetch("/report/salesporcobrar?payboxid=" + payBoxId + "&withcash=3", {method: 'GET'});
             if(!response.ok){
                 throw new Error("Error fetch sales por cobrar");       
             }                    
@@ -1127,11 +1128,11 @@
             $("#tbPorCobrar tbody").empty();
             for($i = 0; $i < _ds.length; $i++) {
                 dr = _ds[$i]; 
-                addRowPorCobrar(dr.dateUpdate, dr.total, dr.id, $i, dr.table);
+                addRowPorCobrar(dr.dateUpdate, dr.total, dr.id, $i, dr.table, dr.client);
             }
         }
 
-        function addRowPorCobrar(vdate, vamount, vid, vindex, vtable) {
+        function addRowPorCobrar(vdate, vamount, vid, vindex, vtable, vclient) {
             let table = document.getElementById("tbPorCobrar");
             let row = document.createElement("tr");
             
@@ -1139,16 +1140,19 @@
             let c2 = document.createElement("td");
             let c3 = document.createElement("td");
             let c4 = document.createElement("td");
+            let c5 = document.createElement("td");
             
             c1.innerText = vid;
             c2.innerText = getOnlytHour(vdate);
             c3.innerText = vtable;
-            c4.innerHTML = vamount;
+            c4.innerText = vclient;
+            c5.innerHTML = vamount;
                         
             row.appendChild(c1);
             row.appendChild(c2);
             row.appendChild(c3);
             row.appendChild(c4);
+            row.appendChild(c5);
                         
             table.appendChild(row);
         }

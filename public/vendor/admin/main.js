@@ -95,6 +95,8 @@ function getPayType($paymentType) {
 
 function getVoucherType($paymentType) {
   switch ($paymentType) {
+      case 0:
+          return '<small class="badge badge-secondary">Sin Documento</small>';
       case 1:
           return '<small class="badge badge-info">Boleta</small>';
       case 2:
