@@ -215,8 +215,8 @@ class SaleController extends Controller
                 "valor_unitario"            => number_format((float)$priceBase, 2, '.', ''),
                 "precio_unitario"           => number_format((float)$priceTotal, 2, '.', ''),
                 "porcentaje_igv"            => $IGV,
-                "descuento"                 => "",
-                "codigo_tipo_afectacion_igv"=> ""
+                "descuento"                 => "0",
+                "codigo_tipo_afectacion_igv"=> "10"
             );
             array_push($items, $subtitem);
         }
@@ -225,12 +225,14 @@ class SaleController extends Controller
         //return response()->json($data);
 
         $autorization = env('DATA_COMPANY_BEARER', 'Bearer 6.pmhqb55lkNsyfGhUlKoUwJwi0CoWwmnAtwm3brYK1A');
+        $apisunat = env('DATA_COMPANY_APISUNAT', 'https://api.lucode.pe/api/v2/documents');
+
         $response = Http::withBody(json_encode($data), 'application/json')
             ->withHeaders([
                 'User-Agent' => 'application/json',
                 'Authorization' => $autorization
             ])
-            ->post('https://api.lucode.pe/api/v1/documents');
+            ->post($apisunat);
 
         //echo($response->body());    
 
@@ -337,8 +339,8 @@ class SaleController extends Controller
                 "valor_unitario"            => number_format((float)$priceBase, 2, '.', ''),
                 "precio_unitario"           => number_format((float)$priceTotal, 2, '.', ''),
                 "porcentaje_igv"            => $IGV,
-                "descuento"                 => "",
-                "codigo_tipo_afectacion_igv"=> ""
+                "descuento"                 => "0",
+                "codigo_tipo_afectacion_igv"=> "10"
             );
             array_push($items, $subtitem);
         }
@@ -347,12 +349,13 @@ class SaleController extends Controller
         //return response()->json($data);
 
         $autorization = env('DATA_COMPANY_BEARER', 'Bearer 6.pmhqb55lkNsyfGhUlKoUwJwi0CoWwmnAtwm3brYK1A');
+        $apisunat = env('DATA_COMPANY_APISUNAT', 'https://api.lucode.pe/api/v2/documents');
         $response = Http::withBody(json_encode($data), 'application/json')
             ->withHeaders([
                 'User-Agent' => 'application/json',
                 'Authorization' => $autorization
             ])
-            ->post('https://api.lucode.pe/api/v1/documents');
+            ->post($apisunat);
 
         if ($response->successful()) {
             // Imprimir Boleta

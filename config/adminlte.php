@@ -308,39 +308,82 @@ return [
             'icon' => 'fas fa-fw fas fa-home',
         ],
         [
-            'text' => 'Categorias',
-            'url'  => '/categories',
-            'icon' => 'fas fa-fw fas fa-cubes',
-        ],
-        [
-            'text' => 'Lugares',
-            'url'  => '/places',
-            'icon' => 'fas fa-fw fas fa-map',
-        ],
-        [
-            'text' => 'Mesas',
-            'url'  => '/tables',
-            'icon' => 'fas fa-fw fas fa-sitemap',
-        ],
-        [
-            'text' => 'Productos',
-            'url'  => '/products',
-            'icon' => 'fas fa-fw fas fa-coffee',
-        ],
-        [
             'text' => 'Pedidos',
             'url'  => '/sales',
             'icon' => 'fas fa-fw fas fa-check',
         ],
         [
-            'text' => 'Clientes',
-            'url'  => '/clients',
-            'icon' => 'fas fa-fw fas fa-user-friends',
-        ],
-        [
-            'text' => 'Pedidos Emitidos',
+            'text' => 'Listado Pedidos',
             'url'  => '/report/lastorders',
             'icon' => 'fas fa-fw fas fa-cart-arrow-down',
+        ],
+        [
+            'key' => 'sales',
+            'text'    => 'Ventas',
+            'icon'    => 'fas fa-fw fas fa-check-circle',
+            'submenu' => [            
+                [
+                    'text' => 'Clientes',
+                    'url'  => '/clients',
+                    'icon' => 'fas fa-fw fas fa-user-friends',
+                ],
+                [
+                    'text' => 'Mesas',
+                    'url'  => '/tables',
+                    'active' => ['tables/*'],
+                    'icon' => 'fas fa-fw fas fa-sitemap',
+                ],
+                [
+                    'text' => 'Lugares',
+                    'url'  => '/places',
+                    'active' => ['places/*'],
+                    'icon' => 'fas fa-fw fas fa-map',
+                ],
+            ],
+        ],
+        [
+            'key' => 'store',
+            'text'    => 'Almacen',
+            'icon'    => 'fas fa-fw fas fa-store',
+            'submenu' => [      
+                [
+                    'text' => 'Productos',
+                    'url'  => '/products',
+                    'active' => ['products/*'],
+                    'icon' => 'fas fa-fw fas fa-coffee',
+                ],
+                [
+                    'text' => 'Categorias',
+                    'url'  => '/categories',
+                    'active' => ['categories/*'],
+                    'icon' => 'fas fa-fw fas fa-cubes',
+                ],
+                [
+                    'text' => 'Proveedores',
+                    'url'  => '/provider',
+                    'active' => ['provider/*'],
+                    'icon' => 'fas fa-fw fas fa-truck',
+                ],
+            ],
+        ],
+        [
+            'key' => 'paybox',
+            'text'    => 'Caja',
+            'icon'    => 'fas fa-fw fas fa-cash-register',
+            'submenu' => [      
+                [
+                    'text' => 'Apertura y Cierre',
+                    'url'  => '/paybox',
+                    'active' => ['paybox/*'],
+                    'icon' => 'fas fa-fw fas fa-briefcase',
+                ],
+                [
+                    'text' => 'POS',
+                    'url'  => '/companypos',
+                    'active' => ['companypos/*'],
+                    'icon' => 'fas fa-fw fas fa-money-check-alt',
+                ],
+            ],
         ],
         [
             'key' => 'sales_reports',
@@ -350,6 +393,7 @@ return [
                 [
                     'text' => 'Reporte de Ventas',
                     'url'  => '/report/sales',
+                    'active' => ['report/sales/*'],
                     'icon' => 'fas fa-fw fas fa-chart-bar',
                 ],
                 // [
@@ -360,11 +404,13 @@ return [
                 [
                     'text' => 'Reporte de Propinas',
                     'url'  => '/report/tips',
+                    'active' => ['report/tips/*'],
                     'icon' => 'fas fa-fw fas fa-coins',
                 ],
                 [
                     'text' => 'Ventas por Cobrar',
                     'url'  => '/report/receivable',
+                    'active' => ['report/receivable/*'],
                     'icon' => 'fas fa-fw fas fa-money-bill',
                 ],
             ],
@@ -378,21 +424,6 @@ return [
                     'text' => 'Usuarios',
                     'url'  => '/user',
                     'icon' => 'fas fa-fw fas fa-user',
-                ],
-                [
-                    'text' => 'Proveedores',
-                    'url'  => '/provider',
-                    'icon' => 'fas fa-fw fas fa-truck',
-                ],
-                [
-                    'text' => 'Caja',
-                    'url'  => '/paybox',
-                    'icon' => 'fas fa-fw fas fa-briefcase',
-                ],
-                [
-                    'text' => 'POS',
-                    'url'  => '/companypos',
-                    'icon' => 'fas fa-fw fas fa-money-check-alt',
                 ],
                 [
                     'text' => 'Personal',
