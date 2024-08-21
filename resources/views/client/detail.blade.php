@@ -1,14 +1,14 @@
 @extends('adminlte::page')
 
-@section('title', 'Detalle del Proveedor')
+@section('title', 'Detalle del Cliente')
 
 @section('content_header')
     <div class="row">
         <div class="col-md-auto">
-            <h1>Detalle de Proveedor: {{ $provider->name }}</h1>
+            <h1>Detalle de Cliente: {{ $client->name }}</h1>
         </div>
         <div class="col">
-            <a href="{{ route('provider.index') }}" class="btn btn-outline-dark" role="button">Atras</a>
+            <a href="{{ route('client.index') }}" class="btn btn-outline-dark" role="button">Atras</a>
         </div>
     </div>
 @stop
@@ -20,7 +20,7 @@
                 <div class="card">
                     <form action="#" method="POST" id="frmListPayments">
                         @csrf
-                        <input type="hidden" name="providerId" id="providerId" value="{{ $provider->id }}">
+                        <input type="hidden" name="clientId" id="clientId" value="{{ $client->id }}">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col">
@@ -77,7 +77,7 @@
                 <div class="info-box bg-gradient-success">
                     <div class="info-box-content">
                         <span class="info-box-text text-center">Pagos</span>
-                        <span id="lExpense" class="info-box-number text-center">s/ 0.00</span>
+                        <span id="lTotal" class="info-box-number text-center">s/ 0.00</span>
                     </div>
                 </div>
             </div>
@@ -108,7 +108,7 @@
                 </x-adminlte-card>    
             </div>
             <div class="col-4">
-                
+
             </div>
         </div>
     @endrole
@@ -161,7 +161,7 @@
     <script>
         let _token = document.head.querySelector("[name~=csrf-token][content]").content;
         let _dtPayments = $("#dtPayments");
-        let _lExpense = $("#lExpense");
+        let _lTotal = $("#lTotal");
 
         $(function() {
             $("#startDate").datepicker({
@@ -213,7 +213,7 @@
         });
 
         async function fetchPayments() {
-            let route = "{{ route('provider.listpayments') }}";        
+            let route = "{{ route('client.listpayments') }}";        
             let data = getFormParams('frmListPayments');
 
             fetch(route, {
@@ -236,12 +236,12 @@
                             },
                             {
                                 "render": function(data, type, row, meta) {
-                                    return getOnlytHour(row.expenseDate);
+                                    return getOnlytHour(row.createdDate);
                                 }
                             },
                             {
                                 "render": function(data, type, row, meta) {
-                                    return row.expense;
+                                    return row.total;
                                 }
                             },
                             {
@@ -251,14 +251,19 @@
                             },
                             {
                                 "render": function(data, type, row, meta) {
-                                    return row.voucherNumber;
+                                    if(row.voucherType > 0){
+                                        return row.voucherSerie + ' - ' + row.voucherNumber;
+                                    }else{
+                                        return "";
+                                    }
                                 }
                             }
                         ]
                     });       
-                    _lExpense.html('S/ ' + result.totalExpense);
+                    _lTotal.html('S/ ' + result.totalPayment);
                 }
             });  
         }
+        
     </script>
 @stop

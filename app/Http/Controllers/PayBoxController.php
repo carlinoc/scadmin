@@ -130,6 +130,8 @@ class PayBoxController extends Controller
 
     public function close(Request $request)
     {
+        //$rows = Sale::all()->where('status', $request->tableId)->where('status', 0)->count();
+
         $payBox = PayBox::find($request->payboxId);
         $payBox->closingDate = Carbon::now();
         $payBox->income = $request->income;

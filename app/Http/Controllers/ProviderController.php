@@ -7,6 +7,7 @@ use App\Models\PayBoxExpense;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
+use Carbon\Carbon;
 
 class ProviderController extends Controller
 {
@@ -88,11 +89,50 @@ class ProviderController extends Controller
 
     public function listpayments(Request $request): JsonResponse
     {
-        $list = PayBoxExpense::select('id', 'expenseDate', 'expense', 'description', 'voucherType', 'voucherNumber')
+        $dateFilter = $request->dateRange;
+        $providerId = $request->providerId;
+
+        $query = PayBoxExpense::select('id', 'expenseDate', 'expense', 'description', 'voucherType', 'voucherNumber')
             ->where('expenseType', 1)
-            ->where('providerId', $request->providerId)
-            ->get();
+            ->where('providerId', $providerId);
+
+        switch($dateFilter){
+            case 'today':
+                $query->whereDate('expenseDate', Carbon::today());
+                break;
+            case 'yesterday':
+                $query->wheredate('expenseDate', Carbon::yesterday());
+                break;
+            case 'this_week':
+                $query->whereBetween('expenseDate', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                break;
+            case 'last_week':
+                $query->whereBetween('expenseDate', [Carbon::now()->subWeek(), Carbon::now()]);
+                break;
+            case 'this_month':
+                $query->whereMonth('expenseDate', Carbon::now()->month)->whereYear('expenseDate', Carbon::now()->year);
+                break;
+            case 'last_month':
+                $query->whereMonth('expenseDate', Carbon::now()->subMonth()->month)->whereYear('expenseDate', Carbon::now()->year);
+                break;
+            case 'this_year':
+                $query->whereYear('expenseDate', Carbon::now()->year);
+                break;
+            case 'custom':
+                $start_date = Carbon::parse($request->startDate);
+                $end_date = Carbon::parse($request->endDate);
+                
+                if ($end_date->greaterThan($start_date)) {
+                    $query->whereBetween('expenseDate', [$start_date, $end_date]);
+                } else {
+                    $query->whereDate('expenseDate', Carbon::today());
+                }           
+                break;           
+        }  
+        
+        $list = $query->get();
+        $totalExpense = $query->sum('expense');
             
-        return response()->json(['status'=>'success', 'list' => $list]);    
+        return response()->json(['status'=>'success', 'list' => $list, 'totalExpense' => $totalExpense]);    
     }
 }

@@ -61,7 +61,10 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('/products', ProductController::class)->names('products');    
 
-    Route::resource('/sales', SaleController::class)->names('sales');    
+    Route::resource('/sales', SaleController::class)->names('sales');
+    
+    Route::get('/sale/available', [SaleController::class, 'available'])->name('sales.available');    
+    Route::get('/sale/tablelist', [SaleController::class, 'tablelist'])->name('sales.tablelist');    
 
     Route::get('/sale/{saleId}', [SaleController::class, 'show'])->name('sales.show');
     Route::get('/sale/pdf/{sale}/{discount}', [SaleController::class, 'pdf'])->name('sales.pdf');
@@ -133,6 +136,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/clients/edit', [ClientController::class, 'edit'])->name('client.edit');
     Route::post('/clients/remove/{clientId}', [ClientController::class, 'remove'])->name('client.remove');
     Route::get('/clients/list', [ClientController::class, 'list'])->name('client.list');
+    Route::get('/clients/detail/{clientId}', [ClientController::class, 'detail'])->name('client.detail');
+    Route::post('/clients/listpayments', [ClientController::class, 'listpayments'])->name('client.listpayments');
 
     Route::post('/split/add/{saleId}', [SaleSplitController::class, 'add'])->name('salesplit.add');
 
@@ -168,6 +173,7 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/companyserial/list/{serietype}', [CompanySerialController::class, 'list'])->name('companyserial.list');
     Route::post('/companyserial/store', [CompanySerialController::class, 'store'])->name('companyserial.store');
+    Route::post('/companyserial/adddebug', [CompanySerialController::class, 'adddebug'])->name('companyserial.adddebug');
 
     Route::get('/companypos', [CompanyPosController::class, 'index'])->name('companypos.index');
     Route::post('/companypos/add', [CompanyPosController::class, 'add'])->name('companypos.add');

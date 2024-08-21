@@ -310,6 +310,12 @@ return [
         [
             'text' => 'Pedidos',
             'url'  => '/sales',
+            'active' => ['sales/*', 'sale/*'],
+            'icon' => 'fas fa-fw fas fa-check',
+        ],
+        [
+            'text' => 'Mesas Disponibles',
+            'url'  => '/sale/available',
             'icon' => 'fas fa-fw fas fa-check',
         ],
         [
@@ -393,7 +399,7 @@ return [
                 [
                     'text' => 'Reporte de Ventas',
                     'url'  => '/report/sales',
-                    'active' => ['report/sales/*'],
+                    'active' => ['report/sales/*', 'report/detail/*'],
                     'icon' => 'fas fa-fw fas fa-chart-bar',
                 ],
                 // [

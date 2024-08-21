@@ -23,9 +23,14 @@
                                 aria-controls="custom-tabs-four-serial" aria-selected="false">Comprobantes</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="custom-tabs-four-serial-tab" data-toggle="pill"
+                            <a class="nav-link" id="custom-tabs-four-tips-tab" data-toggle="pill"
                                 href="#custom-tabs-four-tips" role="tab"
                                 aria-controls="custom-tabs-four-tips" aria-selected="false">Propinas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-debug-tab" data-toggle="pill"
+                                href="#custom-tabs-four-debug" role="tab"
+                                aria-controls="custom-tabs-four-debug" aria-selected="false">Desarrollador</a>
                         </li>
                     </ul>
                 </div>
@@ -163,6 +168,58 @@
                                 </table>
                             </div>
                         </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-debug" role="tabpanel"
+                            aria-labelledby="custom-tabs-four-debug-tab">
+                            <form action="" method="POST" id="frmAddDebug">
+                                @csrf
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <div class="custom-control custom-switch">
+                                            @if($company->debug == 1)
+                                                <input type="checkbox" class="custom-control-input" id="debugMode" name="debugMode" checked>
+                                            @else
+                                                <input type="checkbox" class="custom-control-input" id="debugMode" name="debugMode">
+                                            @endif
+                                            <label class="custom-control-label" for="debugMode">Modo desarrollador</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm">
+                                        
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-sm">
+                                        <div class="form-group">
+                                            <label>Serie (Boleta)</label>
+                                            <input type="text" class="form-control" id="serieBoleta" name="serieBoleta" value="{{$serialBoleta->serie}}">
+                                        </div>            
+                                    </div>
+                                    <div class="col-sm">
+                                        <div class="form-group">
+                                            <label>Número (Boleta)</label>
+                                            <input type="text" class="form-control" id="numberBoleta" name="numberBoleta" value="{{$serialBoleta->number}}">
+                                        </div>            
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <div class="form-group">
+                                            <label>Serie (Factura)</label>
+                                            <input type="text" class="form-control" id="serieFactura" name="serieFactura" value="{{$serialFactura->serie}}">
+                                        </div>            
+                                    </div>
+                                    <div class="col-sm">
+                                        <div class="form-group">
+                                            <label>Número (Factura)</label>
+                                            <input type="text" class="form-control" id="numberFactura" name="numberFactura" value="{{$serialFactura->number}}">
+                                        </div>            
+                                    </div>
+                                </div>
+                                <div class="form-group text-center">
+                                    <button id="saveDebug" type="button" class="btn btn-primary">Guardar Cambios</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -206,6 +263,34 @@
     $(document).ready(function() {
 
         fetchTipsPercent();
+
+        $("#saveDebug").on("click", function(e){
+            e.preventDefault();
+            let elements = [
+                ['serieBoleta', 'Ingrese la serie de la boleta'],
+                ['numberBoleta', 'Ingrese el número de la boleta'],
+                ['serieFactura', 'Ingrese la serie de la factura'],
+                ['numberFactura', 'Ingrese el número de la factura']
+            ];
+
+            if(emptyfy(elements)) {
+                let route = "{{ route('companyserial.adddebug') }}";
+                let data = getFormParams('frmAddDebug');
+                fetch(route, {
+                    method: 'post',
+                    body: data,
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if(result.status=="success"){
+                        showSuccessMsg(result.message);
+                    }
+                    if(result.status=="error"){
+                        showErrorMsg(result.message);
+                    }
+                })
+            }
+        })
 
         _newTipsPercent.on("click", function(e){
             e.preventDefault();

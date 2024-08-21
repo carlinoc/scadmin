@@ -144,7 +144,6 @@ class SaleController extends Controller
     {
         $RUC = env('DATA_COMPANY_RUC','10238228379');
         $company = Company::all()->where('ruc', $RUC)->first();
-        $serial = CompanySerial::select('companyserial.id', 'companyserial.serie', 'companyserial.number')->where('serieType', 1)->first();
         $client = Client::find($request->clientId);
 
         if($client->dni==""){
@@ -152,6 +151,12 @@ class SaleController extends Controller
         }
 
         $IGV = $company->igv;
+        $debug = $company->debug;
+        $serieType = 1;
+        if($debug==1){
+            $serieType = 3;    
+        }
+        $serial = CompanySerial::select('companyserial.id', 'companyserial.serie', 'companyserial.number')->where('serieType', $serieType)->first();
         $serie = $serial->serie;
         $number = $serial->number;
         $discount = $request->discount;
@@ -225,7 +230,10 @@ class SaleController extends Controller
         //return response()->json($data);
 
         $autorization = env('DATA_COMPANY_BEARER', 'Bearer 6.pmhqb55lkNsyfGhUlKoUwJwi0CoWwmnAtwm3brYK1A');
-        $apisunat = env('DATA_COMPANY_APISUNAT', 'https://api.lucode.pe/api/v2/documents');
+        $apisunat = env('DATA_COMPANY_APISUNAT', 'https://api.lucode.pe/api/v222/documents');
+        if($debug == 1){
+            $apisunat = env('DATA_COMPANY_APISUNAT_DEBUG', 'https://api.lucode.pe/api/v1/documents');
+        }
 
         $response = Http::withBody(json_encode($data), 'application/json')
             ->withHeaders([
@@ -246,7 +254,7 @@ class SaleController extends Controller
 
             // Incrementar el número de Boleta
             $newNumber = $number + 1;
-            CompanySerial::where('serieType', 1)->update(['number' => $newNumber]);
+            CompanySerial::where('serieType', $serieType)->update(['number' => $newNumber]);
                         
             // Actualizar el total, subtotal y el voucherType
             Sale::where('id', $request->saleId)
@@ -264,7 +272,7 @@ class SaleController extends Controller
     {
         $RUC = env('DATA_COMPANY_RUC','10238228379');
         $company = Company::all()->where('ruc', $RUC)->first();
-        $serial = CompanySerial::select('companyserial.id', 'companyserial.serie', 'companyserial.number')->where('serieType', 2)->first();
+        
         $client = Client::find($request->clientId);
 
         if($client->ruc==""){
@@ -276,6 +284,12 @@ class SaleController extends Controller
         $clientAddress = (($client->address == "")?"s/n":$client->address);
 
         $IGV = $company->igv;
+        $debug = $company->debug;
+        $serieType = 2;
+        if($debug==1){
+            $serieType = 4;    
+        }
+        $serial = CompanySerial::select('companyserial.id', 'companyserial.serie', 'companyserial.number')->where('serieType', $serieType)->first();
         $serie = $serial->serie;
         $number = $serial->number;
         $discount = $request->discount;
@@ -349,7 +363,11 @@ class SaleController extends Controller
         //return response()->json($data);
 
         $autorization = env('DATA_COMPANY_BEARER', 'Bearer 6.pmhqb55lkNsyfGhUlKoUwJwi0CoWwmnAtwm3brYK1A');
-        $apisunat = env('DATA_COMPANY_APISUNAT', 'https://api.lucode.pe/api/v2/documents');
+        $apisunat = env('DATA_COMPANY_APISUNAT', 'https://api.lucode.pe/api/v222/documents');
+        if($debug == 1){
+            $apisunat = env('DATA_COMPANY_APISUNAT_DEBUG', 'https://api.lucode.pe/api/v1/documents');
+        }
+
         $response = Http::withBody(json_encode($data), 'application/json')
             ->withHeaders([
                 'User-Agent' => 'application/json',
@@ -363,7 +381,7 @@ class SaleController extends Controller
 
             // Incrementar el número de Factura
             $newNumber = $number + 1;
-            CompanySerial::where('serieType', 2)->update(['number' => $newNumber]);
+            CompanySerial::where('serieType', $serieType)->update(['number' => $newNumber]);
                         
             // Actualizar el total, subtotal y el voucherType
             Sale::where('id', $request->saleId)
@@ -913,5 +931,23 @@ class SaleController extends Controller
 
         $printer->cut();
         $printer->close();
+    }
+
+    public function available(Request $request): View
+    {
+
+        return view('sales.available');
+    }
+    
+    public function tablelist(Request $request): JsonResponse
+    {
+        $list = Table::select('tables.id', 'tables.name', 'tables.ability', 'tables.placeId', 
+            DB::raw('(SELECT COUNT(*) FROM sales WHERE sales.tableId = tables.id AND sales.status = 0) AS salesCount'),
+            'places.place')
+            ->join('places', 'places.id', '=', 'tables.placeId')
+            ->orderBy('tables.name', 'asc')
+            ->get();
+        
+        return response()->json(['status'=>'success', 'list' => $list]);    
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Table;
 use App\Models\Place;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -73,5 +74,5 @@ class TableController extends Controller
         }else{
             return redirect()->route('tables.index')->with('error', 'No se puede elimiar una mesa com ventas relacionadas');
         }   
-    }
+    }    
 }

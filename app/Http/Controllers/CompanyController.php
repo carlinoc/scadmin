@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\CompanySerial;
 use Illuminate\Http\Request;
 
 class CompanyController extends Controller
@@ -13,7 +14,10 @@ class CompanyController extends Controller
     public function index()
     {
         $company = Company::all()->first();
-        return view('company.index', ['company' => $company]);
+        $serialBoleta = CompanySerial::select('serie', 'number')->where('serieType', 3)->first();
+        $serialFactura = CompanySerial::select('serie', 'number')->where('serieType', 4)->first();
+
+        return view('company.index', ['company' => $company, 'serialBoleta' => $serialBoleta, 'serialFactura' => $serialFactura]);
     }
 
     /**

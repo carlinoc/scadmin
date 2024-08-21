@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\CompanySerial;
+use App\Models\Sale;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -38,35 +41,24 @@ class CompanySerialController extends Controller
 
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(CompanySerial $companySerial)
+    public function adddebug(Request $request)
     {
-        //
-    }
+        $debugMode = $request->debugMode;
+        $debug = 0;
+        if($debugMode != ""){
+            $debug = 1;
+        }
+        $nowDate = Carbon::now();
+        
+        $RUC = env('DATA_COMPANY_RUC','10238228379');
+        Company::where('ruc', $RUC)->update(['debug' => $debug]);
+        
+        CompanySerial::where('serieType', 3)
+            ->update(['serie' => $request->serieBoleta, 'number' => $request->numberBoleta, 'updated_at' => $nowDate]);
+            
+        CompanySerial::where('serieType', 4)
+            ->update(['serie' => $request->serieFactura, 'number' => $request->numberFactura, 'updated_at' => $nowDate]);    
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(CompanySerial $companySerial)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, CompanySerial $companySerial)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(CompanySerial $companySerial)
-    {
-        //
+        return response()->json(['status'=>'success', 'message'=>'Los datos fueron actualizados']);    
     }
 }
