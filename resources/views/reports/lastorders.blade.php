@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Ultimos Pedidos Realizados') 
+@section('title', 'Ultimas Mesas Atendidas') 
 
 @section('content_header')
-    <h1>Ultimos Pedidos Realizados</h1>
+    <h1>Ultimas Mesas Atendidas</h1>
 @stop
 
 @section('content')
@@ -22,7 +22,7 @@
                                             <i class="fas fa-location-arrow"></i>
                                         </div>
                                     </x-slot>
-                                    <option value="0"> - Todos -</option>
+                                    <option value="0"> - Todos los mozos -</option>
                                     @foreach($users as $user)
                                         <option value="{{$user->id}}">{{$user->name}}</option>
                                     @endforeach
@@ -88,7 +88,6 @@
     let _userId = $("#userId");
 
     $(document).ready(function(){
-        //_userId.val({{ Auth::user()->id }}).change();
         _userId.val(0).change();
 
         fetchReport();
@@ -129,7 +128,7 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return row.createdDate;
+                                return "<small>" +  row.createdDate + "</small>";
                             }
                         },
                         {
@@ -139,7 +138,7 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return row.table;
+                                return "<span class='text-success'>" +  row.table + "</span>";
                             }
                         },
                         {
@@ -149,7 +148,12 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return `${row.discount}%`;
+                                if(row.discount > 0) {
+                                    return "<span class='text-danger'>-" + row.discount + "%</span>";
+                                }else{
+                                    return `${row.discount}%`;
+                                }
+                                
                             }
                         },
                         {

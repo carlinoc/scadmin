@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Table;
 use App\Models\Place;
+use App\Models\SalesDetail;
+use App\Models\Sale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -15,7 +17,7 @@ class TableController extends Controller
     
     public function index(): View
     {
-        $tables = Table::select('tables.id', 'name', 'ability', 'placeId', 'place')->join('places', 'places.id','=','tables.placeId')->get();
+        $tables = Table::select('tables.id', 'name', 'ability', 'placeId', 'place', 'active')->join('places', 'places.id','=','tables.placeId')->get();
         $places = Place::all();
 
         $heads = [
@@ -23,6 +25,7 @@ class TableController extends Controller
             'Lugar',
             'Nombre',
             'Capacidad',
+            'Activo',
             'Acciones'
         ];
 
@@ -43,8 +46,19 @@ class TableController extends Controller
             'placeId' => 'required'   
         ]);
 
-        Table::create($request->all());
-        return redirect()->route('tables.index')->with('success', 'Nuevo mesa creada');
+        $active = 0;
+        if($request->active != ""){
+            $active = 1;
+        }
+                
+        $table = new Table();
+        $table->name = $request->name;
+        $table->placeId = $request->placeId;
+        $table->ability = $request->ability;
+        $table->active = $active;
+        $table->save();
+
+        return redirect()->route('tables.index')->with('success', 'Nueva mesa creada');
     }
     
     public function show(Table $table)
@@ -59,9 +73,20 @@ class TableController extends Controller
         return view('tables.edit', ['table'=>$table, 'places' => $places]);
     }
 
-    public function update(Request $request, Table $table): RedirectResponse
+    public function update(Request $request, Table $table) 
     {
-        $table->update($request->all());
+        $active = 0;
+        if($request->active != ""){
+            $active = 1;
+        }
+                
+        $table = Table::find($table->id);
+        $table->name = $request->name;
+        $table->placeId = $request->placeId;
+        $table->ability = $request->ability;
+        $table->active = $active;
+        $table->update();
+
         return redirect()->route('tables.index')->with('success', 'Mesa actualizada');
     }
 
@@ -75,4 +100,25 @@ class TableController extends Controller
             return redirect()->route('tables.index')->with('error', 'No se puede elimiar una mesa com ventas relacionadas');
         }   
     }    
+
+    public function clean(Request $request) 
+    {
+        $table = Table::find($request->tableId);
+        $table->state = 0;
+        $table->update();
+
+        return response()->json(['status'=>'success', 'message'=>'El estado fue actualizado']);
+    }
+
+    public function clear(Request $request)
+    {
+        try {
+            SalesDetail::where('saleId', $request->saleId)->delete();
+            Sale::find($request->saleId)->delete();
+
+            return response()->json(['status'=>'success', 'message'=>'La mesa fue desocupada']);
+        } catch (\Throwable $th) {
+            return response()->json(['status'=>'error', 'message'=>'Error al desocupar la mesa']);
+        }
+    }
 }

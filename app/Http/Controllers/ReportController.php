@@ -179,7 +179,8 @@ class ReportController extends Controller
     {
         $dateRange = $request->dateRange;
 
-        $query = Sale::select('sales.id', 'subtotal', 'discount', 'total', 'status', 'withCash', DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'tables.name as table', 'tables.placeId as placeId', 'places.place as place')
+        $query = Sale::select('sales.id', 'subtotal', 'discount', 'total', 'status', 'withCash', 'tables.name as table', 'tables.placeId as placeId',
+            DB::raw("DATE_FORMAT(sales.created_at, '%d %b %Y %H:%i') as createdDate"), 'places.place as place')
             ->join('tables', 'tables.id','=','sales.tableId')
             ->join('places', 'places.id','=','tables.placeId')
             ->where('sales.status','=', 1);

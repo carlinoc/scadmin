@@ -55,6 +55,20 @@
                                 @endfor
                             </select>
                         </div>
+                        <div class="row mt-3">
+                            <div class="col-sm">
+                                <div class="custom-control custom-switch">
+                                    @if ($table->active==1)
+                                        <input type="checkbox" class="custom-control-input" id="active" name="active" checked>
+                                    @else
+                                        <input type="checkbox" class="custom-control-input" id="active" name="active">
+                                    @endif        
+                                    <label class="custom-control-label" for="active">Activo</label>
+                                </div>    
+                            </div>
+                            <div class="col-sm">
+                            </div>
+                        </div>
                     </div>    
                     <div class="card-footer">
                         <button type="submit" class="btn btn-primary">Guardar</button>

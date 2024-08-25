@@ -46,6 +46,16 @@
                                 @endfor
                             </select>
                         </div>
+                        <div class="row mt-3">
+                            <div class="col-sm">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="active" name="active">
+                                    <label class="custom-control-label" for="active">Activo</label>
+                                </div>    
+                            </div>
+                            <div class="col-sm">
+                            </div>
+                        </div>
                     </div>    
                     <div class="card-footer">
                         <button type="submit" class="btn btn-primary">Guardar</button>

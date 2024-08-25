@@ -64,13 +64,16 @@ Route::middleware('auth')->group(function () {
     Route::resource('/sales', SaleController::class)->names('sales');
     
     Route::get('/sale/available', [SaleController::class, 'available'])->name('sales.available');    
-    Route::get('/sale/tablelist', [SaleController::class, 'tablelist'])->name('sales.tablelist');    
+    Route::get('/sale/tablelist', [SaleController::class, 'tablelist'])->name('sales.tablelist');  
+    Route::post('/table/clean/{tableId}', [TableController::class, 'clean'])->name('table.clean'); 
+    Route::post('/sale/takeorder', [SaleController::class, 'takeorder'])->name('sales.takeorder'); 
+    Route::get('/table/clear/{saleId}', [TableController::class, 'clear'])->name('table.clear');   
 
     Route::get('/sale/{saleId}', [SaleController::class, 'show'])->name('sales.show');
     Route::get('/sale/pdf/{sale}/{discount}', [SaleController::class, 'pdf'])->name('sales.pdf');
     Route::get('/sale/print/{sale}/{discount}/{withcash}', [SaleController::class, 'print'])->name('sales.print');
     Route::get('/sale/change/{sale}/{discount}/{withcash}', [SaleController::class, 'change'])->name('sales.change');
-    Route::get('/sale/order/{sale}', [SaleController::class, 'order'])->name('sales.order');
+    Route::get('/sale/order/{saleId}', [SaleController::class, 'order'])->name('sales.order');
     Route::post('/sale/changetable', [SaleController::class, 'changetable'])->name('sales.changetable');
     Route::post('/sale/sendticket', [SaleController::class, 'sendticket'])->name('sales.sendticket');
     Route::post('/sale/update', [SaleController::class, 'update'])->name('sales.update');

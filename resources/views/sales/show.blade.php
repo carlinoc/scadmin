@@ -8,7 +8,7 @@
         <h1>Pedido:</h1>    
     </div>
     <div class="col">
-        <a href="{{route('sales.index')}}" class="btn btn-outline-dark" role="button">Atras</a>
+        <a href="{{route('sales.available')}}" class="btn btn-outline-dark" role="button">Atras</a>
     </div>
 </div>
 @stop
@@ -33,7 +33,7 @@
                     </div>
                     <div class="row mt-2">
                         <div class="col-sm-4">
-                            <p class="h5 text-warning"><b>{{date_format($sale->updated_at,"d-m-Y g:i A")}}</b></p>
+                            <p class="h5 text-warning"><b>{{date_format($sale->updated_at, "d M Y g:i A")}}</b></p>
                         </div>
                         <div class="col-sm-4">
                             <p class="h5 text-danger" id="pTotal">Total: S/ <b>0.00</b></p>
@@ -120,10 +120,11 @@
                     </form>
                     <div class="row pt-3 border-top">
                         <div class="col-sm-4">
-
+                            <button id="clearTable" type="button" class="btn btn-info" style="font-weight: bold;">Desocupar Mesa</button>
                         </div>
                         <div class="col text-center">
-                            <a id="send" href="{{route('sales.order', $sale->saleId)}}" class="btn btn-secondary">Generar Comanda</a>        
+                            <button id="generateOrder" type="button" class="btn btn-secondary" style="font-weight: bold;">Generar Comanda</button>
+                            {{-- <a id="send" href="{{route('sales.order', $sale->saleId)}}" class="btn btn-secondary">Generar Comanda</a>         --}}
                         </div>
                         <div class="col text-center">
                             <button id="generateTicket" type="button" class="btn btn-primary" style="font-weight: bold;">Generar Ticket</button>
@@ -326,7 +327,7 @@
             .then(result => {
                 if(result.status=="success"){
                     _t.disabled = false;
-                    window.location = "/sales";
+                    window.location = "/sale/available";
                 }
                 if(result.status=="error"){
                     _t.disabled = false;
@@ -427,6 +428,64 @@
 
             _modalLabel.text("Editar Producto");
             _modal.modal('show');
+        });
+
+        $('#clearTable').on('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: "Atención",
+                text: "Desea desocupar la mesa ?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Aceptar"
+                }).then((result) => {
+                if (result.isConfirmed) {
+                    let _t = this;
+                    _t.disabled = true;
+                    let saleId = $('#saleId').val();                    
+                    fetch("/table/clear/" + saleId).then((response) => {
+                        return response.json();
+                    })
+                    .then((data) => {
+                        _t.disabled = false;
+                        if(data.status=="success"){
+                            window.location = "/sale/available";
+                        }
+                        if(data.status=="error"){
+                            showErrorMsg(data.message);
+                        }       
+                    })
+                    .catch(function(error) {
+                        _t.disabled = false;
+                        console.log(error);
+                    });
+                }
+            });
+        });    
+
+        $('#generateOrder').on('click', function(e) {
+            e.preventDefault();
+            let _t = this;
+            _t.disabled = true;
+            let saleId = $('#saleId').val();            
+            fetch("/sale/order/" + saleId).then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                _t.disabled = false;
+                if(data.status=="success"){
+                    window.location = "/sale/available";
+                }
+                if(data.status=="error"){
+                    showErrorMsg(data.message);
+                }       
+            })
+            .catch(function(error) {
+                _t.disabled = false;
+                console.log(error);
+            });
         });
     });
     

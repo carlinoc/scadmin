@@ -26,6 +26,13 @@
                             <td>{{ $table->name }}</td>
                             <td>{{ $table->ability }}</td>
                             <td>
+                                @if ($table->active==1)
+                                    <span class="badge badge-success">Activo</span>
+                                @else
+                                    <span class="badge badge-danger">Inactivo</span>
+                                @endif    
+                            </td>
+                            <td>
                                 <a href="/tables/{{$table->id}}/edit" class="btn btn-info"><i class="far fa-edit"></i></a>
 
                                 <form action="{{route('tables.destroy', $table)}}" method="post" class="d-inline">

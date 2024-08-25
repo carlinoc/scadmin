@@ -307,19 +307,20 @@ return [
             'url'  => '/home',
             'icon' => 'fas fa-fw fas fa-home',
         ],
-        [
-            'text' => 'Pedidos',
-            'url'  => '/sales',
-            'active' => ['sales/*', 'sale/*'],
-            'icon' => 'fas fa-fw fas fa-check',
-        ],
+        // [
+        //     'text' => 'Pedidos',
+        //     'url'  => '/sales',
+        //     'active' => ['sales/*', 'sale/*'],
+        //     'icon' => 'fas fa-fw fas fa-check',
+        // ],
         [
             'text' => 'Mesas Disponibles',
             'url'  => '/sale/available',
+            'active' => ['sale/*'],
             'icon' => 'fas fa-fw fas fa-check',
         ],
         [
-            'text' => 'Listado Pedidos',
+            'text' => 'Mesas Atendidas',
             'url'  => '/report/lastorders',
             'icon' => 'fas fa-fw fas fa-cart-arrow-down',
         ],

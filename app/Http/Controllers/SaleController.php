@@ -395,10 +395,10 @@ class SaleController extends Controller
         }
     }
 
-    public function order(Sale $sale)
+    public function order(Request $request)
     {
         try {
-            
+            $sale = Sale::find($request->saleId);
             $table = Table::find($sale->tableId);
             $user = User::find($sale->userId);
 
@@ -408,25 +408,28 @@ class SaleController extends Controller
             //Genera Ticket para Barra
             $this->printOrder($sale, 'Barra', $table->name, $user->name);
 
-            $paybox = PayBox::select('id')->where('state','=', 1);
-            $payboxId = 0;
-            if($paybox->count() > 0){
-                $payboxId = $paybox->first()->id;
-            }
+            return response()->json(['status'=>'success', 'message'=>'Se genero las comandas']);
 
-            $sales = Sale::select('sales.id', 'total', 'sales.created_at', 'sales.updated_at', 'tables.name as table', 'tables.placeId as placeId', 'places.place as place')
-                ->join('tables', 'tables.id','=','sales.tableId')
-                ->join('places', 'places.id','=','tables.placeId')->where('sales.status', 0)
-                ->orderBy('sales.id', 'DESC')
-                ->get();
+            // $paybox = PayBox::select('id')->where('state','=', 1);
+            // $payboxId = 0;
+            // if($paybox->count() > 0){
+            //     $payboxId = $paybox->first()->id;
+            // }
 
-            $tables = Table::all();
+            // $sales = Sale::select('sales.id', 'total', 'sales.created_at', 'sales.updated_at', 'tables.name as table', 'tables.placeId as placeId', 'places.place as place')
+            //     ->join('tables', 'tables.id','=','sales.tableId')
+            //     ->join('places', 'places.id','=','tables.placeId')->where('sales.status', 0)
+            //     ->orderBy('sales.id', 'DESC')
+            //     ->get();
 
-            $heads = $this->getHeads();
+            // $tables = Table::all();
 
-            return view('sales.index', ['sales' => $sales, 'heads' => $heads, 'tables' => $tables, 'payboxId' => $payboxId]);
+            // $heads = $this->getHeads();
+
+            // return view('sales.index', ['sales' => $sales, 'heads' => $heads, 'tables' => $tables, 'payboxId' => $payboxId]);
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Error al generar la comanda');
+            return response()->json(['status'=>'error', 'message'=>'Error al generar la comanda']);
+            //return redirect()->back()->with('error', 'Error al generar la comanda');
         }
     }
 
@@ -439,8 +442,12 @@ class SaleController extends Controller
 
         $sale = Sale::find($request->saleId);
         $table = Table::find($sale->tableId);
+        $tableName = $table->name;
+        $table->state = 1;
+        $table->update(); 
+
         try{
-            $this->printTicket($sale->id, $request->discount, $request->withCash, $clientId, $table->name);
+            $this->printTicket($sale->id, $request->discount, $request->withCash, $clientId, $tableName);
         } catch (\Throwable $th) {
             return response()->json(['status'=>'error', 'message'=>'Error al imprimir el ticket']);
         }
@@ -757,6 +764,7 @@ class SaleController extends Controller
             $connector = new WindowsPrintConnector($print_name);
             $printer = new Printer($connector);
 
+            $printer->selectPrintMode(Printer::MODE_EMPHASIZED);
             $printer->setJustification(Printer::JUSTIFY_CENTER);
             $printer->text("SANCRIS - RESTOBAR" . "\n");
             $printer->text($inCharge." - Ticket Nro: #".$sale->id." - Mesa: ".$tableName." \n");
@@ -935,19 +943,48 @@ class SaleController extends Controller
 
     public function available(Request $request): View
     {
-
-        return view('sales.available');
+        $paybox = PayBox::select('id')->where('state','=', 1);
+        $payboxId = 0;
+        if($paybox->count() > 0){
+            $payboxId = $paybox->first()->id;
+        }
+        return view('sales.available', ['payboxId' => $payboxId]);
     }
     
     public function tablelist(Request $request): JsonResponse
     {
         $list = Table::select('tables.id', 'tables.name', 'tables.ability', 'tables.placeId', 
             DB::raw('(SELECT COUNT(*) FROM sales WHERE sales.tableId = tables.id AND sales.status = 0) AS salesCount'),
-            'places.place')
+            'places.place', 'tables.active', 'tables.state')
             ->join('places', 'places.id', '=', 'tables.placeId')
+            ->where('tables.active', 1)
             ->orderBy('tables.name', 'asc')
             ->get();
         
         return response()->json(['status'=>'success', 'list' => $list]);    
+    }
+
+    public function takeorder(Request $request)
+    {
+        $paybox = PayBox::select('id')->where('state','=', 1)->where('startDate', '>=', Carbon::now()->subDays(1)->toDateTimeString())->count();
+        if($paybox==0){
+            return redirect()->route('sales.available')->with('warning', 'Es necesario aperturar la CAJA');
+        }else{
+            $rows = Sale::all()->where('tableId', $request->tableId)->where('status', 0);
+            if($rows->count()>0){
+                $saleId = $rows->first()->id;
+                return redirect()->route('sales.show', ['saleId' => $saleId]);
+            }else{
+                $sale = new Sale();
+                $sale->tableId = $request->tableId;
+                $sale->userId = $request->userId;
+                $sale->total = 0;
+                $sale->status = 0;
+                $sale->payboxId = $request->payboxId;
+                $sale->save();
+
+                return redirect()->route('sales.show', ['saleId' => $sale->id]);
+            }
+        }
     }
 }

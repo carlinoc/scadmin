@@ -130,24 +130,25 @@ class PayBoxController extends Controller
 
     public function close(Request $request)
     {
-        //$rows = Sale::all()->where('status', $request->tableId)->where('status', 0)->count();
+        $rows = Sale::all()->where('status', 0)->count();
+        if($rows > 0){
+            return response()->json(['status'=>'error', 'message'=>'No se puede cerrar la caja, existen pedidos pendientes']);
+        }else{
+            $payBox = PayBox::find($request->payboxId);
+            $payBox->closingDate = Carbon::now();
+            $payBox->income = $request->income;
+            $payBox->expenses = $request->expenses;
+            $payBox->cashSales = $request->cashSales;
+            $payBox->cardSales = $request->cardSales;
+            $payBox->missingBalance = $request->missingBalance;
+            $payBox->leftoverBalance = $request->leftoverBalance;
+            $payBox->finalBalance = $request->finalBalance;
+            $payBox->cashRegister = $request->cashRegister;
+            $payBox->state = 2;
+            $payBox->update();
 
-        $payBox = PayBox::find($request->payboxId);
-        $payBox->closingDate = Carbon::now();
-        $payBox->income = $request->income;
-        $payBox->expenses = $request->expenses;
-        $payBox->cashSales = $request->cashSales;
-        $payBox->cardSales = $request->cardSales;
-        $payBox->missingBalance = $request->missingBalance;
-        $payBox->leftoverBalance = $request->leftoverBalance;
-        $payBox->finalBalance = $request->finalBalance;
-        $payBox->cashRegister = $request->cashRegister;
-        $payBox->state = 2;
-        $payBox->update();
-
-        Sale::where('status', 0)->update(['payboxId' => null]); 
-
-        return response()->json(['status'=>'success', 'message'=>'Se realizo el cierre de caja']);    
+            return response()->json(['status'=>'success', 'message'=>'Se realizo el cierre de caja']);    
+        }
     }
 
     public function verifyopen(Request $request ){
