@@ -11,6 +11,7 @@ use App\Http\Controllers\ExpenseProviderController;
 use App\Http\Controllers\ExpenseServiceController;
 use App\Http\Controllers\ExpenseStaffController;
 use App\Http\Controllers\IncomeController;
+use App\Http\Controllers\MainBoxController;
 use App\Http\Controllers\OtherPayController;
 use App\Http\Controllers\PayBoxController;
 use App\Http\Controllers\PayBoxExpenseController;
@@ -85,6 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/salesdetail/edit', [SalesDetailController::class, 'edit'])->name('salesdetail.edit');
     Route::post('/salesdetail/remove/{saleDetailId}', [SalesDetailController::class, 'remove'])->name('salesdetail.remove');
     Route::post('/salesdetail/remove/{saleDetailId}/{saveHistory}', [SalesDetailController::class, 'remove'])->name('salesdetail.remove');
+    Route::get('/salesdetail/print/{saleDetailId}', [SalesDetailController::class, 'print'])->name('salesdetail.print');
 
     Route::get('/salelist', [SaleController::class, 'list'])->name('salelist.list');
     
@@ -215,6 +217,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/payboxexpense/edit', [PayBoxExpenseController::class, 'edit'])->name('payboxexpense.edit');
     Route::post('/payboxexpense/remove/{payboxExpenseId}', [PayBoxExpenseController::class, 'remove'])->name('payboxexpense.remove');
     Route::get('/payboxexpense/list/{payboxId}', [PayBoxExpenseController::class, 'list'])->name('payboxexpense.list');
+
+    Route::get('/mainbox', [MainBoxController::class, 'index'])->name('mainbox.index');
+    Route::post('/mainbox/add', [MainBoxController::class, 'add'])->name('mainbox.add');
+    Route::post('/mainbox/edit', [MainBoxController::class, 'edit'])->name('mainbox.edit');
+    Route::post('/mainbox/list', [MainBoxController::class, 'list'])->name('mainbox.list');
+    Route::post('/mainbox/addexpense', [MainBoxController::class, 'addexpense'])->name('mainbox.addexpense');
+    Route::post('/mainbox/editexpense', [MainBoxController::class, 'editexpense'])->name('mainbox.editexpense');
+    Route::post('/mainbox/remove/{mainboxId}', [MainBoxController::class, 'remove'])->name('mainbox.remove');
 });
 
 require __DIR__.'/auth.php';

@@ -390,6 +390,12 @@ return [
                     'active' => ['companypos/*'],
                     'icon' => 'fas fa-fw fas fa-money-check-alt',
                 ],
+                [
+                    'text' => 'Caja Principal',
+                    'url'  => '/mainbox',
+                    'active' => ['mainbox/*'],
+                    'icon' => 'fas fa-fw fas fa-coins',
+                ],
             ],
         ],
         [
@@ -412,7 +418,7 @@ return [
                     'text' => 'Reporte de Propinas',
                     'url'  => '/report/tips',
                     'active' => ['report/tips/*'],
-                    'icon' => 'fas fa-fw fas fa-coins',
+                    'icon' => 'fas fa-fw fas fa-comment-dollar',
                 ],
                 [
                     'text' => 'Ventas por Cobrar',

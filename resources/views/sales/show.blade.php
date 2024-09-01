@@ -74,6 +74,9 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <a href="" data-id="{{ $saleDetail->id }}" class="btn btn-sm btn-danger remove_product"><i class="fas fa-trash"></i></a>
+                                        @if($saleDetail->printOrder == 0 && $sale->printOrder == 1)
+                                            <a href="" data-id="{{ $saleDetail->id }}" class="btn btn-sm btn-secondary print_item"><i class="fas fa-print"></i></a>
+                                        @endif
                                     </td>
                                 </tr>
                                 <?php $sumTotal += $saleDetail->total ?>
@@ -123,11 +126,14 @@
                             <button id="clearTable" type="button" class="btn btn-info" style="font-weight: bold;">Desocupar Mesa</button>
                         </div>
                         <div class="col text-center">
-                            <button id="generateOrder" type="button" class="btn btn-secondary" style="font-weight: bold;">Generar Comanda</button>
-                            {{-- <a id="send" href="{{route('sales.order', $sale->saleId)}}" class="btn btn-secondary">Generar Comanda</a>         --}}
+                            <button id="generateOrder" type="button" class="btn btn-secondary" style="font-weight: bold;">Imprimir Comanda</button>
                         </div>
                         <div class="col text-center">
-                            <button id="generateTicket" type="button" class="btn btn-primary" style="font-weight: bold;">Generar Ticket</button>
+                            @if($sale->printOrder == 0)
+                                <button id="generateTicket" type="button" class="btn btn-primary" disabled style="font-weight: bold;">Imprimir Ticket</button>
+                            @else
+                                <button id="generateTicket" type="button" class="btn btn-primary" style="font-weight: bold;">Imprimir Ticket</button>    
+                            @endif    
                         </div>
                     </div>    
                 </div>    
@@ -430,6 +436,32 @@
             _modal.modal('show');
         });
 
+        $(document).on('click', '.print_item', function(e){
+            e.preventDefault();
+            let _t = this;
+            let saleDetailId = $(this).data('id');
+            let saleId = $('#saleId').val();            
+            fetch("/salesdetail/print/" + saleDetailId).then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                _t.disabled = false;
+                if(data.status=="success"){
+                    showSuccessMsg(data.message);
+                    setTimeout(function(){
+                        window.location = "/sale/" + saleId;
+                    }, 2000);
+                }
+                if(data.status=="error"){
+                    showErrorMsg(data.message);
+                }       
+            })
+            .catch(function(error) {
+                _t.disabled = false;
+                console.log(error);
+            });
+        })
+
         $('#clearTable').on('click', function(e) {
             e.preventDefault();
             Swal.fire({
@@ -451,7 +483,7 @@
                     .then((data) => {
                         _t.disabled = false;
                         if(data.status=="success"){
-                            window.location = "/sale/available";
+                            showSuccessMsg(data.message);
                         }
                         if(data.status=="error"){
                             showErrorMsg(data.message);
@@ -476,7 +508,10 @@
             .then((data) => {
                 _t.disabled = false;
                 if(data.status=="success"){
-                    window.location = "/sale/available";
+                    showSuccessMsg(data.message);
+                    setTimeout(function(){
+                        window.location = "/sale/" + saleId;
+                    }, 3000);
                 }
                 if(data.status=="error"){
                     showErrorMsg(data.message);

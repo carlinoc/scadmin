@@ -83,7 +83,7 @@ class SaleController extends Controller
 
     public function show(Request $request): View
     {
-        $sale = Sale::select('sales.id as saleId', 'total', 'sales.created_at', 'sales.updated_at', 'tables.name as table', 'users.name as user')
+        $sale = Sale::select('sales.id as saleId', 'total', 'sales.created_at', 'sales.updated_at', 'tables.name as table', 'users.name as user', 'sales.printOrder')
              ->join('tables', 'tables.id','=','sales.tableId')
              ->join('users', 'users.id','=','sales.userId')
              ->where('sales.id', $request->saleId)->first();
@@ -94,7 +94,7 @@ class SaleController extends Controller
 
         $clients = Client::all();
 
-        $salesDetails = SalesDetail::select('sales_detail.id','sales_detail.price', 'quantity', 'total', 'products.name as product', 'products.id as productId')
+        $salesDetails = SalesDetail::select('sales_detail.id','sales_detail.price', 'quantity', 'total', 'products.name as product', 'products.id as productId', 'sales_detail.printOrder')
             ->join('products', 'products.id','=','sales_detail.productId')
             ->where('sales_detail.saleId', $request->saleId)->get();
 
@@ -408,25 +408,10 @@ class SaleController extends Controller
             //Genera Ticket para Barra
             $this->printOrder($sale, 'Barra', $table->name, $user->name);
 
-            return response()->json(['status'=>'success', 'message'=>'Se genero las comandas']);
+            $sale->printOrder = 1;
+            $sale->update();
 
-            // $paybox = PayBox::select('id')->where('state','=', 1);
-            // $payboxId = 0;
-            // if($paybox->count() > 0){
-            //     $payboxId = $paybox->first()->id;
-            // }
-
-            // $sales = Sale::select('sales.id', 'total', 'sales.created_at', 'sales.updated_at', 'tables.name as table', 'tables.placeId as placeId', 'places.place as place')
-            //     ->join('tables', 'tables.id','=','sales.tableId')
-            //     ->join('places', 'places.id','=','tables.placeId')->where('sales.status', 0)
-            //     ->orderBy('sales.id', 'DESC')
-            //     ->get();
-
-            // $tables = Table::all();
-
-            // $heads = $this->getHeads();
-
-            // return view('sales.index', ['sales' => $sales, 'heads' => $heads, 'tables' => $tables, 'payboxId' => $payboxId]);
+            return response()->json(['status'=>'success', 'message'=>'Se imprimio la comanda']);
         } catch (\Throwable $th) {
             return response()->json(['status'=>'error', 'message'=>'Error al generar la comanda']);
             //return redirect()->back()->with('error', 'Error al generar la comanda');
@@ -785,6 +770,9 @@ class SaleController extends Controller
 
             $printer->cut();
             $printer->close();
+
+            SalesDetail::where('saleId', $sale->id)
+                ->update(['printOrder' => 1]);
         }
     }
 

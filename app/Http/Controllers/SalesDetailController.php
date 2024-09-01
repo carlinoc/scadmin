@@ -9,6 +9,10 @@ use App\Models\SalesHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Mike42\Escpos\Printer;
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
+use App\Models\Table;
+use App\Models\User;
 
 class SalesDetailController extends Controller
 {
@@ -113,6 +117,25 @@ class SalesDetailController extends Controller
         return response()->json(['status'=>'success', 'message'=>'El producto fue eliminado']);    
     }
 
+    public function print(Request $request)
+    {
+        $saleDetail = SalesDetail::select('sales_detail.id', 'sales_detail.quantity', 'products.name as product', 'products.inCharge', 'sales_detail.saleId')
+            ->join('products', 'products.id', '=', 'sales_detail.productId')
+            ->where('sales_detail.id', $request->saleDetailId)
+            ->first();
+
+        $sale = Sale::find($saleDetail->saleId);
+        $table = Table::find($sale->tableId);
+        $user = User::find($sale->userId);
+
+        //$this->printOrder($sale, '$request->inCharge', $table->name, $user->name, $saleDetail->product->name, $saleDetail->quantity);
+        $this->printOrder($sale, $saleDetail->inCharge, $table->name, $user->name, $saleDetail->product, $saleDetail->quantity);
+
+        SalesDetail::where('id', $request->saleDetailId)->update(['printOrder' => 1]);
+                
+        return response()->json(['status'=>'success', 'message'=>'Se imprimio la comanda']);    
+    }
+
     public function saveSalesHistory(string $saleId, string $action, Int $discount, float $total, int $productId, int $quantity, int $newquantity){
         $salesHistory = new SalesHistory();
         $salesHistory->saleId = $saleId;
@@ -126,5 +149,34 @@ class SalesDetailController extends Controller
         $salesHistory->quantity = $quantity;
         $salesHistory->newquantity = $newquantity;
         $salesHistory->save();
+    }
+
+
+    private function printOrder(Sale $sale, String $inCharge, String $tableName, String $user, String $product, int $quantity)
+    {
+        $print_name = env('DATA_COMPANY_POS','POS-80C');
+        $connector = new WindowsPrintConnector($print_name);
+        $printer = new Printer($connector);
+
+        $printer->selectPrintMode(Printer::MODE_EMPHASIZED);
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+        $printer->text("SANCRIS - RESTOBAR" . "\n");
+        $printer->text($inCharge." - Ticket Nro: #".$sale->id." - Mesa: ".$tableName." \n");
+        $printer->text("Fecha: ".date_format($sale->created_at,"d-m-Y g:i A")."\n");
+        $printer->text("Mozo: " . $user . "\n");
+        $printer->feed(1);
+
+        $printer->setJustification(Printer::JUSTIFY_LEFT);
+        $printer->text("-----------------------------------------------\n");
+
+        $qty = $quantity;
+        $name = trim($product);
+        $line = sprintf("%-3s %-30.30s \n", $qty, $name);
+        $printer->text("$line");
+
+        $printer->feed(2);
+
+        $printer->cut();
+        $printer->close();
     }
 }

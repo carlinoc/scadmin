@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MainBox;
 use App\Models\PayBox;
 use App\Models\Provider;
 use App\Models\Staff;
@@ -146,6 +147,14 @@ class PayBoxController extends Controller
             $payBox->cashRegister = $request->cashRegister;
             $payBox->state = 2;
             $payBox->update();
+
+            $mainBox = new MainBox();
+            $mainBox->movementType = 1;
+            $mainBox->incomeconceptId = 2;
+            $mainBox->income = $request->cashRegister;
+            $mainBox->description = "Cierre de caja";
+            $mainBox->userId = Auth::user()->id;
+            $mainBox->save();
 
             return response()->json(['status'=>'success', 'message'=>'Se realizo el cierre de caja']);    
         }
