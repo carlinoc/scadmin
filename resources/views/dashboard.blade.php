@@ -21,7 +21,7 @@
         <div class="col-md-6">
             <div class="card card-primary">
                 <div class="card-header">
-                    <h3 class="card-title">Top 5 platos más vendidos de la semana</h3>
+                    <h3 class="card-title">Top 5 platos más vendidos</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
                             <i class="fas fa-minus"></i>
@@ -46,7 +46,7 @@
         <div class="col-md-6">
             <div class="card card-info">
                 <div class="card-header">
-                    <h3 class="card-title">Top 5 bebidas más vendidas de la semana</h3>
+                    <h3 class="card-title">Top 5 bebidas más vendidas</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
                             <i class="fas fa-minus"></i>

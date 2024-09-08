@@ -140,7 +140,7 @@
                         <thead>
                             <tr>
                                 <th style="width: 80px;">Nro</th>
-                                <th style="width: 100px;">Fecha y Hora</th>
+                                <th style="width: 100px;">Fecha</th>
                                 <th style="width: 80px;">Mesa</th>
                                 <th style="width: 80px;">SubTotal</th>
                                 <th style="width: 80px;">Desc.</th>
@@ -240,12 +240,16 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return row.createdDate;
+                                return "<small>" +  row.createdDate + "</small>";
                             }
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return row.table;
+                                if(row.splitNumber > 0) {
+                                    return "<span class='text-primary'>" +  row.table + "-" + row.splitNumber + "</span>";
+                                }else{
+                                    return "<span class='text-success'>" +  row.table + "</span>";
+                                }
                             }
                         },
                         {

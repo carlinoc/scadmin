@@ -1,16 +1,16 @@
 @extends('adminlte::page')
 
-@section('title', 'Mantenimiento de Otros Pagos')
+@section('title', 'Mantenimiento de Servicios')
 
 @section('content_header')
-    <h1>Mantenimiento de Otros Pagos</h1>
+    <h1>Mantenimiento de Servicios</h1>
 @stop
 
 @section('content')
     <div>
         <div class="row">
             <div class="form-group col-md-6">
-                <a href="#" id="newOtherPay" class="btn btn-primary">Crear Nuevo Pago</a>
+                <a href="#" id="newService" class="btn btn-primary">Crear Nuevo Servicio</a>
             </div>    
         </div>
     </div>
@@ -18,11 +18,11 @@
     <div>
         <x-adminlte-card>
             <div class="card-body">
-                <table id="dtOtherPay" class="row-border" style="width:100%">
+                <table id="dtService" class="row-border" style="width:100%">
                     <thead>
                         <tr>
                             <th>Id</th>
-                            <th>Motivo</th>
+                            <th>Servicio</th>
                             <th>Descripción</th>
                             <th>Opciones</th>
                         </tr>
@@ -32,7 +32,7 @@
         </x-adminlte-card>
     </div>
 
-    @include('otherpay.add-modal')
+    @include('service.add-modal')
 @stop
 
 @section('css')
@@ -43,47 +43,47 @@
 <script src="/vendor/admin/main.js"></script>
 <script>
     const _token = document.head.querySelector("[name~=csrf-token][content]").content;
-
-    let _otherpayId = $("#otherpayId");
-    let _motive = $("#motive");
+    
+    let _serviceId = $("#serviceId");
+    let _service = $("#service");
     let _description = $("#description");
     let _addOtherPay = $("#addOtherPay");
     
-    let _dtOtherPay = $("#dtOtherPay");
+    let _dtService = $("#dtService");
     let _modal = $("#addModal");
     let _modalLabel = $("#addModalLabel");
     let _ds=null;
 
     $(document).ready(function() {
 
-        fetchOtherPay();
+        fetchService();
 
-        $('#newOtherPay').on('click', function(e) {
+        $('#newService').on('click', function(e) {
             e.preventDefault();
             clearForm();
-            _modalLabel.text("Nuevo Motivo de Pago");
+            _modalLabel.text("Nuevo Servicio");
             _modal.modal('show');
             
             setTimeout(function(){
-                _motive.focus();
+                _service.focus();
             }, 300);
         });
 
-        $('#addOtherPay').on('click', function(e) {
+        $('#addService').on('click', function(e) {
             e.preventDefault();
             let elements = [
-                ['motive', 'Ingrese el motivo de pago']
+                ['service', 'Ingrese el servicio']
             ];
 
             if(emptyfy(elements)) {
-                let otherpayId = _otherpayId.val();
+                let serviceId = _serviceId.val();
                 
-                let route = "{{ route('otherpay.add') }}";
-                if(otherpayId!="") {
-                    route = "{{ route('otherpay.edit') }}";
+                let route = "{{ route('service.add') }}";
+                if(serviceId!="") {
+                    route = "{{ route('service.edit') }}";
                 }
 
-                let data = getFormParams('frmAddOtherPay');
+                let data = getFormParams('frmAddService');
                 fetch(route, {
                     method: 'post',
                     body: data,
@@ -94,7 +94,7 @@
                         _modal.modal('hide');
                         clearForm();
                         showSuccessMsg(result.message);
-                        fetchOtherPay();
+                        fetchService();
                     }
                     if(result.status=="error"){
                         showErrorMsg(result.message);
@@ -103,27 +103,27 @@
             }
         });
         
-        _dtOtherPay.on('click', '.editProvider', function (e) {
+        _dtService.on('click', '.editItem', function (e) {
             e.preventDefault();
             let index = $(this).data('index');
             let rw = _ds[index];
             with (rw) {
-                _otherpayId.val(id);
-                _motive.val(motive);
+                _serviceId.val(id);
+                _service.val(service);
                 
                 _description.val(description);
             }
             
-            _modalLabel.text("Editar Proveedor");
+            _modalLabel.text("Editar Servicio");
             _modal.modal('show');
         });
 
-        _dtOtherPay.on('click', '.removeProvider', function (e) {
+        _dtService.on('click', '.removeItem', function (e) {
             e.preventDefault();
-            let otherpayId = $(this).data('id');
+            let serviceId = $(this).data('id');
             Swal.fire({
                 title: "Atención",
-                text: "Deseas eliminar el motivo de pago?",
+                text: "Deseas eliminar el servicio?",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -131,7 +131,7 @@
                 confirmButtonText: "Aceptar"
                 }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch("/otherpay/remove/" + otherpayId, {
+                    fetch("/service/remove/" + serviceId, {
                         method: 'post',
                         headers: {
                             'Content-Type': 'application/json',
@@ -142,7 +142,7 @@
                     .then(result => {
                         if(result.status=="success"){
                             showSuccessMsg(result.message);
-                            fetchOtherPay();
+                            fetchService();
                         }
                         if(result.status=="error"){
                             showErrorMsg(result.message);
@@ -153,15 +153,15 @@
         });
     });
     
-    async function fetchOtherPay() {
-        const response = await fetch("/otherpay/list", {method: 'GET'});
+    async function fetchService() {
+        const response = await fetch("/service/list", {method: 'GET'});
         if(!response.ok){
-            throw new Error("Error fetch otherpay");       
+            throw new Error("Error fetch service");       
         }                    
         const data = await response.json();
         _ds = data.list;
-        _dtOtherPay.DataTable().destroy();
-        _dtOtherPay.DataTable({
+        _dtService.DataTable().destroy();
+        _dtService.DataTable({
             "data": data.list,
             "responsive": true,
             order: [[0, 'desc']],
@@ -173,7 +173,7 @@
                 },
                 {
                     "render": function(data, type, row, meta) {
-                        return row.motive;
+                        return row.service;
                     }
                 },
                 {
@@ -183,7 +183,7 @@
                 },
                 {
                     "render": function(data, type, row, meta) {
-                        return '<a href="/otherpay/detail/'+row.id+'/" class="btn btn-sm btn-warning"><i class="far fa-eye"></i></a> <a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-info editProvider"><i class="far fa-edit"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-sm btn-danger removeProvider"><i class="far fa-trash-alt"></i></a>';
+                        return '<a href="/service/detail/'+row.id+'/" class="btn btn-sm btn-warning"><i class="far fa-eye"></i></a> <a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-info editItem"><i class="far fa-edit"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-sm btn-danger removeItem"><i class="far fa-trash-alt"></i></a>';
                     }
                 }
             ]
@@ -191,9 +191,8 @@
     }
 
     function clearForm() {
-        _otherpayId.val('');
-        _motive.val("");
-
+        _serviceId.val("");
+        _service.val("");
         _description.val("");
     }
 </script>        

@@ -182,12 +182,12 @@
                             </div>
                             </form>
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-10">
                                     <div class="card">
                                         <div class="card-header border-0">
                                             <label id="lTotalExpense">Total S/ 0.00</label>
                                             <div class="card-tools">
-                                                <button id="newSalary" type="button" class="btn btn-success">+ Nuevo</button>
+                                                {{-- <button id="newSalary" type="button" class="btn btn-success">+ Nuevo</button> --}}
                                             </div>
                                         </div>
                                         <div class="card-body table-responsive p-0">
@@ -198,7 +198,7 @@
                                                         <th style="width:120px">Fecha</th>
                                                         <th style="width:100px">Tipo</th>
                                                         <th style="width:100px">Monto S/</th>
-                                                        <th style="width:80px">Opc.</th>
+                                                        <th style="width:80px">Caja</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="tbSalary">
@@ -415,13 +415,13 @@
                     $("#dtSalary tbody").empty();
                     for($i = 0; $i < _ds.length; $i++) {
                         dr = _ds[$i]; 
-                        addRowExpense(dr.expenseDate, dr.expense, dr.id, $i, dr.staffPayType);
+                        addRowExpense(dr.expenseDate, dr.expense, dr.id, $i, dr.staffPayType, dr.boxType);
                     }       
                 }
             });
         }
 
-        function addRowExpense(vdate, vexpense, vid, vindex, vstaffPayType) {
+        function addRowExpense(vdate, vexpense, vid, vindex, vstaffPayType, vboxType) {
             let table = document.getElementById("tbSalary");
             let row = document.createElement("tr");
             
@@ -435,7 +435,8 @@
             c2.innerText = getOnlytHour(vdate);
             c3.innerHTML = getStaffPayType(vstaffPayType);
             c4.innerText = vexpense;
-            c5.innerHTML = '<a href="#" data-index="'+vindex+'" class="btn btn-xs btn-info editItem"><i class="far fa-edit"></i></a> <a href="#" data-id="'+vid+'" class="btn btn-xs btn-danger removeItem"><i class="far fa-trash-alt"></i></a>';
+            c5.innerHTML = getBoxType(vboxType);
+            //c5.innerHTML = '<a href="#" data-index="'+vindex+'" class="btn btn-xs btn-info editItem"><i class="far fa-edit"></i></a> <a href="#" data-id="'+vid+'" class="btn btn-xs btn-danger removeItem"><i class="far fa-trash-alt"></i></a>';
                         
             row.appendChild(c1);
             row.appendChild(c2);

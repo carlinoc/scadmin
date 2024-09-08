@@ -1,14 +1,14 @@
 @extends('adminlte::page')
 
-@section('title', 'Detalle del Proveedor')
+@section('title', 'Detalle del Servicio')
 
 @section('content_header')
     <div class="row">
         <div class="col-md-auto">
-            <h1>Detalle de Proveedor: {{ $provider->name }}</h1>
+            <h1>Detalle de Servicio: {{ $service->service }}</h1>
         </div>
         <div class="col">
-            <a href="{{ route('provider.index') }}" class="btn btn-outline-dark" role="button">Atras</a>
+            <a href="{{ route('service.index') }}" class="btn btn-outline-dark" role="button">Atras</a>
         </div>
     </div>
 @stop
@@ -20,7 +20,7 @@
                 <div class="card">
                     <form action="#" method="POST" id="frmListPayments">
                         @csrf
-                        <input type="hidden" name="providerId" id="providerId" value="{{ $provider->id }}">
+                        <input type="hidden" name="serviceId" id="serviceId" value="{{ $service->id }}">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col">
@@ -93,7 +93,7 @@
             <div class="col-8">
                 <x-adminlte-card>
                     <div class="card-body">
-                        <table id="dtPayments" class="row-border" style="width:100%">
+                        <table id="dtService" class="row-border" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Id</th>
@@ -161,7 +161,7 @@
     <script src="/vendor/admin/main.js"></script>
     <script>
         let _token = document.head.querySelector("[name~=csrf-token][content]").content;
-        let _dtPayments = $("#dtPayments");
+        let _dtService = $("#dtService");
         let _lExpense = $("#lExpense");
 
         $(function() {
@@ -214,7 +214,7 @@
         });
 
         async function fetchPayments() {
-            let route = "{{ route('provider.listpayments') }}";        
+            let route = "{{ route('service.listexpense') }}";        
             let data = getFormParams('frmListPayments');
 
             fetch(route, {
@@ -224,8 +224,8 @@
             .then(response => response.json())
             .then(result => {
                 if(result.status=="success") {
-                    _dtPayments.DataTable().destroy();
-                    _dtPayments.DataTable({
+                    _dtService.DataTable().destroy();
+                    _dtService.DataTable({
                         "data": result.list,
                         "responsive": true,
                         order: [[1, 'desc']],

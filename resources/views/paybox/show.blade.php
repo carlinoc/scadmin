@@ -216,7 +216,7 @@
                                 <div class="col-4">
                                     <div class="card">
                                         <div class="card-header border-0">
-                                            <h3 class="card-title">Depositos</h3>
+                                            <h3 class="card-title">Ingresos</h3>
                                             <div class="card-tools">
                                                 <button id="newIncome" type="button" class="btn btn-success">+ Nuevo</button>
                                             </div>

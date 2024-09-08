@@ -38,6 +38,7 @@
                                     <option value="0">Todos los movimientos</option>
                                     <option value="1">Solo Ingresos</option>
                                     <option value="2">Solo Gastos</option>
+                                    <option value="3">Solo Eliminados</option>
                                 </select>
                             </div>
                             <div class="col">
@@ -108,7 +109,7 @@
                     <table id="dtMainBox" class="table table-striped" style="width:100%">
                         <thead>
                             <tr>
-                                <th style="width: 30px;">Nro</th>
+                                <th style="width: 30px;">Id</th>
                                 <th style="width: 100px;">Fecha y Hora</th>
                                 <th style="width: 100px;">Concepto Ingreso</th>
                                 <th style="width: 80px;">Ingreso</th>
@@ -557,7 +558,12 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return '<a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-info itemEdit"><i class="far fa-edit"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-sm btn-danger itemRemove"><i class="far fa-trash-alt"></i></a>';
+                                if(row.history_count > 0){
+                                    return '<a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-info itemEdit"><i class="far fa-edit"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-sm btn-danger itemRemove"><i class="far fa-trash-alt"></i></a> <a href="/report/history/'+row.id+'" class="btn btn-sm btn-success historysale"><i class="fas fa-history"></i></a>';    
+                                }else{
+                                    return '<a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-info itemEdit"><i class="far fa-edit"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-sm btn-danger itemRemove"><i class="far fa-trash-alt"></i></a>';
+                                }
+                                
                             }
                         }
                     ]

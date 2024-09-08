@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MainBox;
+use App\Models\MainBoxHistory;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Carbon\Carbon;
@@ -30,7 +31,7 @@ class MainBoxController extends Controller
         return view('mainbox.index', ['incomeConcepts' => $incomeConcepts, 'providers' => $providers, 'staffs' => $staffs, 'services' => $services, 'otherpays' => $otherpays]);
     }
 
-    public function add(Request $request): JsonResponse 
+    public function add(Request $request): JsonResponse
     {
         $mainBox = new MainBox();
         $mainBox->movementType = 1;
@@ -40,37 +41,55 @@ class MainBoxController extends Controller
         $mainBox->userId = Auth::user()->id;
         $mainBox->save();
 
-        return response()->json(['status'=>'success', 'message'=>'El ingreso fue agregado']);    
+        return response()->json(['status'=>'success', 'message'=>'El ingreso fue agregado']);
     }
 
     public function edit(Request $request): JsonResponse
     {
         $mainBox = MainBox::find($request->mainBoxId);
+        $lastIncome = $mainBox->income;
+        $newIncome = $request->income;
+
         $mainBox->movementType = 1;
         $mainBox->incomeconceptId = $request->incomeconceptId;
-        $mainBox->income = $request->income;
+        $mainBox->income = $newIncome;
         $mainBox->description = $request->description;
         $mainBox->userId = Auth::user()->id;
         $mainBox->update();
 
-        return response()->json(['status'=>'success', 'message'=>'El ingreso fue actualizado']);    
+        $mainBoxHistory = new MainBoxHistory();
+        $mainBoxHistory->movementType = 1;
+        $mainBoxHistory->action = "Ingreso Actualizado";
+        $mainBoxHistory->lastIncome = $lastIncome;
+        $mainBoxHistory->newIncome = $newIncome;
+        $mainBoxHistory->userId = Auth::user()->id;
+        $mainBoxHistory->mainBoxId = $request->mainBoxId;
+        $mainBoxHistory->save();
+
+        return response()->json(['status'=>'success', 'message'=>'El ingreso fue actualizado']);
     }
 
     public function list(Request $request): JsonResponse
     {
         $dateFilter = $request->dateRange;
         $movementType = $request->movementType;
+        $state = 0;
+        if($movementType == 3) {
+            $state = 1;
+        }
 
-        $query = MainBox::select('mainbox.id', 'mainbox.movementType', 'mainbox.income', 'mainbox.expense', 'mainbox.expenseType', 'mainbox.staffPayType', 
-            DB::raw("DATE_FORMAT(mainbox.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'mainbox.description', 'mainbox.userId', 'incomeconcept.name as incomeConcept', 
+        $query = MainBox::select('mainbox.id', 'mainbox.movementType', 'mainbox.income', 'mainbox.expense', 'mainbox.expenseType', 'mainbox.staffPayType',
+            DB::raw("DATE_FORMAT(mainbox.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'mainbox.description', 'mainbox.userId', 'incomeconcept.name as incomeConcept',
             'users.name as userName', 'provider.name as providerName', 'mainbox.staffPayType', 'otherpay.motive as otherPayMotive', 'mainbox.incomeconceptId',
-            'mainbox.providerId', 'mainbox.staffId', 'mainbox.otherPayId', 'mainbox.voucherType', 'mainbox.voucherNumber', 'mainbox.serviceId')
+            'mainbox.providerId', 'mainbox.staffId', 'mainbox.otherPayId', 'mainbox.voucherType', 'mainbox.voucherNumber', 'mainbox.serviceId',
+            DB::raw('(SELECT COUNT(*) FROM mainboxhistory WHERE mainboxhistory.mainboxId = mainbox.id) AS history_count'))
             ->join('users', 'users.id', '=', 'mainbox.userId')
             ->leftjoin('incomeconcept', 'incomeconcept.id', '=', 'mainbox.incomeconceptId')
             ->leftjoin('provider', 'provider.id', '=', 'mainbox.providerId')
-            ->leftjoin('otherpay', 'otherpay.id', '=', 'mainbox.otherPayId');
+            ->leftjoin('otherpay', 'otherpay.id', '=', 'mainbox.otherPayId')
+            ->where('mainbox.state', '=', $state);
 
-        if($movementType > 0){
+        if($movementType > 0 && $movementType < 3) {
             $query->where('mainbox.movementType', '=', $movementType);
         }
 
@@ -103,52 +122,53 @@ class MainBoxController extends Controller
                 case 'custom':
                     $start_date = Carbon::parse($request->startDate);
                     $end_date = Carbon::parse($request->endDate);
-                    
+
                     if ($end_date->greaterThan($start_date)) {
                         $query->whereBetween('mainbox.created_at', [$start_date, $end_date]);
                     } else {
                         $query->whereDate('mainbox.created_at',Carbon::today());
-                    }           
-                    break;           
+                    }
+                    break;
             }
         }
 
         $list = $query->get();
         $query2 = clone $query;
+
         $totalIncome = $query->sum('mainbox.income');
         $totalExpense = $query2->sum('mainbox.expense');
-        
+
         return response()->json(['status'=>'success', 'list' => $list, 'totalIncome' => $totalIncome, 'totalExpense' => $totalExpense]);
     }
 
-    public function addexpense(Request $request): JsonResponse 
+    public function addexpense(Request $request): JsonResponse
     {
         $mainBox = new MainBox();
         $mainBox->movementType = 2;
         $mainBox->expense = $request->expense;
-        
+
         $expenseType = $request->expenseType;
 
         if ($expenseType == 1) {
-            $mainBox->providerId = $request->providerId;    
+            $mainBox->providerId = $request->providerId;
         }
 
         if ($expenseType == 2) {
-            $mainBox->serviceId = $request->serviceId;    
+            $mainBox->serviceId = $request->serviceId;
         }
 
         if ($expenseType == 3) {
-            $mainBox->staffId = $request->staffId;    
-            $mainBox->staffPayType = $request->staffPayType;    
+            $mainBox->staffId = $request->staffId;
+            $mainBox->staffPayType = $request->staffPayType;
         }
 
         if ($expenseType == 4) {
-            $mainBox->otherPayId = $request->otherPayId;    
+            $mainBox->otherPayId = $request->otherPayId;
         }
 
         if($expenseType != 3) {
             $mainBox->voucherType = $request->voucherType;
-            $mainBox->voucherNumber = $request->voucherNumber;    
+            $mainBox->voucherNumber = $request->voucherNumber;
         }
 
         $mainBox->expenseType = $expenseType;
@@ -156,37 +176,40 @@ class MainBoxController extends Controller
         $mainBox->userId = Auth::user()->id;
         $mainBox->save();
 
-        return response()->json(['status'=>'success', 'message'=>'El gasto fue agregado']);    
+        return response()->json(['status'=>'success', 'message'=>'El gasto fue agregado']);
     }
 
-    public function editexpense(Request $request): JsonResponse 
+    public function editexpense(Request $request): JsonResponse
     {
         $mainBox = MainBox::find($request->mainBoxId);
-        $mainBox->movementType = 2;
-        $mainBox->expense = $request->expense;
+        $lastExpense = $mainBox->expense;
+        $newExpense = $request->expense;
         
+        $mainBox->movementType = 2;
+        $mainBox->expense = $newExpense;
+
         $expenseType = $request->expenseType;
 
         if ($expenseType == 1) {
-            $mainBox->providerId = $request->providerId;    
+            $mainBox->providerId = $request->providerId;
         }
 
         if ($expenseType == 2) {
-            $mainBox->serviceId = $request->serviceId;    
+            $mainBox->serviceId = $request->serviceId;
         }
 
         if ($expenseType == 3) {
-            $mainBox->staffId = $request->staffId;    
-            $mainBox->staffPayType = $request->staffPayType;    
+            $mainBox->staffId = $request->staffId;
+            $mainBox->staffPayType = $request->staffPayType;
         }
 
         if ($expenseType == 4) {
-            $mainBox->otherPayId = $request->otherPayId;    
+            $mainBox->otherPayId = $request->otherPayId;
         }
 
         if($expenseType != 3) {
             $mainBox->voucherType = $request->voucherType;
-            $mainBox->voucherNumber = $request->voucherNumber;    
+            $mainBox->voucherNumber = $request->voucherNumber;
         }
 
         $mainBox->expenseType = $expenseType;
@@ -194,13 +217,32 @@ class MainBoxController extends Controller
         $mainBox->userId = Auth::user()->id;
         $mainBox->update();
 
-        return response()->json(['status'=>'success', 'message'=>'El gasto fue actualizado']);    
+        $mainBoxHistory = new MainBoxHistory();
+        $mainBoxHistory->movementType = 2;
+        $mainBoxHistory->action = "Gasto Actualizado";
+        $mainBoxHistory->lastExpense = $lastExpense;
+        $mainBoxHistory->newExpense = $newExpense;
+        $mainBoxHistory->userId = Auth::user()->id;
+        $mainBoxHistory->mainBoxId = $request->mainBoxId;
+        $mainBoxHistory->save();
+
+        return response()->json(['status'=>'success', 'message'=>'El gasto fue actualizado']);
     }
 
     public function remove(Request $request): JsonResponse
     {
-        MainBox::find($request->mainboxId)->delete();
+        //MainBox::find($request->mainboxId)->delete();
 
-        return response()->json(['status'=>'success', 'message'=>'El registro fue eliminado']);     
+        $mainBox = MainBox::find($request->mainboxId);
+        $mainBox->state = 1;
+        $mainBox->update();
+
+        $mainBoxHistory = new MainBoxHistory();
+        $mainBoxHistory->action = "Registro Eliminado";
+        $mainBoxHistory->userId = Auth::user()->id;
+        $mainBoxHistory->mainBoxId = $request->mainboxId;
+        $mainBoxHistory->save();
+
+        return response()->json(['status'=>'success', 'message'=>'El registro fue eliminado']);
     }
 }

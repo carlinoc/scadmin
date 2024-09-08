@@ -27,6 +27,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\SaleSplitController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TipsPercentController;
 
@@ -87,6 +88,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/salesdetail/remove/{saleDetailId}', [SalesDetailController::class, 'remove'])->name('salesdetail.remove');
     Route::post('/salesdetail/remove/{saleDetailId}/{saveHistory}', [SalesDetailController::class, 'remove'])->name('salesdetail.remove');
     Route::get('/salesdetail/print/{saleDetailId}', [SalesDetailController::class, 'print'])->name('salesdetail.print');
+    Route::get('/salesdetail/list/{saleId}', [SalesDetailController::class, 'list'])->name('salesdetail.list');
+    Route::get('/salesdetail/splitlist/{saleId}', [SalesDetailController::class, 'splitlist'])->name('salesdetail.splitlist');
+    Route::post('/salesdetail/addsale', [SalesDetailController::class, 'addsale'])->name('salesdetail.addsale');
+    Route::post('/salesdetail/adddetail', [SalesDetailController::class, 'adddetail'])->name('salesdetail.adddetail');
+    Route::post('/salesdetail/removedetail', [SalesDetailController::class, 'removedetail'])->name('salesdetail.removedetail');
+    Route::post('/salesdetail/sendticket', [SalesDetailController::class, 'sendticket'])->name('salesdetail.sendticket');
 
     Route::get('/salelist', [SaleController::class, 'list'])->name('salelist.list');
     
@@ -207,7 +214,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/otherpay/edit', [OtherPayController::class, 'edit'])->name('otherpay.edit');
     Route::post('/otherpay/remove/{otherpayId}', [OtherPayController::class, 'remove'])->name('otherpay.remove');
     Route::get('/otherpay/list', [OtherPayController::class, 'list'])->name('otherpay.list');
-
+    Route::get('/otherpay/detail/{otherpayId}', [OtherPayController::class, 'detail'])->name('otherpay.detail');
+    Route::post('/otherpay/listexpense', [OtherPayController::class, 'listexpense'])->name('otherpay.listexpense');
+    
     Route::post('/payboxincome/add', [PayBoxIncomeController::class, 'add'])->name('payboxincome.add');
     Route::post('/payboxincome/edit', [PayBoxIncomeController::class, 'edit'])->name('payboxincome.edit');
     Route::post('/payboxincome/remove/{payboxIncomeId}', [PayBoxIncomeController::class, 'remove'])->name('payboxincome.remove');
@@ -225,6 +234,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/mainbox/addexpense', [MainBoxController::class, 'addexpense'])->name('mainbox.addexpense');
     Route::post('/mainbox/editexpense', [MainBoxController::class, 'editexpense'])->name('mainbox.editexpense');
     Route::post('/mainbox/remove/{mainboxId}', [MainBoxController::class, 'remove'])->name('mainbox.remove');
+
+    Route::get('/service', [ServiceController::class, 'index'])->name('service.index');
+    Route::post('/service/add', [ServiceController::class, 'add'])->name('service.add');
+    Route::post('/service/edit', [ServiceController::class, 'edit'])->name('service.edit');
+    Route::post('/service/remove/{serviceId}', [ServiceController::class, 'remove'])->name('service.remove');
+    Route::get('/service/list', [ServiceController::class, 'list'])->name('service.list');
+    Route::get('/service/detail/{serviceId}', [ServiceController::class, 'detail'])->name('service.detail');
+    Route::post('/service/listexpense', [ServiceController::class, 'listexpense'])->name('service.listexpense');
 });
 
 require __DIR__.'/auth.php';

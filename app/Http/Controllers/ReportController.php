@@ -11,6 +11,7 @@ use App\Models\Client;
 use App\Models\CompanyPos;
 use App\Models\PayBox;
 use App\Models\PayBoxExpense;
+use App\Models\SalesDetail;
 use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -44,9 +45,9 @@ class ReportController extends Controller
         $filterpay = $request->filterpay;
 
         $query = Sale::select('sales.id', 'sales.subtotal', 'sales.discount', 'sales.total', 'sales.status', 'sales.withCash', 
-            DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'tables.name as table', 'tables.placeId as placeId', 
+            DB::raw("DATE_FORMAT(sales.created_at, '%d %b %Y %H:%i') as createdDate"), 'tables.name as table', 'tables.placeId as placeId', 
             'places.place as place', 'places.place as pay', 'companypos.pos', 'sales.voucherType',
-            'sales.tips', 'sales.tipsType', 'sales.sunat', 'sales.voucherSerie', 'sales.voucherNumber',
+            'sales.tips', 'sales.tipsType', 'sales.sunat', 'sales.voucherSerie', 'sales.voucherNumber', 'sales.splitNumber',
             DB::raw('(SELECT COUNT(*) FROM saleshistory WHERE saleshistory.saleId = sales.id) AS history_count'),)
             ->join('tables', 'tables.id','=','sales.tableId')
             ->join('places', 'places.id','=','tables.placeId')
@@ -180,7 +181,7 @@ class ReportController extends Controller
         $dateRange = $request->dateRange;
 
         $query = Sale::select('sales.id', 'subtotal', 'discount', 'total', 'status', 'withCash', 'tables.name as table', 'tables.placeId as placeId',
-            DB::raw("DATE_FORMAT(sales.created_at, '%d %b %Y %H:%i') as createdDate"), 'places.place as place')
+            DB::raw("DATE_FORMAT(sales.created_at, '%d %b %Y %H:%i') as createdDate"), 'places.place as place', 'sales.splitNumber')
             ->join('tables', 'tables.id','=','sales.tableId')
             ->join('places', 'places.id','=','tables.placeId')
             ->where('sales.status','=', 1);
@@ -362,12 +363,21 @@ class ReportController extends Controller
 
     public function topfood(Request $request)
     {
+        $list = DB::table('sales_detail')
+            ->select('productId', DB::raw('DATE(created_at) as date'), DB::raw('count(productId) as total'))
+            ->whereMonth('created_at',Carbon::now()->subMonth()->month)->whereYear('created_at',Carbon::now()->year)
+            ->groupBy('date', 'productId')
+            ->orderBy('total', 'desc')
+            ->get();
+
+            //->whereMonth('created_at',Carbon::now()->subMonth()->month)->whereYear('created_at',Carbon::now()->year)
+
         // $query = Sale::select('sales.id', 'sales.subtotal', 'sales.discount', 'sales.total', 'sales.status', 'sales.withCash', 
         //     DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'companypos.pos', 'sales.tips', 'sales.tipsType')
         //     ->leftjoin('companypos', 'companypos.id','=','sales.companyPosId')
         //     ->where('sales.status', '=', 1)
         //     ->where('sales.tips', '>', 0);
 
-        return response()->json(['status'=>'success']);    
+        return response()->json(['status'=>'success', 'list' => $list]);    
     }
 }

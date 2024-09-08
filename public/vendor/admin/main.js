@@ -67,6 +67,15 @@ function emptyfy(elements) {
     return true;
 }
 
+function getBoxType($boxType) {
+  switch ($boxType) {
+      case 1:
+          return '<small class="badge badge-success">Caja Principal</small>';
+      case 2:
+          return '<small class="badge badge-secondary">Caja Diaria</small>';
+  }
+}
+
 function getTipsType($paymentType) {
   switch ($paymentType) {
       case 1:

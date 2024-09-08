@@ -32,7 +32,11 @@
                             <p class="h5 text-success">Numero: <b>{{$sale->saleId}}</b></p>
                         </div>
                         <div class="col-sm-3">
-                            <label class="h5 text-info mr-2" id="tableName">Mesa: <b>{{$sale->table}}</b></label>
+                            @if($sale->splitNumber > 0)
+                                <label class="h5 text-info mr-2" id="tableName">Mesa: <b>{{$sale->table}} - {{$sale->splitNumber}}</b></label>
+                            @else
+                                <label class="h5 text-info mr-2" id="tableName">Mesa: <b>{{$sale->table}}</b></label>
+                            @endif
                         </div>
                         <div class="col-sm-3">
                             <input type="hidden" name="saleId" id="saleId" value="{{$sale->saleId}}">
@@ -43,17 +47,17 @@
                         </div>
                     </div>
                     <div class="row mt-2">
-                        <div class="col-sm-3">
-                            <p class="h5 text-warning"><b>{{date_format($sale->updated_at,"d-m-Y g:i A")}}</b></p>
+                        <div class="col-sm-3 pt-1">
+                            <p class="h6 text-warning"><b>{{date_format($sale->updated_at,"d M Y g:i A")}}</b></p>
                         </div>
                         <div class="col-sm-3">
-                            <p class="h5 text-danger" id="pTotal">Total: S/ <b>0.00</b></p>
+                            <a href="/report/split/{{$sale->saleId}}" class="btn bg-warning"><i class="fas fa-coins"></i> Dividir Cuenta</a>
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-3 pt-1">
                             <p class="text-muted">Atendio: {{ $sale->user }}</p>
                         </div>
-                        <div class="col-sm-3">
-                            
+                        <div class="col-sm-3 pt-1">
+                            <p class="h5 text-danger" id="pTotal">Total: S/ <b>0.00</b></p>
                         </div>
                     </div>
                     <div class="row">

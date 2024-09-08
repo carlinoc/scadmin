@@ -1,14 +1,14 @@
 @extends('adminlte::page')
 
-@section('title', 'Detalle del Proveedor')
+@section('title', 'Detalle del Pago')
 
 @section('content_header')
     <div class="row">
         <div class="col-md-auto">
-            <h1>Detalle de Proveedor: {{ $provider->name }}</h1>
+            <h1>Detalle de Pago: {{ $otherpay->motive }}</h1>
         </div>
         <div class="col">
-            <a href="{{ route('provider.index') }}" class="btn btn-outline-dark" role="button">Atras</a>
+            <a href="{{ route('otherpay.index') }}" class="btn btn-outline-dark" role="button">Atras</a>
         </div>
     </div>
 @stop
@@ -18,9 +18,9 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="card">
-                    <form action="#" method="POST" id="frmListPayments">
+                    <form action="#" method="POST" id="frmListExpense">
                         @csrf
-                        <input type="hidden" name="providerId" id="providerId" value="{{ $provider->id }}">
+                        <input type="hidden" name="otherpayId" id="otherpayId" value="{{ $otherpay->id }}">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col">
@@ -93,7 +93,7 @@
             <div class="col-8">
                 <x-adminlte-card>
                     <div class="card-body">
-                        <table id="dtPayments" class="row-border" style="width:100%">
+                        <table id="dtExpense" class="row-border" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Id</th>
@@ -161,7 +161,7 @@
     <script src="/vendor/admin/main.js"></script>
     <script>
         let _token = document.head.querySelector("[name~=csrf-token][content]").content;
-        let _dtPayments = $("#dtPayments");
+        let _dtExpense = $("#dtExpense");
         let _lExpense = $("#lExpense");
 
         $(function() {
@@ -175,7 +175,7 @@
 
         $(document).ready(function () {
 
-            fetchPayments();
+            fetchExpenses();
 
             $("#startDate").on('changeDate', function(ev){
                 $(this).datepicker('hide');
@@ -204,18 +204,18 @@
                     if (start_date == "" || end_date == "") {
                         alert("Las fechas son requeridas");
                     } else {
-                        fetchPayments();
+                        fetchExpenses();
                     }    
                 }else{
-                    fetchPayments();
+                    fetchExpenses();
                 }
             });
 
         });
 
-        async function fetchPayments() {
-            let route = "{{ route('provider.listpayments') }}";        
-            let data = getFormParams('frmListPayments');
+        async function fetchExpenses() {
+            let route = "{{ route('otherpay.listexpense') }}";        
+            let data = getFormParams('frmListExpense');
 
             fetch(route, {
                 method: 'post',
@@ -224,8 +224,8 @@
             .then(response => response.json())
             .then(result => {
                 if(result.status=="success") {
-                    _dtPayments.DataTable().destroy();
-                    _dtPayments.DataTable({
+                    _dtExpense.DataTable().destroy();
+                    _dtExpense.DataTable({
                         "data": result.list,
                         "responsive": true,
                         order: [[1, 'desc']],
@@ -266,5 +266,6 @@
                 }
             });  
         }
+        
     </script>
 @stop

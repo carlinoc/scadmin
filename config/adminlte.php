@@ -449,9 +449,16 @@ return [
                     'icon' => 'fas fa-fw fas fa-building',
                 ],
                 [
-                    'text' => 'Otros Pagos',
+                    'text' => 'Mant. de Pagos',
                     'url'  => '/otherpay',
+                    'active' => ['otherpay/*'],
                     'icon' => 'fas fa-fw fas fa-money-bill',
+                ],
+                [
+                    'text' => 'Mant. de Servicios',
+                    'url'  => '/service',
+                    'active' => ['service/*'],
+                    'icon' => 'fas fa-fw fas fa-lightbulb',
                 ],
             ],
         ],

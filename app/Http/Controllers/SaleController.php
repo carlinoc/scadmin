@@ -590,7 +590,8 @@ class SaleController extends Controller
 
     public function detailorder(Request $request): View
     {
-        $sale = Sale::select('sales.id as saleId', 'subtotal', 'sales.discount', 'total', 'status', 'withCash', 'sales.created_at', 'sales.clientId', 'sales.updated_at','tables.name as table', 'clients.name as client', 'users.name as user', 'paybox.state as payboxState', 'sales.companyPosId')
+        $sale = Sale::select('sales.id as saleId', 'subtotal', 'sales.discount', 'total', 'status', 'withCash', 'sales.created_at', 'sales.clientId', 'sales.updated_at',
+            'tables.name as table', 'clients.name as client', 'users.name as user', 'paybox.state as payboxState', 'sales.companyPosId', 'sales.splitNumber')
              ->join('tables', 'tables.id','=','sales.tableId')
              ->join('clients', 'clients.id','=','sales.clientId')
              ->join('users', 'users.id','=','sales.userId')
@@ -634,16 +635,13 @@ class SaleController extends Controller
 
     public function split(Request $request): View
     {
-        $sale = Sale::select('sales.id as saleId', 'subtotal', 'discount', 'total', 'status', 'withCash', 'created_at', 'updated_at','tables.name as table', 'clients.name as client')
+        $sale = Sale::select('sales.id as saleId', 'subtotal', 'sales.discount', 'total', 'status', 'withCash', 'tableId', 'payboxId', 'created_at', 'updated_at', 
+            'tables.name as table', 'clients.name as client', 'clientId')
              ->join('tables', 'tables.id','=','sales.tableId')
              ->join('clients', 'clients.id','=','sales.clientId')
              ->where('sales.id', $request->saleId)->first();
 
-        $salesDetails = SalesDetail::select('sales_detail.id','sales_detail.price', 'quantity', 'total', 'products.name as product', 'products.id as productId')
-            ->join('products', 'products.id','=','sales_detail.productId')
-            ->where('sales_detail.saleId', $request->saleId)->get();
-
-        return view('reports.split', ['sale' => $sale, 'salesDetails' => $salesDetails]);
+        return view('reports.split', ['sale' => $sale]);
     }
 
     protected function listAllSales()
@@ -942,7 +940,7 @@ class SaleController extends Controller
     public function tablelist(Request $request): JsonResponse
     {
         $list = Table::select('tables.id', 'tables.name', 'tables.ability', 'tables.placeId', 
-            DB::raw('(SELECT COUNT(*) FROM sales WHERE sales.tableId = tables.id AND sales.status = 0) AS salesCount'),
+            DB::raw('(SELECT COUNT(*) FROM sales WHERE sales.tableId = tables.id AND sales.status = 0 AND sales.splitNumber = 0) AS salesCount'),
             'places.place', 'tables.active', 'tables.state')
             ->join('places', 'places.id', '=', 'tables.placeId')
             ->where('tables.active', 1)

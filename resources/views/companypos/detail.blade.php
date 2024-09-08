@@ -107,7 +107,7 @@
                     <div class="card-header border-0">
                         <h3 class="card-title">Depositos</h3>
                         <div class="card-tools">
-                            <a href="#" id="newIncome" class="btn btn-tool btn-sm">
+                            <a href="#" id="newIncome" class="btn btn-tool btn-sm bg-success">
                                 <i class="fas fa-plus"></i> Nuevo
                             </a>
                         </div>
@@ -133,7 +133,7 @@
                     <div class="card-header border-0">
                         <h3 class="card-title">Gastos</h3>
                         <div class="card-tools">
-                            <a href="#" id="newExpense" class="btn btn-tool btn-sm">
+                            <a href="#" id="newExpense" class="btn btn-tool btn-sm bg-danger">
                                 <i class="fas fa-plus"></i> Nuevo
                             </a>
                         </div>

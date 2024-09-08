@@ -60,7 +60,6 @@
                         <tr>
                             <th>Nro</th>
                             <th>Fecha y Hora</th>
-                            <th>Lugar</th>
                             <th>Mesa</th>
                             <th>Sub. Total</th>
                             <th>Descuento</th>
@@ -133,12 +132,11 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return row.place;
-                            }
-                        },
-                        {
-                            "render": function(data, type, row, meta) {
-                                return "<span class='text-success'>" +  row.table + "</span>";
+                                if(row.splitNumber > 0) {
+                                    return "<span class='text-primary'>" +  row.table + "-" + row.splitNumber + "</span>";
+                                }else{
+                                    return "<span class='text-success'>" +  row.table + "</span>";
+                                }
                             }
                         },
                         {
