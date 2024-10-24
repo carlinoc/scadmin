@@ -1,0 +1,33 @@
+label:not(.form-check-label):not(.custom-file-label) {
+    font-weight: 600;
+}
+
+table.dataTable {
+    border-collapse:collapse;
+}
+
+table.dataTable tbody td {
+    vertical-align:middle!important;
+}
+
+label {
+    font-size: 15px;
+    margin-bottom: .10rem!important;
+}
+
+.modal-header {
+    background-color: #2b3137;
+}
+
+.modal-header h4 {
+    color: white;
+}
+
+.modal-header .close  {
+    color: white;
+}
+
+.tableborder {
+    padding: 0.5rem;
+}
+

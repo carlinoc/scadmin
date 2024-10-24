@@ -1,0 +1,7 @@
+let _modemTypeId = $("#modemTypeId");
+let _name = $("#name");
+let _description = $("#description");
+let _dtModemType = $("#dtModemType");
+let _modal = $("#addModal");
+let _modalLabel = $("#addModalLabel");
+let _ds=null;
