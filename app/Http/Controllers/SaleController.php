@@ -642,17 +642,29 @@ class SaleController extends Controller
         return response()->json(['status'=>'success', 'message'=>'La venta fue anulada']);
     }
 
-    public function removesale(Request $request): JsonResponse
+    public function removesale(Request $request)
     {
-        $sale = Sale::find($request->saleId);
+        $saleId = $request->saleId;
+        $mainId = $request->mainId;
+
+        $sale = Sale::find($saleId);
         if($sale->voucherType > 0) {
             return response()->json(['status'=>'error', 'message'=>'No se puede anular una venta con comprobantes de venta emitidos.']);
         }
-        
-        $sale->status = 2;
-        //$sale->update();
 
-        return response()->json(['status'=>'success', 'message'=>'La venta fue anulada']);
+        SalesDetail::where('saleid', $saleId)->update(['saleId' => $mainId]);
+        $sale->total = 0;
+        $sale->subtotal = 0;
+        $sale->status = 2;
+        $sale->update();
+
+        $total = SalesDetail::select('id', 'total')->where('saleId', $mainId)->sum('total');
+        $sale2 = Sale::find($mainId);
+        $sale2->total = $total;
+        $sale2->subtotal = $total;
+        $sale2->update();
+
+        return response()->json(['status'=>'success', 'message'=>'La cuenta fue eliminada']);
     }
 
     public function nullify(Request $request): RedirectResponse

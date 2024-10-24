@@ -221,6 +221,7 @@ class SalesDetailController extends Controller
                     ->join('products', 'products.id', '=', 'sales_detail.productId');
             }])
             ->where('parentId', $request->saleId)
+            ->where('status', 0)
             ->orderBy('splitNumber', 'desc')
             ->get();
 

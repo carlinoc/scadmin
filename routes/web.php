@@ -106,7 +106,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/sale/nullify/{saleId}', [SaleController::class, 'nullify'])->name('sales.nullify');
     Route::post('/sale/cancelsale/{saleId}', [SaleController::class, 'cancelsale'])->name('sales.cancelsale');
-    Route::get('/sale/removesale/{saleId}', [SaleController::class, 'removesale'])->name('sales.removesale');
+    Route::get('/sale/removesale/{saleId}/{mainId}/', [SaleController::class, 'removesale'])->name('sales.removesale');
 
     Route::get('/report/sales', [ReportController::class, 'sales'])->name('report.sales');
     Route::post('/report/saleslist', [ReportController::class, 'saleslist'])->name('report.saleslist');

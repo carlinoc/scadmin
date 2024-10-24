@@ -232,26 +232,39 @@
                     return;
                 }
 
-                let id = $(this).data("id");
-                let index = $(this).data("index");
+                Swal.fire({
+                    title: "Atención",
+                    text: "Desea eliminar la cuenta y regresar los productos a la cuenta principal?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Aceptar"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                        let mainId = _saleId.val();
+                        let saleId = $(this).data("id");
+                        let index = $(this).data("index");
 
-                fetch("/sale/removesale/" + id + "/")
-                .then((response) => {
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log(data); 
-                })
-                .catch(function(error) {
-                    console.log(error);
-                });
-                
-                // const response = fetch("/sale/removesale/" + id + "/", {method: 'GET'});
-                // if(!response.ok){
-                //     throw new Error("Error fetch removesale");       
-                // }                    
-                // const result = response.json();
-                // console.log(result);
+                        fetch("/sale/removesale/" + saleId + "/" + mainId + "/")
+                        .then((response) => {
+                            return response.json();
+                        })
+                        .then((result) => {
+                            if(result.status=="success"){
+                                showSuccessMsg(result.message);
+                                fetchSalesDetail();
+                                fetchSplitList();
+                            }
+                            if(result.status=="error"){
+                                showErrorMsg(result.message);
+                            }
+                        })
+                        .catch(function(error) {
+                            console.log(error);
+                        });        
+                    }
+                });    
             })
 
             $(".btnprint").on('click', function(e) {
