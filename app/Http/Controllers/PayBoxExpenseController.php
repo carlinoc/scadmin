@@ -72,6 +72,7 @@ class PayBoxExpenseController extends Controller
         //$payBoxExpense->expenseDate = Carbon::now();
         //$payBoxExpense->expense = $request->expense;
         $payBoxExpense->description = $request->description;
+        $payBoxExpense->expenseType = $request->expenseType;
 
         $payBoxExpense->providerId = null;
         $payBoxExpense->serviceId = null;

@@ -1003,7 +1003,7 @@ class SaleController extends Controller
         if($paybox==0){
             return redirect()->route('sales.available')->with('warning', 'Es necesario aperturar la CAJA');
         }else{
-            $rows = Sale::all()->where('tableId', $request->tableId)->where('status', 0);
+            $rows = Sale::all()->where('tableId', $request->tableId)->where('status', 0)->whereNull('parentId');
             if($rows->count()>0){
                 $saleId = $rows->first()->id;
                 return redirect()->route('sales.show', ['saleId' => $saleId]);

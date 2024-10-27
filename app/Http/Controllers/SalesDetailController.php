@@ -14,6 +14,7 @@ use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use App\Models\Table;
 use App\Models\User;
 use App\Models\PayBox;
+use App\Models\Client;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Company;
@@ -374,8 +375,11 @@ class SalesDetailController extends Controller
     }
 
     public function senddocument(Request $request){
+        $clientId = $request->clientId;
 
-        
+        if($clientId > 1){
+            $client = Client::find($clientId);
+        }
 
         $personaId = env('DATA_COMPANY_PERSONAID', '66ec583b65bbba0015243286');
         $personaToken = env('DATA_COMPANY_PERSONATOKEN', 'DEV_6AqWeKCsK7TRoUcytbBAX1qjCuP0lUj5awGJhFSt0xlyWwtxj28i85qmyOM5mCYs');
@@ -383,11 +387,9 @@ class SalesDetailController extends Controller
         $company = Company::all()->where('ruc', $RUC)->first();
         $IGV = $company->igv;
         $debug = $company->debug;
-        $document = "03";
+        $document = "03"; // Boleta
         $serieType = 1;
-        // if($debug==1){
-        //     $serieType = 3;    
-        // }
+
         $serial = CompanySerial::select('companyserial.id', 'companyserial.serie', 'companyserial.number')->where('serieType', $serieType)->first();
         $serie = $serial->serie;
         $number = sprintf('%08s', $serial->number);
@@ -402,12 +404,18 @@ class SalesDetailController extends Controller
             ->join('products', 'products.id','=','sales_detail.productId')
             ->where('sales_detail.saleId', $request->saleId);
 
+        $salesDetails = $query->get();
+
         $query2 = $query;
         $total = $query2->sum('total');    
+
         if($discount>0){
             $desc = $total * ($discount / 100);
             $total = $total - $desc;
         }
+
+        $totalgravada = $total / (1 + ($IGV / 100));
+        $totaligv = $total - $totalgravada;
 
         $totalLetter = Myhelpers::numberToLetter($total);
         
@@ -448,33 +456,21 @@ class SalesDetailController extends Controller
                         ]
                     ]
                 ],
-                "cac:AccountingCustomerParty" => [
-                    "cac:Party" => [
-                        "cac:PartyIdentification" => [
-                            "cbc:ID" => [
-                                "_attributes" => ["schemeID" => "1"],
-                                "_text" => "00000000"
-                            ]
-                        ],
-                        "cac:PartyLegalEntity" => [
-                            "cbc:RegistrationName" => ["_text" => "---"]
-                        ]
-                    ]
-                ],
+                "cac:AccountingCustomerParty" => [],
                 "cac:TaxTotal" => [
                     "cbc:TaxAmount" => [
                         "_attributes" => ["currencyID" => "PEN"],
-                        "_text" => 1.37
+                        "_text" => (float)number_format($totaligv, 2)
                     ],
                     "cac:TaxSubtotal" => [
                         [
                             "cbc:TaxableAmount" => [
                                 "_attributes" => ["currencyID" => "PEN"],
-                                "_text" => 7.63
+                                "_text" => (float)number_format($totalgravada, 2)
                             ],
                             "cbc:TaxAmount" => [
                                 "_attributes" => ["currencyID" => "PEN"],
-                                "_text" => 1.37
+                                "_text" => (float)number_format($totaligv, 2)
                             ],
                             "cac:TaxCategory" => [
                                 "cac:TaxScheme" => [
@@ -489,87 +485,129 @@ class SalesDetailController extends Controller
                 "cac:LegalMonetaryTotal" => [
                     "cbc:LineExtensionAmount" => [
                         "_attributes" => ["currencyID" => "PEN"],
-                        "_text" => 7.63
+                        "_text" => (float)number_format($totalgravada, 2)
                     ],
                     "cbc:TaxInclusiveAmount" => [
                         "_attributes" => ["currencyID" => "PEN"],
-                        "_text" => 9
+                        "_text" => (float)number_format($total, 2)
                     ],
                     "cbc:PayableAmount" => [
                         "_attributes" => ["currencyID" => "PEN"],
-                        "_text" => 9
+                        "_text" => (float)number_format($total, 2)
                     ]
                 ],
                 "cac:InvoiceLine" => []
             ]
         ];
 
-        // $items = array();
+        $items = array();
+        $i = 0;
+        foreach ($salesDetails as $row) {
+            $i++;
+            $name = trim($row->product);
+            $qty = $row->quantity;
+            $pTotal = $row->price;
+            //Aplicamos descuento si es mayor a cero
+            if($discount > 0){
+                $desc = $pTotal * ($discount / 100); 
+                $pTotal = $pTotal - $desc;
+            }            
+            $pGravada = $pTotal / (1 + ($IGV / 100));
+            $pIGV = $pTotal - $pGravada;
 
-        // for($i = 0; $i < 2; $i++){
+            $subtitem = [
+                "cbc:ID" => ["_text" => $i],
+                "cbc:InvoicedQuantity" => [
+                    "_attributes" => ["unitCode" => "NIU"],
+                    "_text" => $qty,
+                ],
+                "cbc:LineExtensionAmount" => [
+                    "_attributes" => ["currencyID" => "PEN"],
+                    "_text" => (float)number_format($pGravada, 2),
+                ],
+                "cac:PricingReference" => [
+                    "cac:AlternativeConditionPrice" => [
+                        "cbc:PriceAmount" => [
+                            "_attributes" => ["currencyID" => "PEN"],
+                            "_text" => (float)number_format($pTotal, 2),
+                        ],
+                        "cbc:PriceTypeCode" => ["_text" => "01"],
+                    ],
+                ],
+                "cac:TaxTotal" => [
+                    "cbc:TaxAmount" => [
+                        "_attributes" => ["currencyID" => "PEN"],
+                        "_text" => (float)number_format($pIGV, 2),
+                    ],
+                    "cac:TaxSubtotal" => [
+                        [
+                            "cbc:TaxableAmount" => [
+                                "_attributes" => ["currencyID" => "PEN"],
+                                "_text" => 16.96,
+                            ],
+                            "cbc:TaxAmount" => [
+                                "_attributes" => ["currencyID" => "PEN"],
+                                "_text" => 3.05,
+                            ],
+                            "cac:TaxCategory" => [
+                                "cbc:Percent" => ["_text" => 18],
+                                "cbc:TaxExemptionReasonCode" => ["_text" => "10"],
+                                "cac:TaxScheme" => [
+                                    "cbc:ID" => ["_text" => "1000"],
+                                    "cbc:Name" => ["_text" => "IGV"],
+                                    "cbc:TaxTypeCode" => ["_text" => "VAT"],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                "cac:Item" => ["cbc:Description" => ["_text" => "Chocolate con Leche"]],
+                "cac:Price" => [
+                    "cbc:PriceAmount" => [
+                        "_attributes" => ["currencyID" => "PEN"],
+                        "_text" => 8.48,
+                    ],
+                ],
+            ];
+            array_push($items, $subtitem);
+        }
 
-        //     $subtitem = [
-        //         "cbc:ID" => ["_text" => 1],
-        //         "cbc:InvoicedQuantity" => [
-        //             "_attributes" => ["unitCode" => "NIU"],
-        //             "_text" => 1
-        //         ],
-        //         "cbc:LineExtensionAmount" => [
-        //             "_attributes" => ["currencyID" => "PEN"],
-        //             "_text" => 7.63
-        //         ],
-        //         "cac:PricingReference" => [
-        //             "cac:AlternativeConditionPrice" => [
-        //                 "cbc:PriceAmount" => [
-        //                     "_attributes" => ["currencyID" => "PEN"],
-        //                     "_text" => 9
-        //                 ],
-        //                 "cbc:PriceTypeCode" => ["_text" => "01"]
-        //             ]
-        //         ],
-        //         "cac:TaxTotal" => [
-        //             "cbc:TaxAmount" => [
-        //                 "_attributes" => ["currencyID" => "PEN"],
-        //                 "_text" => 1.37
-        //             ],
-        //             "cac:TaxSubtotal" => [
-        //                 [
-        //                     "cbc:TaxableAmount" => [
-        //                         "_attributes" => ["currencyID" => "PEN"],
-        //                         "_text" => 7.63
-        //                     ],
-        //                     "cbc:TaxAmount" => [
-        //                         "_attributes" => ["currencyID" => "PEN"],
-        //                         "_text" => 1.37
-        //                     ],
-        //                     "cac:TaxCategory" => [
-        //                         "cbc:Percent" => ["_text" => 18],
-        //                         "cbc:TaxExemptionReasonCode" => ["_text" => "10"],
-        //                         "cac:TaxScheme" => [
-        //                             "cbc:ID" => ["_text" => "1000"],
-        //                             "cbc:Name" => ["_text" => "IGV"],
-        //                             "cbc:TaxTypeCode" => ["_text" => "VAT"]
-        //                         ]
-        //                     ]
-        //                 ]
-        //             ]
-        //         ],
-        //         "cac:Item" => [
-        //             "cbc:Description" => ["_text" => "Cafe"]
-        //         ],
-        //         "cac:Price" => [
-        //             "cbc:PriceAmount" => [
-        //                 "_attributes" => ["currencyID" => "PEN"],
-        //                 "_text" => 7.6271186441
-        //             ]
-        //         ]
-        //     ];
-    
-        //     array_push($items, $subtitem);
+        $data['documentBody']['cac:InvoiceLine'] = $items;
 
-        // }
-
-        // $data['documentBody']['cac:InvoiceLine'] = $items;
+        if($clientId == 1){
+            $data['documentBody']['cac:AccountingCustomerParty'] = [
+                "cac:Party" => [
+                            "cac:PartyIdentification" => [
+                                "cbc:ID" => [
+                                    "_attributes" => ["schemeID" => "1"],
+                                    "_text" => "00000000"
+                                ]
+                            ],
+                            "cac:PartyLegalEntity" => [
+                                "cbc:RegistrationName" => ["_text" => "---"]
+                            ]
+                        ]
+            ];    
+        }else{
+            $data['documentBody']['cac:AccountingCustomerParty'] = [
+                "cac:Party" => [
+                            "cac:PartyIdentification" => [
+                                "cbc:ID" => [
+                                    "_attributes" => ["schemeID" => "1"],
+                                    "_text" => $client->dni
+                                ]
+                            ],
+                            "cac:PartyLegalEntity" => [
+                                "cbc:RegistrationName" => ["_text" => $client->name],
+                                "cac:RegistrationAddress" => [
+                                    "cac:AddressLine" => [
+                                        "cbc:Line" => ["_text" => $client->address]
+                                    ]
+                                ]
+                            ]
+                        ]
+            ];
+        }
 
         return response()->json($data);
     }
