@@ -98,9 +98,11 @@ class SaleController extends Controller
             ->join('products', 'products.id','=','sales_detail.productId')
             ->where('sales_detail.saleId', $request->saleId)->get();
 
-        $companyPosList = CompanyPos::all();    
+        $companyPosList = CompanyPos::all();
+        
+        $urllocal = env('DATA_URL_LOCAL','http://127.0.0.1:8000');
 
-        return view('sales.show', ['sale' => $sale, 'products' => $products, 'salesDetails' => $salesDetails, 'tables' => $tables, 'clients' => $clients, 'companyPosList' => $companyPosList]);
+        return view('sales.show', ['sale' => $sale, 'products' => $products, 'salesDetails' => $salesDetails, 'tables' => $tables, 'clients' => $clients, 'companyPosList' => $companyPosList, 'urllocal' => $urllocal]);
     }
 
     public function history(Request $request): View {
@@ -414,15 +416,17 @@ class SaleController extends Controller
             $user = User::find($sale->userId);
 
             //Genera Ticket para Cocina
-            $this->printOrder($sale, 'Cocina', $table->name, $user->name);
+            //$this->printOrder($sale, 'Cocina', $table->name, $user->name);
 
             //Genera Ticket para Barra
-            $this->printOrder($sale, 'Barra', $table->name, $user->name);
+            //$this->printOrder($sale, 'Barra', $table->name, $user->name);
+
+            $data = $this->getOrderData($sale->id, $table->name, $user->name);
 
             $sale->printOrder = 1;
             $sale->update();
 
-            return response()->json(['status'=>'success', 'message'=>'Se imprimio la comanda']);
+            return response()->json(['status'=>'success', 'message'=>'Se imprimio la comanda', 'data'=>$data]);
         } catch (\Throwable $th) {
             return response()->json(['status'=>'error', 'message'=>'Error al generar la comanda']);
             //return redirect()->back()->with('error', 'Error al generar la comanda');
@@ -446,13 +450,15 @@ class SaleController extends Controller
         $table->state = 1;
         $table->update(); 
 
-        try{
-            $this->printTicket($sale->id, $request->discount, $request->withCash, $clientId, $tableName, $companyPosId);
-        } catch (\Throwable $th) {
-            return response()->json(['status'=>'error', 'message'=>'Error al imprimir el ticket']);
-        }
+        // try{
+        //     $this->printTicket($sale->id, $request->discount, $request->withCash, $clientId, $tableName, $companyPosId);
+        // } catch (\Throwable $th) {
+        //     return response()->json(['status'=>'error', 'message'=>'Error al imprimir el ticket']);
+        // }
 
-        return response()->json(['status'=>'success', 'message'=>'El ticket fue imprimido']);
+        $data = $this->getTicketData($sale->id, $request->discount, $request->withCash, $clientId, $tableName, $companyPosId);
+
+        return response()->json(['status'=>'success', 'message'=>'El ticket fue imprimido', 'data' => $data]);
     }
 
     public function print(Sale $sale, Int $discount, Int $withcash)
@@ -622,9 +628,11 @@ class SaleController extends Controller
             ->join('products', 'products.id','=','sales_detail.productId')
             ->where('sales_detail.saleId', $request->saleId)->get();
 
-        $companyPosList = CompanyPos::all();    
+        $companyPosList = CompanyPos::all();
+        
+        $urllocal = env('DATA_URL_LOCAL','http://127.0.0.1:8000');
 
-        return view('reports.detail', ['sale' => $sale, 'products' => $products, 'salesDetails' => $salesDetails, 'clients' => $clients, 'companyPosList' => $companyPosList]);
+        return view('reports.detail', ['sale' => $sale, 'products' => $products, 'salesDetails' => $salesDetails, 'clients' => $clients, 'companyPosList' => $companyPosList, 'urllocal' => $urllocal]);
     }
 
     public function cancelsale(Request $request): JsonResponse
@@ -720,6 +728,49 @@ class SaleController extends Controller
         return $heads;
     }
 
+    protected function getTicketData(int $saleId, int $discount, int $withCash, int $clientId, String $tableName, int $companyPosId)
+    {
+        $RUC = env('DATA_COMPANY_RUC','10238228379');
+        $company = Company::all()->where('ruc', $RUC)->first();
+        if($companyPosId == 0){ $companyPosId = null; }
+
+        $salesDetails = SalesDetail::select('sales_detail.id','sales_detail.price', 'quantity', 'total', 'products.name as product', 'products.id as productId')
+        ->join('products', 'products.id','=','sales_detail.productId')
+        ->where('sales_detail.saleId', $saleId)->get();
+
+        $data = array();
+        
+        $data["saleId"] = $saleId;
+        $data["slogan"] = $company->slogan;
+        $data["address"] = $company->address;
+        $data["tableName"] = $tableName;
+        $data["discount"] = $discount;
+        $data["website"] = $company->website;
+
+        $total1 = 0;
+        foreach ($salesDetails as $row) {
+            $total1 += $row->total;
+            $qty = $row->quantity;
+            $name = trim($row->product);
+
+            $detail[] = array("name"=>$name, "quantity"=>$qty, "price"=>$row->price, "total"=>$row->total);
+
+            $data["detail"] = $detail;
+        }
+
+        $total2 = $total1;
+        if($discount > 0){
+            $desc = $total1 * ($discount / 100);
+            $total2 = $total1 - $desc;
+        }
+
+        Sale::where('id', $saleId)
+            ->update(['subtotal' => $total1, 'total' => $total2, 'discount' => $discount, 'status' => 1, 
+                'withCash' => $withCash, 'clientId' => $clientId, 'companyPosId' => $companyPosId]);
+
+        return json_encode($data);
+    }
+
     protected function printTicket(int $saleId, int $discount, int $withCash, int $clientId, String $tableName, int $companyPosId)
     {
         $RUC = env('DATA_COMPANY_RUC','10238228379');
@@ -781,6 +832,33 @@ class SaleController extends Controller
         $printer->cut();
         $printer->close();
     }
+
+    private function getOrderData(int $saleId, String $tableName, String $user) {
+        $list = SalesDetail::select('sales_detail.id','sales_detail.price', 'quantity', 'total', 'products.name as product', 'products.id as productId', 'products.inCharge')
+        ->join('products', 'products.id','=','sales_detail.productId')
+        ->where('sales_detail.saleId', $saleId)->get();
+
+        $data = array();
+        
+        $data["saleId"] = $saleId;
+        $data["tableName"] = $tableName;
+        $data["user"] = $user;
+
+        foreach ($list as $row) {
+            $qty = $row->quantity;
+            $name = trim($row->product);
+            $inCharge = $row->inCharge;
+
+            $detail[] = array("name"=>$name, "quantity"=>$qty, "inCharge"=>$inCharge);
+
+            $data["detail"] = $detail;
+        }
+
+        SalesDetail::where('saleId', $saleId)->update(['printOrder' => 1]);
+        
+        return json_encode($data);
+    }
+
 
     private function printOrder(Sale $sale, String $inCharge, String $tableName, String $user)
     {
@@ -1067,5 +1145,118 @@ class SaleController extends Controller
         SalesDetail::where('saleId', $sale->id)->update(['printOrder' => 1]);
 
         return response()->json(['status'=>'success', 'message'=>'Ticket Impreso']);    
+    }
+
+    public function localprint(Request $request){
+        try {
+            $rs = json_decode($request->getContent(), true);
+            $slogan = $rs['slogan'];
+            $address = $rs['address'];
+            $tableName = $rs['tableName'];
+            $saleId = $rs['saleId'];
+            $discount = $rs['discount'];
+            $website = $rs['website'];
+
+            $now = date('d/m/Y');
+            $hour = date('H:i');
+            
+            $print_name = env('DATA_COMPANY_POS','POS-80C');
+            $connector = new WindowsPrintConnector($print_name);
+            $printer = new Printer($connector);
+
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text($slogan . "\n");
+            $printer->text($address . "\n");
+            $printer->text("Mesa: " . $tableName . " - Ticket Nro: #" . $saleId . "\n");
+            $printer->text("Fecha: " . $now . "     Hora: " . $hour . "\n");
+            $printer->feed(1);
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text("-----------------------------------------------\n");
+
+            $total1 = 0;
+            for($i = 0; $i < count($rs['detail']); $i++) {
+                $total1 += $rs['detail'][$i]['total'];
+
+                $name = $rs['detail'][$i]['name'];
+                $quantity = $rs['detail'][$i]['quantity'];
+                $price = $rs['detail'][$i]['price'];
+                $total = $rs['detail'][$i]['total'];
+
+                $mask = "%-40.40s\n";
+                $line = sprintf($mask, $name);
+                $line .= sprintf("%4s %15.2f %15.2f\n", $quantity." x", $price, $total);
+                $printer->text("$line");
+            }
+
+            $printer->text("-----------------------------------------------\n");
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text("     TOTAL: S/ ". $total1 ."\n");
+
+            $total2 = $total1;
+            if($discount > 0){
+                $printer->text("     Descuento por promoción - " . $discount . "%\n");
+                $desc = $total1 * ($discount / 100);
+                $total2 = $total1 - $desc;
+                $printer->text("     TOTAL: S/ ". $total2 ."\n");
+            }
+
+            $printer->feed(2);
+
+            $printer->text($website);
+            $printer->feed(2);
+
+            $printer->cut();
+            $printer->close();
+
+            return response()->json(['status'=>'success', 'message'=>'Ticket Impreso']);
+        } catch (\Exception $e) {
+            return response()->json(['status'=>'error', 'message'=>'Error al imprimir']);
+        }        
+    }       
+
+    public function orderprint(Request $request){
+        try {
+            $rs = json_decode($request->getContent(), true);
+            $inCharge = $request->incharge;
+            $saleId = $rs['saleId'];
+            $tableName = $rs['tableName'];
+            $user = $rs['user'];
+            
+            $now = date('d/m/Y');
+            $hour = date('H:i');
+
+            $print_name = env('DATA_COMPANY_POS','POS-80C');
+            $connector = new WindowsPrintConnector($print_name);
+            $printer = new Printer($connector);
+
+            
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text($inCharge." - Ticket Nro: #".$saleId." - Mesa: ".$tableName." \n");
+            $printer->text("Fecha: " . $now . "     Hora: " . $hour . "\n");
+            $printer->text("Mozo: " . $user . "\n");
+            $printer->feed(1);
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text("-----------------------------------------------\n");
+            $printer->selectPrintMode(Printer::MODE_DOUBLE_HEIGHT);
+            for($i = 0; $i < count($rs['detail']); $i++) {
+                $name = $rs['detail'][$i]['name'];
+                $quantity = $rs['detail'][$i]['quantity'];
+                if($inCharge == $rs['detail'][$i]['inCharge']){
+                    $line = sprintf("%-3s %-30.30s \n",$quantity, $name);
+                    $printer->text("$line");
+                }
+            }
+
+            $printer->feed(2);
+
+            $printer->cut();
+            $printer->close();
+
+            return response()->json(['status'=>'success', 'message'=>'Comanda Impresa: '.$inCharge]);
+        } catch (\Exception $e) {
+            return response()->json(['status'=>'error', 'message'=>'Error al imprimir']);
+        }        
     }
 }

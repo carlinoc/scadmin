@@ -248,6 +248,7 @@
     let _tipsType = $("#tipsType");
     let _rloading = $("#rloading");
     let _sunat = {{ $sale->sunat }};
+    let _url = '{{ $urllocal }}';
     
     $(document).ready(function(){
         let sumTotal = parseFloat($('#sumTotal').val());
@@ -488,7 +489,22 @@
             .then(response => response.json())
             .then(result => {
                 if(result.status=="success"){
-                    window.location = _backUrl.val();
+                    let _data = result.data;
+                    fetch(_url + '/sale/localprint', {
+                        method: 'post',
+                        body: _data,
+                        headers: { 'X-CSRF-TOKEN': _token },
+                    })
+                    .then(response => response.json()) 
+                    .then(res => {
+                        if(res.status=="success"){
+                            window.location = _backUrl.val();
+                        }
+                        if(res.status=="error"){
+                            showErrorMsg(res.message);
+                        }
+                    })
+                    .catch(err => console.log(err));
                 }
                 if(result.status=="error"){
                     showErrorMsg(result.message);

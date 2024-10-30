@@ -42,6 +42,9 @@ use App\Http\Controllers\TipsPercentController;
 |
 */
 
+Route::post('/sale/localprint', [SaleController::class, 'localprint']);
+Route::post('/sale/orderprint/{incharge}', [SaleController::class, 'orderprint']);
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -70,7 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/table/clean/{tableId}', [TableController::class, 'clean'])->name('table.clean'); 
     Route::post('/sale/takeorder', [SaleController::class, 'takeorder'])->name('sales.takeorder'); 
     Route::get('/table/clear/{saleId}', [TableController::class, 'clear'])->name('table.clear');   
-
+    
     Route::get('/sale/{saleId}', [SaleController::class, 'show'])->name('sales.show');
     Route::get('/sale/pdf/{sale}/{discount}', [SaleController::class, 'pdf'])->name('sales.pdf');
     Route::get('/sale/print/{sale}/{discount}/{withcash}', [SaleController::class, 'print'])->name('sales.print');
@@ -83,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/sale/sendfactura', [SaleController::class, 'sendfactura'])->name('sales.sendfactura');
     Route::post('/sale/addtips', [SaleController::class, 'addtips'])->name('sales.addtips');
     Route::post('/sale/reprint', [SaleController::class, 'reprint'])->name('sales.reprint');
-
+    
     Route::post('/salesdetail/add', [SalesDetailController::class, 'add'])->name('salesdetail.add');
     Route::post('/salesdetail/edit', [SalesDetailController::class, 'edit'])->name('salesdetail.edit');
     Route::post('/salesdetail/remove/{saleDetailId}', [SalesDetailController::class, 'remove'])->name('salesdetail.remove');

@@ -198,6 +198,7 @@
     let _phone = $("#phone");
     let _discount = $("#discount1");
     let _items = [];
+    let _url = '{{ $urllocal }}';
 
     $(document).ready(function(){
         let sumTotal = parseFloat($('#sumTotal').val());
@@ -355,7 +356,22 @@
             .then(result => {
                 if(result.status=="success"){
                     _t.disabled = false;
-                    window.location = "/sale/available";
+                    let _data = result.data;
+                    fetch(_url + '/sale/localprint', {
+                        method: 'post',
+                        body: _data,
+                        headers: { 'X-CSRF-TOKEN': _token },
+                    })
+                    .then(response => response.json()) 
+                    .then(res => {
+                        if(res.status=="success"){
+                            window.location = "/sale/available";
+                        }
+                        if(res.status=="error"){
+                            showErrorMsg(res.message);
+                        }
+                    })
+                    .catch(err => console.log(err));
                 }
                 if(result.status=="error"){
                     _t.disabled = false;
@@ -537,16 +553,45 @@
                 fetch("/sale/order/" + saleId).then((response) => {
                     return response.json();
                 })
-                .then((data) => {
+                .then((result) => {
                     _t.disabled = false;
-                    if(data.status=="success"){
-                        showSuccessMsg(data.message);
-                        setTimeout(function(){
-                            window.location = "/sale/" + saleId;
-                        }, 2000);
+                    if(result.status=="success"){
+                        let _data = result.data;
+                        //print order cocina
+                        fetch(_url + '/sale/orderprint/Cocina', {
+                            method: 'post', body: _data,
+                            headers: { 'X-CSRF-TOKEN': _token },
+                        })
+                        .then(response => response.json()) 
+                        .then(res => {
+                            if(res.status=="success"){
+                                console.log(res.message);
+                            }
+                            if(res.status=="error"){
+                                showErrorMsg(res.message);
+                            }
+                        });
+                        //print order barra
+                        fetch(_url + '/sale/orderprint/Barra', {
+                            method: 'post', body: _data,
+                            headers: { 'X-CSRF-TOKEN': _token },
+                        })
+                        .then(response => response.json()) 
+                        .then(res => {
+                            if(res.status=="success"){
+                                console.log(res.message);
+                                showSuccessMsg(res.message);
+                                setTimeout(function(){
+                                    window.location = "/sale/" + saleId;
+                                }, 2000);
+                            }
+                            if(res.status=="error"){
+                                showErrorMsg(res.message);
+                            }
+                        });
                     }
-                    if(data.status=="error"){
-                        showErrorMsg(data.message);
+                    if(result.status=="error"){
+                        showErrorMsg(result.message);
                     }       
                 })
                 .catch(function(error) {
@@ -554,27 +599,28 @@
                     console.log(error);
                 });
             }else{
-                $('#ids').val(_items);
-                let route = "{{ route('sales.reprint') }}";
-                let data = getFormParams('frmRePrint');
-                fetch(route, {
-                    method: 'post',
-                    body: data,
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if(result.status=="success"){
-                        _t.disabled = false;
-                        showSuccessMsg(result.message);
-                        setTimeout(function(){
-                            window.location = "/sale/available";
-                        }, 2000);
-                    }
-                    if(result.status=="error"){
-                        _t.disabled = false;
-                        showErrorMsg(result.message);
-                    }
-                });
+                showErrorMsg("en mantenimiento");
+                // $('#ids').val(_items);
+                // let route = "{{ route('sales.reprint') }}";
+                // let data = getFormParams('frmRePrint');
+                // fetch(route, {
+                //     method: 'post',
+                //     body: data,
+                // })
+                // .then(response => response.json())
+                // .then(result => {
+                //     if(result.status=="success"){
+                //         _t.disabled = false;
+                //         showSuccessMsg(result.message);
+                //         setTimeout(function(){
+                //             window.location = "/sale/available";
+                //         }, 2000);
+                //     }
+                //     if(result.status=="error"){
+                //         _t.disabled = false;
+                //         showErrorMsg(result.message);
+                //     }
+                // });
             }
         });
     });
