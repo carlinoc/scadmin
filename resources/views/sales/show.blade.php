@@ -556,39 +556,51 @@
                 .then((result) => {
                     _t.disabled = false;
                     if(result.status=="success"){
-                        let _data = result.data;
-                        //print order cocina
-                        fetch(_url + '/sale/orderprint/Cocina', {
-                            method: 'post', body: _data,
-                            headers: { 'X-CSRF-TOKEN': _token },
-                        })
-                        .then(response => response.json()) 
-                        .then(res => {
-                            if(res.status=="success"){
-                                console.log(res.message);
+                        let resdata = result.data;
+                        let _data = JSON.parse(result.data);
+                        if(_data['detail'].length > 0){
+                            let find1 = searchIncharge(_data['detail'], "Cocina");
+                            if(find1 > 0){
+                                //print order cocina
+                                fetch(_url + '/sale/orderprint/Cocina', {
+                                    method: 'post', body: resdata,
+                                    headers: { 'X-CSRF-TOKEN': _token },
+                                })
+                                .then(response => response.json()) 
+                                .then(res => {
+                                    if(res.status=="success"){
+                                        console.log(res.message);
+                                    }
+                                    if(res.status=="error"){
+                                        showErrorMsg(res.message);
+                                        console.log(res.error);
+                                    }
+                                });        
                             }
-                            if(res.status=="error"){
-                                showErrorMsg(res.message);
+                            
+                            let find2 = searchIncharge(_data['detail'], "Barra");
+                            if(find2 > 0){
+                                //print order barra
+                                fetch(_url + '/sale/orderprint/Barra', {
+                                    method: 'post', body: resdata,
+                                    headers: { 'X-CSRF-TOKEN': _token },
+                                })
+                                .then(response => response.json()) 
+                                .then(res => {
+                                    if(res.status=="success"){
+                                        console.log(res.message);
+                                        showSuccessMsg(res.message);
+                                        // setTimeout(function(){
+                                        //     //window.location = "/sale/" + saleId;
+                                        // }, 2000);
+                                    }
+                                    if(res.status=="error"){
+                                        showErrorMsg(res.message);
+                                        console.log(res.error);
+                                    }
+                                });    
                             }
-                        });
-                        //print order barra
-                        fetch(_url + '/sale/orderprint/Barra', {
-                            method: 'post', body: _data,
-                            headers: { 'X-CSRF-TOKEN': _token },
-                        })
-                        .then(response => response.json()) 
-                        .then(res => {
-                            if(res.status=="success"){
-                                console.log(res.message);
-                                showSuccessMsg(res.message);
-                                setTimeout(function(){
-                                    window.location = "/sale/" + saleId;
-                                }, 2000);
-                            }
-                            if(res.status=="error"){
-                                showErrorMsg(res.message);
-                            }
-                        });
+                        }
                     }
                     if(result.status=="error"){
                         showErrorMsg(result.message);
@@ -643,6 +655,16 @@
         _phone.val('');
         _discount.val(0).change();
 
+    }
+
+    function searchIncharge(items, incharge){
+        let find = 0;
+        for(let i = 0; i < items.length; i++){
+            if(items[i]['inCharge'] == incharge){
+                return 1;
+            }
+        }
+        return 0;
     }
 </script>    
 @stop

@@ -1226,33 +1226,35 @@ class SaleController extends Controller
             $now = date('d/m/Y');
             $hour = date('H:i');
 
-            $print_name = env('DATA_COMPANY_POS','POS-80C');
-            $connector = new WindowsPrintConnector($print_name);
-            $printer = new Printer($connector);
-
-            
-            $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text($inCharge." - Ticket Nro: #".$saleId." - Mesa: ".$tableName." \n");
-            $printer->text("Fecha: " . $now . "     Hora: " . $hour . "\n");
-            $printer->text("Mozo: " . $user . "\n");
-            $printer->feed(1);
-
-            $printer->setJustification(Printer::JUSTIFY_LEFT);
-            $printer->text("-----------------------------------------------\n");
-            $printer->selectPrintMode(Printer::MODE_DOUBLE_HEIGHT);
-            for($i = 0; $i < count($rs['detail']); $i++) {
-                $name = $rs['detail'][$i]['name'];
-                $quantity = $rs['detail'][$i]['quantity'];
-                if($inCharge == $rs['detail'][$i]['inCharge']){
-                    $line = sprintf("%-3s %-30.30s \n",$quantity, $name);
-                    $printer->text("$line");
+            if(count($rs['detail']) > 0){
+                $print_name = env('DATA_COMPANY_POS','POS-80C');
+                $connector = new WindowsPrintConnector($print_name);
+                $printer = new Printer($connector);
+    
+                
+                $printer->setJustification(Printer::JUSTIFY_CENTER);
+                $printer->text($inCharge." - Ticket Nro: #".$saleId." - Mesa: ".$tableName." \n");
+                $printer->text("Fecha: " . $now . "     Hora: " . $hour . "\n");
+                $printer->text("Mozo: " . $user . "\n");
+                $printer->feed(1);
+    
+                $printer->setJustification(Printer::JUSTIFY_LEFT);
+                $printer->text("-----------------------------------------------\n");
+                $printer->selectPrintMode(Printer::MODE_DOUBLE_HEIGHT);
+                for($i = 0; $i < count($rs['detail']); $i++) {
+                    $name = $rs['detail'][$i]['name'];
+                    $quantity = $rs['detail'][$i]['quantity'];
+                    if($inCharge == $rs['detail'][$i]['inCharge']){
+                        $line = sprintf("%-3s %-30.30s \n",$quantity, $name);
+                        $printer->text("$line");
+                    }
                 }
+    
+                $printer->feed(2);
+    
+                $printer->cut();
+                $printer->close();      
             }
-
-            $printer->feed(2);
-
-            $printer->cut();
-            $printer->close();
 
             return response()->json(['status'=>'success', 'message'=>'Comanda Impresa: '.$inCharge]);
         } catch (\Exception $e) {
