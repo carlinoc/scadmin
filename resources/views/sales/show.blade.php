@@ -357,11 +357,7 @@
                 if(result.status=="success"){
                     _t.disabled = false;
                     let _data = result.data;
-                    fetch(_url + '/sale/localprint', {
-                        method: 'post',
-                        body: _data,
-                        headers: { 'X-CSRF-TOKEN': _token },
-                    })
+                    fetch(_url + '/sale/localprint?data=' + _data)
                     .then(response => response.json()) 
                     .then(res => {
                         if(res.status=="success"){
@@ -556,51 +552,7 @@
                 .then((result) => {
                     _t.disabled = false;
                     if(result.status=="success"){
-                        let resdata = result.data;
-                        let _data = JSON.parse(result.data);
-                        if(_data['detail'].length > 0){
-                            let find1 = searchIncharge(_data['detail'], "Cocina");
-                            if(find1 > 0){
-                                //print order cocina
-                                fetch(_url + '/sale/orderprint/Cocina', {
-                                    method: 'post', body: resdata,
-                                    headers: { 'X-CSRF-TOKEN': _token },
-                                })
-                                .then(response => response.json()) 
-                                .then(res => {
-                                    if(res.status=="success"){
-                                        console.log(res.message);
-                                    }
-                                    if(res.status=="error"){
-                                        showErrorMsg(res.message);
-                                        console.log(res.error);
-                                    }
-                                });        
-                            }
-                            
-                            let find2 = searchIncharge(_data['detail'], "Barra");
-                            if(find2 > 0){
-                                //print order barra
-                                fetch(_url + '/sale/orderprint/Barra', {
-                                    method: 'post', body: resdata,
-                                    headers: { 'X-CSRF-TOKEN': _token },
-                                })
-                                .then(response => response.json()) 
-                                .then(res => {
-                                    if(res.status=="success"){
-                                        console.log(res.message);
-                                        showSuccessMsg(res.message);
-                                        // setTimeout(function(){
-                                        //     //window.location = "/sale/" + saleId;
-                                        // }, 2000);
-                                    }
-                                    if(res.status=="error"){
-                                        showErrorMsg(res.message);
-                                        console.log(res.error);
-                                    }
-                                });    
-                            }
-                        }
+                        sendToPrint(result.data);
                     }
                     if(result.status=="error"){
                         showErrorMsg(result.message);
@@ -611,28 +563,24 @@
                     console.log(error);
                 });
             }else{
-                showErrorMsg("en mantenimiento");
-                // $('#ids').val(_items);
-                // let route = "{{ route('sales.reprint') }}";
-                // let data = getFormParams('frmRePrint');
-                // fetch(route, {
-                //     method: 'post',
-                //     body: data,
-                // })
-                // .then(response => response.json())
-                // .then(result => {
-                //     if(result.status=="success"){
-                //         _t.disabled = false;
-                //         showSuccessMsg(result.message);
-                //         setTimeout(function(){
-                //             window.location = "/sale/available";
-                //         }, 2000);
-                //     }
-                //     if(result.status=="error"){
-                //         _t.disabled = false;
-                //         showErrorMsg(result.message);
-                //     }
-                // });
+                $('#ids').val(_items);
+                let route = "{{ route('sales.reprint') }}";
+                let data = getFormParams('frmRePrint');
+                fetch(route, {
+                    method: 'post',
+                    body: data,
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if(result.status=="success"){
+                        _t.disabled = false;
+                        sendToPrint(result.data);
+                    }
+                    if(result.status=="error"){
+                        _t.disabled = false;
+                        showErrorMsg(result.message);
+                    }
+                });
             }
         });
     });
@@ -665,6 +613,48 @@
             }
         }
         return 0;
+    }
+
+    function sendToPrint(resultData){
+        console.log(resultData);
+        
+        let resdata = resultData;
+        let _data = JSON.parse(resultData);
+        if(_data['detail'].length > 0){
+            let find1 = searchIncharge(_data['detail'], "Cocina");
+            if(find1 > 0){
+                //print order cocina
+                fetch(_url + '/sale/orderprint?incharge=Cocina&data=' + resdata)
+                .then(response => response.json()) 
+                .then(res => {
+                    if(res.status=="success"){
+                        console.log(res.message);
+                        $('#generateTicket').prop('disabled', false);
+                    }
+                    if(res.status=="error"){
+                        showErrorMsg(res.message);
+                        console.log(res.error);
+                    }
+                });        
+            }
+            
+            let find2 = searchIncharge(_data['detail'], "Barra");
+            if(find2 > 0){
+                //print order barra
+                fetch(_url + '/sale/orderprint?incharge=Barra&data=' + resdata)
+                .then(response => response.json()) 
+                .then(res => {
+                    if(res.status=="success"){
+                        console.log(res.message);
+                        $('#generateTicket').prop('disabled', false);
+                    }
+                    if(res.status=="error"){
+                        showErrorMsg(res.message);
+                        console.log(res.error);
+                    }
+                });    
+            }
+        }
     }
 </script>    
 @stop

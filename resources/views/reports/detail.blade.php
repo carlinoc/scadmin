@@ -490,11 +490,7 @@
             .then(result => {
                 if(result.status=="success"){
                     let _data = result.data;
-                    fetch(_url + '/sale/localprint', {
-                        method: 'post',
-                        body: _data,
-                        headers: { 'X-CSRF-TOKEN': _token },
-                    })
+                    fetch(_url + '/sale/localprint?data=' + _data)
                     .then(response => response.json()) 
                     .then(res => {
                         if(res.status=="success"){

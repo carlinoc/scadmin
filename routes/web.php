@@ -42,8 +42,8 @@ use App\Http\Controllers\TipsPercentController;
 |
 */
 
-Route::post('/sale/localprint', [SaleController::class, 'localprint']);
-Route::post('/sale/orderprint/{incharge}', [SaleController::class, 'orderprint']);
+Route::get('/sale/localprint', [SaleController::class, 'localprint']);
+Route::get('/sale/orderprint', [SaleController::class, 'orderprint']);
 
 Route::get('/', function () {
     return view('welcome');

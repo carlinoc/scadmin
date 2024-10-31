@@ -1106,50 +1106,41 @@ class SaleController extends Controller
             array_push($_ids, $ids[$index]);    
         }        
         
-        $list = SalesDetail::select('sales_detail.id', 'sales_detail.quantity', 'products.name as product')
+        $list = SalesDetail::select('sales_detail.id', 'sales_detail.quantity', 'products.name as product', 'products.inCharge')
             ->whereIn('sales_detail.id', $_ids)
             ->join('products', 'products.id', '=', 'sales_detail.productId')
             ->get();
-
-        $print_name = env('DATA_COMPANY_POS','POS-80C');
-        $connector = new WindowsPrintConnector($print_name);
-        $printer = new Printer($connector);
 
         $sale = Sale::select('sales.id', 'sales.tableId', 'tables.name as table', 'users.name as user', 'sales.created_at')
             ->join('tables', 'tables.id', '=', 'sales.tableId')
             ->join('users', 'users.id', '=', 'sales.userId')
             ->where('sales.id', $request->saleId)
-            ->first();
-        
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("Ticket Nro: #".$sale->id." - Mesa: ".$sale->table." \n");
-        $printer->text("Fecha: ".date_format($sale->created_at,"d-m-Y g:i A")."\n");
-        $printer->text("Mozo: " . $sale->user . "\n");
-        $printer->feed(1);
+            ->first();    
 
-        $printer->setJustification(Printer::JUSTIFY_LEFT);
-        $printer->text("-----------------------------------------------\n");
-        $printer->selectPrintMode(Printer::MODE_DOUBLE_HEIGHT);
+        $data = array();
+    
+        $data["saleId"] = $sale->id;
+        $data["tableName"] = $sale->table;
+        $data["user"] = $sale->user;
+
         foreach ($list as $row) {
             $qty = $row->quantity;
             $name = trim($row->product);
-            $line = sprintf("%-3s %-30.30s \n", $qty, $name);
-            $printer->text("$line");
+            $inCharge = $row->inCharge;
+
+            $detail[] = array("name"=>$name, "quantity"=>$qty, "inCharge"=>$inCharge);
+
+            $data["detail"] = $detail;
         }
-
-        $printer->feed(2);
-
-        $printer->cut();
-        $printer->close();
 
         SalesDetail::where('saleId', $sale->id)->update(['printOrder' => 1]);
 
-        return response()->json(['status'=>'success', 'message'=>'Ticket Impreso']);    
+        return response()->json(['status'=>'success', 'message'=>'Data Generada', 'data' => json_encode($data)]);    
     }
 
     public function localprint(Request $request){
         try {
-            $rs = json_decode($request->getContent(), true);
+            $rs = json_decode($request->data, true);
             $slogan = $rs['slogan'];
             $address = $rs['address'];
             $tableName = $rs['tableName'];
@@ -1217,7 +1208,7 @@ class SaleController extends Controller
 
     public function orderprint(Request $request){
         try {
-            $rs = json_decode($request->getContent(), true);
+            $rs = json_decode($request->data, true);
             $inCharge = $request->incharge;
             $saleId = $rs['saleId'];
             $tableName = $rs['tableName'];
@@ -1226,7 +1217,7 @@ class SaleController extends Controller
             $now = date('d/m/Y');
             $hour = date('H:i');
 
-            if(count($rs['detail']) > 0){
+            if(1 > 0){
                 $print_name = env('DATA_COMPANY_POS','POS-80C');
                 $connector = new WindowsPrintConnector($print_name);
                 $printer = new Printer($connector);
