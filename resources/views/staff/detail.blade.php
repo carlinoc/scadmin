@@ -5,7 +5,7 @@
 @section('content_header')
     <div class="row">
         <div class="col-md-auto">
-            <h1>Detalle del Personal:</h1>
+            <h1>{{$staff->name}}</h1>
         </div>
         <div class="col">
             <a href="{{ route('staff.index') }}" class="btn btn-outline-dark" role="button">Atras</a>
@@ -15,7 +15,7 @@
 
 @section('content')
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-10">
             <div class="card card-primary card-outline card-outline-tabs">
                 <div class="card-header p-0 border-bottom-0">
                     <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
@@ -129,7 +129,7 @@
                             @csrf
                             <input type="hidden" id="staffId" name="staffId" value="{{$staff->id}}">
                             <div class="row mb-2">
-                                <div class="col-4">  
+                                <div class="col-auto">  
                                     <select class="form-control" name="dateRange" id="dateRange" required>
                                         <x-slot name="prependSlot">
                                             <div class="input-group-text bg-gradient-info">
@@ -199,6 +199,8 @@
                                                         <th style="width:100px">Tipo</th>
                                                         <th style="width:100px">Monto S/</th>
                                                         <th style="width:80px">Caja</th>
+                                                        <th style="width:120px">Descripción</th>
+                                                        <th style="width:80px">Opciones</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="tbSalary">
@@ -415,13 +417,13 @@
                     $("#dtSalary tbody").empty();
                     for($i = 0; $i < _ds.length; $i++) {
                         dr = _ds[$i]; 
-                        addRowExpense(dr.expenseDate, dr.expense, dr.id, $i, dr.staffPayType, dr.boxType);
+                        addRowExpense(dr.expenseDate, dr.expense, dr.id, $i, dr.staffPayType, dr.boxType, dr.description, dr.urlid);
                     }       
                 }
             });
         }
 
-        function addRowExpense(vdate, vexpense, vid, vindex, vstaffPayType, vboxType) {
+        function addRowExpense(vdate, vexpense, vid, vindex, vstaffPayType, vboxType, vdescription, vurlId) {
             let table = document.getElementById("tbSalary");
             let row = document.createElement("tr");
             
@@ -430,18 +432,35 @@
             let c3 = document.createElement("td");
             let c4 = document.createElement("td");
             let c5 = document.createElement("td");
+            let c6 = document.createElement("td");
+            let c7 = document.createElement("td");
             
             c1.innerText = vid;
             c2.innerText = getOnlytHour(vdate);
             c3.innerHTML = getStaffPayType(vstaffPayType);
             c4.innerText = vexpense;
             c5.innerHTML = getBoxType(vboxType);
+            let description = vdescription;
+            if(description == null) {
+                description = "";
+            }
+            c6.innerHTML = '<small>' + description + '</small>';
+            let url = "/mainbox";
+            if(vboxType == "2") {
+                url = "/paybox/show/" + vurlId;
+            }
+            if(vboxType == "3") {
+                url = "/companypos/detail/" + vurlId;
+            }
+            c7.innerHTML = '<a href=" ' + url + '" target="_blank" class="btn btn-sm btn-warning"><i class="far fa-eye"></i></a>';
                        
             row.appendChild(c1);
             row.appendChild(c2);
             row.appendChild(c3);
             row.appendChild(c4);
             row.appendChild(c5);
+            row.appendChild(c6);
+            row.appendChild(c7);
                         
             table.appendChild(row);
         }

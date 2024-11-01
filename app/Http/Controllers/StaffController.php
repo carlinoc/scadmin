@@ -124,16 +124,16 @@ class StaffController extends Controller
         $dateFilter = $request->dateRange;
         $staffPayType = $request->staffPayType;
 
-        $list1 = DB::table("mainbox")->select('id','created_at as expenseDate', 'expense', 'description', 'staffPayType', DB::raw('1 as boxType'))
+        $list1 = DB::table("mainbox")->select('id','created_at as expenseDate', 'expense', 'description', 'staffPayType', 'payboxId as urlid',   DB::raw('1 as boxType'))
             ->where('staffId', $request->staffId)
             ->where('state', 0)
             ->where('movementType', 2);
 
-        $list2 = DB::table("payboxexpense")->select('id','expenseDate', 'expense', 'description', 'staffPayType', DB::raw('2 as boxType'))
+        $list2 = DB::table("payboxexpense")->select('id','expenseDate', 'expense', 'description', 'staffPayType', 'payboxId as urlid', DB::raw('2 as boxType'))
             ->where('staffId', $request->staffId)      
             ->where('expenseType', 3);
 
-        $list3 = DB::table("posexpense")->select('id','expenseDate', 'expense', 'description', 'staffPayType', DB::raw('3 as boxType'))
+        $list3 = DB::table("posexpense")->select('id','expenseDate', 'expense', 'description', 'staffPayType', 'companyPosId as urlid', DB::raw('3 as boxType'))
             ->where('staffId', $request->staffId)      
             ->where('expenseType', 3);    
 

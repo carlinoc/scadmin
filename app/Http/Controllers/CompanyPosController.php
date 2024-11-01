@@ -25,9 +25,9 @@ class CompanyPosController extends Controller
 
     public function list(Request $request): JsonResponse
     {
-        $list = CompanyPos::select('companyPos.id', 'companyPos.pos', 'companyPos.commission', 'companyPos.contactName', 'companyPos.contactPhone', 'companyPos.description', 
+        $list = CompanyPos::select('companypos.id', 'companypos.pos', 'companypos.commission', 'companypos.contactName', 'companypos.contactPhone', 'companypos.description', 
             'staff.name as staffName', 'staff.id as staffId', 'ruc', 'bank', 'accountNumber', 'mainPos')
-            ->leftJoin('staff', 'companyPos.staffId', '=', 'staff.id')
+            ->leftJoin('staff', 'companypos.staffId', '=', 'staff.id')
             ->get();
         return response()->json(['list' => $list]);
     }
