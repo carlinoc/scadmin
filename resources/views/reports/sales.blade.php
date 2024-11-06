@@ -374,8 +374,25 @@
     }    
 
     $(document).ready(function(){
+        let dateRange = localStorage.getItem("sales_daterange");
+        if(dateRange == null) dateRange = "today";
+        $("#dateRange").val(dateRange).change();
+
+        let boxchecked = localStorage.getItem("sales_ischecked");
+        if(boxchecked == null) boxchecked = true;
+        if(boxchecked == "true") {
+            $("#currentPayBox").prop("checked", true);
+        }else{
+            $("#currentPayBox").prop("checked", false);
+        }
 
         fetchReport();
+
+        $("#currentPayBox").on('change', function(e) {
+            e.preventDefault();
+            var isChecked = $(this).is(":checked");
+            localStorage.setItem("sales_ischecked", isChecked);
+        });   
 
         $('#withCash').on('change', function(e) {
             e.preventDefault();
@@ -398,6 +415,7 @@
         $('#dateRange').on('change', function(e) {
             e.preventDefault();
             var range = this.value;
+            localStorage.setItem("sales_daterange", range);
             if(range=="custom"){
                 $("#rowDates").show();    
             }else{

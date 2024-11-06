@@ -95,7 +95,22 @@
                             <input type="text" class="form-control" id="voucherNumber" name="voucherNumber">
                         </div>
                     </div>
-                    <div class="form-group mt-2">
+                    <div class="row mt-2">
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label>Fecha</label>
+                                <div class="input-group date">
+                                    <input type="text" data-date-format="dd-mm-yyyy" id="expenseDate" name="expenseDate" class="form-control datetimepicker-input"/>
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>  
+                            </div>
+                        </div>
+                        <div class="col-sm">          
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-form-label" for="description"><i class="fas fa-check"></i> Descripción</label>
                         <textarea class="form-control" rows="3" id="description1" name="description" placeholder="Breve descripción"></textarea>
                     </div>

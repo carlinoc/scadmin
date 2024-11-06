@@ -123,6 +123,7 @@
         let _dtDetail = $("#dtDetail");
         let _table = "{{ $sale->table }}";
         let _payboxState = $("#payBoxState");
+        let _url = '{{ $urllocal }}';
                 
         $(document).ready(function(){
 
@@ -146,12 +147,19 @@
                 })
                 .then(response => response.json())
                 .then(result => {
-                    if(result.status=="success"){
-                        showSuccessMsg(result.message);
-                    }
-                    if(result.status=="error"){
-                        showErrorMsg(result.message);
-                    }
+                    let _data = result.data;
+                    fetch(_url + '/sale/localprint?data=' + _data)
+                    .then(response => response.json()) 
+                    .then(res => {
+                        if(res.status=="success"){
+                            showSuccessMsg(result.message);
+                            //window.location = _backUrl.val();
+                        }
+                        if(res.status=="error"){
+                            showErrorMsg(res.message);
+                        }
+                    })
+                    .catch(err => console.log(err));
                 })
             });
 
@@ -285,11 +293,28 @@
                 .then(response => response.json())
                 .then(result => {
                     if(result.status=="success"){
-                        showSuccessMsg(result.message);
+                        let _data = result.data;
+                        fetch(_url + '/sale/localprint?data=' + _data)
+                        .then(response => response.json()) 
+                        .then(res => {
+                            if(res.status=="success"){
+                                showSuccessMsg(result.message);
+                            }
+                            if(res.status=="error"){
+                                showErrorMsg(res.message);
+                            }
+                        })
+                        .catch(err => console.log(err));
                     }
                     if(result.status=="error"){
                         showErrorMsg(result.message);
                     }
+                    // if(result.status=="success"){
+                    //     showSuccessMsg(result.message);
+                    // }
+                    // if(result.status=="error"){
+                    //     showErrorMsg(result.message);
+                    // }
                 })
             })
 

@@ -80,6 +80,7 @@ class MainBoxController extends Controller
         
         $query = MainBox::select('mainbox.id', 'mainbox.movementType', 'mainbox.income', 'mainbox.expense', 'mainbox.expenseType', 'mainbox.staffPayType',
             DB::raw("DATE_FORMAT(mainbox.created_at, '%d %b %Y %H:%i') as createdDate"), 'mainbox.description', 'mainbox.userId', 'incomeconcept.name as incomeConcept',
+            DB::raw("DATE_FORMAT(mainbox.created_at, '%d-%m-%Y') as expenseDate"),
             'users.name as userName', 'provider.name as providerName', 'mainbox.staffPayType', 'otherpay.motive as otherPayMotive', 'mainbox.incomeconceptId',
             'mainbox.providerId', 'mainbox.staffId', 'mainbox.otherPayId', 'mainbox.voucherType', 'mainbox.voucherNumber', 'mainbox.serviceId', 'mainbox.payboxId',
             DB::raw('(SELECT COUNT(*) FROM mainboxhistory WHERE mainboxhistory.mainboxId = mainbox.id) AS history_count'))
@@ -152,7 +153,8 @@ class MainBoxController extends Controller
         $mainBox = new MainBox();
         $mainBox->movementType = 2;
         $mainBox->expense = $request->expense;
-
+        $time = Carbon::now()->toTimeString();
+        $expenseDate = Carbon::parse($request->expenseDate)->format('Y-m-d') . ' ' . $time;
         $expenseType = $request->expenseType;
 
         if ($expenseType == 1) {
@@ -180,6 +182,8 @@ class MainBoxController extends Controller
         $mainBox->expenseType = $expenseType;
         $mainBox->description = $request->description;
         $mainBox->userId = Auth::user()->id;
+        $mainBox->created_at = $expenseDate;
+        $mainBox->updated_at = $expenseDate;
         $mainBox->save();
 
         return response()->json(['status'=>'success', 'message'=>'El gasto fue agregado']);
@@ -190,6 +194,8 @@ class MainBoxController extends Controller
         $mainBox = MainBox::find($request->mainBoxId);
         $lastExpense = $mainBox->expense;
         $newExpense = $request->expense;
+        $time = Carbon::now()->toTimeString();
+        $expenseDate = Carbon::parse($request->expenseDate)->format('Y-m-d') . ' ' . $time;
         
         $mainBox->movementType = 2;
         $mainBox->expense = $newExpense;
@@ -199,7 +205,7 @@ class MainBoxController extends Controller
         $mainBox->providerId = null;
         $mainBox->serviceId = null;
         $mainBox->staffId = null;
-        $mainBox->staffPayType = null;
+        $mainBox->staffPayType = 0;
         $mainBox->otherPayId = null;
         
         if ($expenseType == 1) {
@@ -227,24 +233,26 @@ class MainBoxController extends Controller
         $mainBox->expenseType = $expenseType;
         $mainBox->description = $request->description;
         $mainBox->userId = Auth::user()->id;
+        $mainBox->created_at = $expenseDate;
+        $mainBox->updated_at = $expenseDate;
         $mainBox->update();
 
-        $mainBoxHistory = new MainBoxHistory();
-        $mainBoxHistory->movementType = 2;
-        $mainBoxHistory->action = "Gasto Actualizado";
-        $mainBoxHistory->lastExpense = $lastExpense;
-        $mainBoxHistory->newExpense = $newExpense;
-        $mainBoxHistory->userId = Auth::user()->id;
-        $mainBoxHistory->mainBoxId = $request->mainBoxId;
-        $mainBoxHistory->save();
-
+        if($newExpense != $lastExpense) {
+            $mainBoxHistory = new MainBoxHistory();
+            $mainBoxHistory->movementType = 2;
+            $mainBoxHistory->action = "Gasto Actualizado";
+            $mainBoxHistory->lastExpense = $lastExpense;
+            $mainBoxHistory->newExpense = $newExpense;
+            $mainBoxHistory->userId = Auth::user()->id;
+            $mainBoxHistory->mainBoxId = $request->mainBoxId;
+            $mainBoxHistory->save();    
+        }
+        
         return response()->json(['status'=>'success', 'message'=>'El gasto fue actualizado']);
     }
 
     public function remove(Request $request): JsonResponse
     {
-        //MainBox::find($request->mainboxId)->delete();
-
         $mainBox = MainBox::find($request->mainboxId);
         $mainBox->state = 1;
         $mainBox->update();

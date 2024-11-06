@@ -297,6 +297,8 @@ class SalesDetailController extends Controller
     {
         $clientId = 1;
         $discount = $request->discount;
+        $withCash = 0;
+        $companyPosId = 0;
         
         $sale = Sale::find($request->saleId);
         $table = Table::find($sale->tableId);
@@ -304,14 +306,61 @@ class SalesDetailController extends Controller
         if($sale->splitNumber > 0){
             $tableName = $table->name . ' - ' . $sale->splitNumber;    
         }
+        $table->state = 1;
+        $table->update(); 
 
-        try{
-            $this->printTicket($sale->id, $discount, 0, $clientId, $tableName);
-        } catch (\Throwable $th) {
-            return response()->json(['status'=>'error', 'message'=>'Error al imprimir el ticket']);
+        // try{
+        //     $this->printTicket($sale->id, $discount, 0, $clientId, $tableName);
+        // } catch (\Throwable $th) {
+        //     return response()->json(['status'=>'error', 'message'=>'Error al imprimir el ticket']);
+        // }
+
+        $data = $this->getTicketData($sale->id, $discount, $withCash, $clientId, $tableName, $companyPosId);
+
+        return response()->json(['status'=>'success', 'message'=>'El ticket fue imprimido', 'data' => $data]);
+    }
+
+    protected function getTicketData(int $saleId, int $discount, int $withCash, int $clientId, String $tableName, int $companyPosId)
+    {
+        $RUC = env('DATA_COMPANY_RUC','10238228379');
+        $company = Company::all()->where('ruc', $RUC)->first();
+        if($companyPosId == 0){ $companyPosId = null; }
+
+        $salesDetails = SalesDetail::select('sales_detail.id','sales_detail.price', 'quantity', 'total', 'products.name as product', 'products.id as productId')
+        ->join('products', 'products.id','=','sales_detail.productId')
+        ->where('sales_detail.saleId', $saleId)->get();
+
+        $data = array();
+        
+        $data["saleId"] = $saleId;
+        $data["slogan"] = $company->slogan;
+        $data["address"] = $company->address;
+        $data["tableName"] = $tableName;
+        $data["discount"] = $discount;
+        $data["website"] = $company->website;
+
+        $total1 = 0;
+        foreach ($salesDetails as $row) {
+            $total1 += $row->total;
+            $qty = $row->quantity;
+            $name = trim($row->product);
+
+            $detail[] = array("name"=>$name, "quantity"=>$qty, "price"=>$row->price, "total"=>$row->total);
+
+            $data["detail"] = $detail;
         }
 
-        return response()->json(['status'=>'success', 'message'=>'El ticket fue imprimido']);
+        $total2 = $total1;
+        if($discount > 0){
+            $desc = $total1 * ($discount / 100);
+            $total2 = $total1 - $desc;
+        }
+
+        Sale::where('id', $saleId)
+            ->update(['subtotal' => $total1, 'total' => $total2, 'discount' => $discount, 'status' => 1, 
+                'withCash' => $withCash, 'clientId' => $clientId, 'companyPosId' => $companyPosId]);
+
+        return json_encode($data);
     }
 
     protected function printTicket(int $saleId, int $discount, int $withCash, int $clientId, String $tableName)

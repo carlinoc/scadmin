@@ -691,7 +691,9 @@ class SaleController extends Controller
              ->leftjoin('paybox', 'paybox.id','=','sales.payboxId')
              ->where('sales.id', $request->saleId)->first();
 
-        return view('reports.split', ['sale' => $sale]);
+        $urllocal = env('DATA_URL_LOCAL','http://127.0.0.1:8000');     
+
+        return view('reports.split', ['sale' => $sale, 'urllocal' => $urllocal]);
     }
 
     protected function listAllSales()

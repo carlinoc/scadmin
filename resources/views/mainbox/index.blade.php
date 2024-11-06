@@ -211,12 +211,15 @@
     let _lExpense = $("#lExpense");
     let _lTotal = $("#lTotal");
     let _ds = null;
-    
+        
     $(function() {
         $("#startDate").datepicker({
             "dateFormat": "yy-mm-dd"
         });
         $("#endDate").datepicker({
+            "dateFormat": "yy-mm-dd"
+        });
+        $("#expenseDate").datepicker({
             "dateFormat": "yy-mm-dd"
         });
     });
@@ -236,6 +239,10 @@
         });
 
         $("#endDate").on('changeDate', function(ev){
+            $(this).datepicker('hide');
+        });
+
+        $("#expenseDate").on('changeDate', function(ev){
             $(this).datepicker('hide');
         });
 
@@ -376,6 +383,7 @@
 
             let elements = [
                 ['expense', 'Ingrese el monto del gasto'],
+                ['expenseDate', 'Ingrese la fecha'],
             ];
 
             if(emptyfy(elements)) {
@@ -436,6 +444,7 @@
                     _description1.val(description);
 
                     _expenseType.val(expenseType).change();
+                    $("#expenseDate").val(expenseDate);
                     
                     _modalExpenseTitle.text("Editar Gasto");
                     _modalExpense.modal("show");
@@ -582,11 +591,13 @@
                     ]
                 });
 
-                _lIncome.text("S/ " + result.totalIncome);
-                _lExpense.text("S/ " + result.totalExpense);
+                //$('#lYape').html('S/ ' + formatMoney(result.withYape));
+
+                _lIncome.text("S/ " + formatMoney(result.totalIncome));
+                _lExpense.text("S/ " + formatMoney(result.totalExpense));
                 let total = 0.00;
                 total = parseFloat(result.totalIncome) - parseFloat(result.totalExpense);
-                _lTotal.text("S/ " + total.toFixed(2));
+                _lTotal.text("S/ " + formatMoney(total.toFixed(2)));
             }
         });    
     }
@@ -611,6 +622,7 @@
         _description1.val("");
 
         _expenseType.val(1).change();
+        $("#expenseDate").val("");
     }
 
     
