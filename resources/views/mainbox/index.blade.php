@@ -35,8 +35,8 @@
                             </div>
                             <div class="col-auto">
                                 <select class="form-control" name="movementType" id="movementType">
-                                    <option value="-1">Movimientos > 0</option>
                                     <option value="0">Todos los movimientos</option>
+                                    <option value="-2">Excluir cierre y apertura</option>
                                     <option value="1">Solo Ingresos</option>
                                     <option value="2">Solo Gastos</option>
                                     <option value="3">Solo Eliminados</option>
@@ -116,13 +116,13 @@
                     <table id="dtMainBox" class="table table-striped" style="width:100%">
                         <thead>
                             <tr>
-                                <th style="width: 30px;">Id</th>
+                                <th style="width: 20px;">Id</th>
                                 <th style="width: 100px;">Fecha</th>
                                 <th style="width: 100px;">Concepto Ingreso</th>
-                                <th style="width: 80px;">Ingreso</th>
+                                <th style="width: 70px;">Ingreso</th>
                                 <th style="width: 100px;">Concepto Salida</th>
-                                <th style="width: 80px;">Salida</th>
-                                <th style="width: 80px;">Descripción</th>
+                                <th style="width: 70px;">Salida</th>
+                                <th style="width: 120px;">Descripción</th>
                                 <th style="width: 80px;">Usuario</th>
                                 <th style="width: 80px;">Opciones</th>
                             </tr>
@@ -189,8 +189,6 @@
     let _mainBoxId2 = $('#mainBoxId2');
     let _modalExpense = $('#modalExpense');
     let _modalExpenseTitle = $('#modalExpenseTitle');
-    let _expenseType = $('#expenseType');
-    let _staffPayType = $('#staffPayType');
     let _providerId = $('#providerId');
     let _serviceId = $('#serviceId');
     let _staffId = $('#staffId');
@@ -211,6 +209,7 @@
     let _lExpense = $("#lExpense");
     let _lTotal = $("#lTotal");
     let _ds = null;
+    let _subCategoryId = "";
         
     $(function() {
         $("#startDate").datepicker({
@@ -225,12 +224,73 @@
     });
         
     $(document).ready(function() {
+        let dateRange = localStorage.getItem("mainbox_daterange");
+        if(dateRange == null) dateRange = "today";
+        $("#dateRange").val(dateRange).change();
+
+        let movementType = localStorage.getItem("mainbox_movementType");
+        if(movementType == null) movementType = "0";
+        $("#movementType").val(movementType).change();
 
         _pProvider.hide();
         _pService.hide();
         _pStaff.hide();
         _pOtherPay.hide();
         _dVoucher.hide();
+
+        $("#movementType").on('change', function(e) {
+            e.preventDefault();
+            var type = this.value;
+            localStorage.setItem("mainbox_movementType", type);
+        });
+
+        $("#expensecategoryId").on('change', function(e) {            
+            e.preventDefault();
+            let parentId = $(this).val();
+            if(parentId != ""){
+                fetchSubCategories(parentId);
+            }
+        });
+
+        $("#subCategoryId").on('change', function(e) {            
+            e.preventDefault();
+            let expenseType = $('#expensecategoryId option:selected').attr('data-expensetype');
+            if(expenseType != ""){
+                switch (expenseType) {
+                    case '1':
+                        _pProvider.show();  
+                        _pService.hide();
+                        _pStaff.hide();
+                        _pOtherPay.hide();
+                        break;
+                    case '2':
+                        _pService.show();  
+                        _pProvider.hide();
+                        _pStaff.hide();
+                        _pOtherPay.hide();    
+                        break;    
+                    case '3':
+                        _pStaff.show();
+                        _pProvider.hide();
+                        _pService.hide();
+                        _pOtherPay.hide();   
+                        break; 
+                    case '4':
+                        _pOtherPay.show();
+                        _pProvider.hide();
+                        _pService.hide();
+                        _pStaff.hide();
+                        break;
+                    default:
+                        _pProvider.hide();
+                        _pService.hide();  
+                        _pStaff.hide();
+                        _pOtherPay.hide();
+                        break;     
+                }
+                $("#expenseType").val(expenseType);
+            }
+        });
 
         fetchMainBox();
 
@@ -249,6 +309,8 @@
         $('#dateRange').on('change', function(e) {
             e.preventDefault();
             var range = this.value;
+            localStorage.setItem("mainbox_daterange", range);
+
             if(range=="custom"){
                 $("#rowDates").show();    
             }else{
@@ -320,67 +382,8 @@
             _modalExpense.modal("show");
         })
 
-        _expenseType.on("change", function() {
-            let expenseType = _expenseType.val();
-            switch (expenseType) {
-                case '1':
-                    _pProvider.show();  
-                    _pService.hide();
-                    _pStaff.hide();
-                    _dStaff.hide();
-                    _pOtherPay.hide();
-                    _dVoucher.show();
-                    break;
-                case '2':
-                    _pService.show();  
-                    _pProvider.hide();
-                    _pStaff.hide();
-                    _dStaff.hide();
-                    _pOtherPay.hide();    
-                    _dVoucher.show();
-                    break;    
-                case '3':
-                    _pStaff.show();
-                    _dStaff.show();  
-                    _pProvider.hide();
-                    _pService.hide();
-                    _pOtherPay.hide();   
-                    _dVoucher.hide();
-                    break; 
-                case '4':
-                    _pOtherPay.show();
-                    _pProvider.hide();
-                    _pService.hide();
-                    _pStaff.hide();
-                    _dStaff.hide();
-                    _dVoucher.hide();
-                    _dVoucher.show();
-                    break;
-            }
-        })
-
         $("#addExpense").on("click", function(e) {
             e.preventDefault();
-            if (_expenseType.val()== 1 && _providerId.val()==null ){
-                showWarningMsg('Seleccione un proveedor');                            
-                return;
-            }
-
-            if (_expenseType.val()== 2 && _serviceId.val()=="" ){
-                showWarningMsg('Seleccione un servicio');                            
-                return;
-            }
-
-            if (_expenseType.val()== 3 && _staffId.val()=="" ){
-                showWarningMsg('Seleccione un personal');                            
-                return;
-            }
-
-            if (_expenseType.val()== 4 && _otherPayId.val()=="" ){
-                showWarningMsg('Seleccione un concepto de pago');                            
-                return;
-            }
-
             let elements = [
                 ['expense', 'Ingrese el monto del gasto'],
                 ['expenseDate', 'Ingrese la fecha'],
@@ -417,6 +420,8 @@
             e.preventDefault();
             let index = $(this).data('index');
             let rw = _ds[index];
+            console.log(rw);
+            
             with (rw) {
                 if(movementType == 1) {
                     clearFormIncome();
@@ -433,7 +438,9 @@
                     clearFormExpense();
 
                     _mainBoxId2.val(id);
-                    _staffPayType.val(staffPayType).change();
+                    $("#expensecategoryId").val(parentId).change();
+                    _subCategoryId = expensecategoryId;
+                    $("#expenseType").val(expenseType);
                     _providerId.val(providerId).change();
                     _serviceId.val(serviceId).change();
                     _staffId.val(staffId).change();
@@ -442,8 +449,7 @@
                     _voucherType.val(voucherType).change();
                     _voucherNumber.val(voucherNumber);
                     _description1.val(description);
-
-                    _expenseType.val(expenseType).change();
+                    
                     $("#expenseDate").val(expenseDate);
                     
                     _modalExpenseTitle.text("Editar Gasto");
@@ -499,12 +505,16 @@
         .then(response => response.json())
         .then(result => {
             if(result.status=="success") {
+                let _pageLength = localStorage.getItem("mainbox_pageLength");
+                if(_pageLength == null) _pageLength = 10;
+
                 _ds = result.list;
                 _dtMainBox.DataTable().destroy();    
                 _dtMainBox.DataTable({
                     "data": result.list,
                     "responsive": true,
                     order: [[0, 'desc']],
+                    pageLength: _pageLength,
                     "columns": [
                         {
                             "render": function(data, type, row, meta) {
@@ -537,16 +547,21 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                let concept = "";   
+                                let concept = "";
+                                if(row.expenseType == 1){
+                                    concept = " <small class='badge badge-warning'>" + row.providerName + "</small>";
+                                }   
                                 if(row.expenseType == 3){
                                     concept = getStaffPayType(row.staffPayType);
                                 }
                                 if(row.expenseType == 4){
-                                    concept = " <small class='badge badge-secondary'>" + row.otherPayMotive + "</small>";
-                                    return concept;
+                                    concept = " <small class='badge badge-warning'>" + row.otherPayMotive + "</small>";
                                 }
                                 if(row.expenseType == 5){
-                                    return "<small class='badge badge-danger'>Saldo Inicial</small>";  
+                                    concept = "<small class='badge badge-danger'>Saldo Inicial</small>";  
+                                }
+                                if(row.category != null){
+                                    concept = " <small class='badge badge-light'>" + row.category + "</small>";
                                 }
                                 return getExpenseType(row.expenseType) + concept;
 
@@ -563,8 +578,8 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                if(row.description != null && row.description.length > 24){
-                                    return row.description.substring(0,24) + "...";      
+                                if(row.description != null && row.description.length > 26){
+                                    return row.description.substring(0,26) + "...";      
                                 }else{
                                     if(row.payboxId != null){
                                         return "<a href='/paybox/show/" + row.payboxId + "' target='_blank'>" + row.description + "</a>";
@@ -598,6 +613,11 @@
                 let total = 0.00;
                 total = parseFloat(result.totalIncome) - parseFloat(result.totalExpense);
                 _lTotal.text("S/ " + formatMoney(total.toFixed(2)));
+
+                $("#dtMainBox_length select").on('change', function(e) {
+                    var myvalue = $(this).val();
+                    localStorage.setItem("mainbox_pageLength", myvalue);
+                });
             }
         });    
     }
@@ -611,7 +631,6 @@
 
     function clearFormExpense(){
         _mainBoxId2.val("");
-        _staffPayType.val("0").change();
         _providerId.val("0").change();
         _serviceId.val("").change();
         _staffId.val("").change();
@@ -620,11 +639,29 @@
         _voucherType.val(0).change();
         _voucherNumber.val("");
         _description1.val("");
-
-        _expenseType.val(1).change();
+        
         $("#expenseDate").val("");
+
+        _subCategoryId = "";
+        $("#expensecategoryId").val("").change();
+        $("#subCategoryId").val("").change();
+        $("#expenseType").val("");
     }
 
-    
+    async function fetchSubCategories(parentId) {
+        const response = await fetch("/expensecategories/subcategories/" + parentId, {method: 'GET'});
+        if(!response.ok){
+            throw new Error("Error fetch subcategories");       
+        }                    
+        const data = await response.json();
+        $("#subCategoryId").empty();
+        $("#subCategoryId").append('<option value=""></option>');
+        for(let i = 0; i < data.list.length; i++) {
+            $("#subCategoryId").append('<option value="' + data.list[i].id + '">' + data.list[i].category + '</option>');
+        }
+        if(_subCategoryId != "") {
+            $("#subCategoryId").val(_subCategoryId).change();
+        }
+    }    
 </script>    
 @stop    

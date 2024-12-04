@@ -7,6 +7,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyPosController;
 use App\Http\Controllers\CompanySerialController;
+use App\Http\Controllers\ExpenseCategoriesController;
 use App\Http\Controllers\ExpenseProviderController;
 use App\Http\Controllers\ExpenseServiceController;
 use App\Http\Controllers\ExpenseStaffController;
@@ -235,6 +236,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/otherpay/list', [OtherPayController::class, 'list'])->name('otherpay.list');
     Route::get('/otherpay/detail/{otherpayId}', [OtherPayController::class, 'detail'])->name('otherpay.detail');
     Route::post('/otherpay/listexpense', [OtherPayController::class, 'listexpense'])->name('otherpay.listexpense');
+    Route::get('/otherpay/subcategories/{parentId}', [OtherPayController::class, 'subcategories'])->name('otherpay.subcategories');
+    Route::get('/otherpay/categories', [OtherPayController::class, 'categories'])->name('otherpay.categories');
     
     Route::post('/payboxincome/add', [PayBoxIncomeController::class, 'add'])->name('payboxincome.add');
     Route::post('/payboxincome/edit', [PayBoxIncomeController::class, 'edit'])->name('payboxincome.edit');
@@ -261,6 +264,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/service/list', [ServiceController::class, 'list'])->name('service.list');
     Route::get('/service/detail/{serviceId}', [ServiceController::class, 'detail'])->name('service.detail');
     Route::post('/service/listexpense', [ServiceController::class, 'listexpense'])->name('service.listexpense');
+
+    Route::get('/expensecategories', [ExpenseCategoriesController::class, 'index'])->name('expensecategories.index');
+    Route::post('/expensecategories/add', [ExpenseCategoriesController::class, 'add'])->name('expensecategories.add');
+    Route::post('/expensecategories/edit', [ExpenseCategoriesController::class, 'edit'])->name('expensecategories.edit');
+    Route::get('/expensecategories/list', [ExpenseCategoriesController::class, 'list'])->name('expensecategories.list');
+    Route::post('/expensecategories/remove/{expenseCategoryId}', [ExpenseCategoriesController::class, 'remove'])->name('expensecategories.remove');
+    Route::get('/expensecategories/subcategories/{parentId}', [ExpenseCategoriesController::class, 'subcategories'])->name('expensecategories.subcategories');
 });
 
 require __DIR__.'/auth.php';

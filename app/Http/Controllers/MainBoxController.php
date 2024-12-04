@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ExpenseCategories;
 use App\Models\MainBox;
 use App\Models\MainBoxHistory;
 use Illuminate\Http\Request;
@@ -28,7 +29,9 @@ class MainBoxController extends Controller
         $services = Service::all();
         $otherpays = OtherPay::all();
 
-        return view('mainbox.index', ['incomeConcepts' => $incomeConcepts, 'providers' => $providers, 'staffs' => $staffs, 'services' => $services, 'otherpays' => $otherpays]);
+        $categories = ExpenseCategories::where('isParent', 1)->get();
+
+        return view('mainbox.index', ['incomeConcepts' => $incomeConcepts, 'providers' => $providers, 'staffs' => $staffs, 'services' => $services, 'otherpays' => $otherpays, 'categories' => $categories]);
     }
 
     public function add(Request $request): JsonResponse
@@ -83,8 +86,10 @@ class MainBoxController extends Controller
             DB::raw("DATE_FORMAT(mainbox.created_at, '%d-%m-%Y') as expenseDate"),
             'users.name as userName', 'provider.name as providerName', 'mainbox.staffPayType', 'otherpay.motive as otherPayMotive', 'mainbox.incomeconceptId',
             'mainbox.providerId', 'mainbox.staffId', 'mainbox.otherPayId', 'mainbox.voucherType', 'mainbox.voucherNumber', 'mainbox.serviceId', 'mainbox.payboxId',
-            DB::raw('(SELECT COUNT(*) FROM mainboxhistory WHERE mainboxhistory.mainboxId = mainbox.id) AS history_count'))
+            DB::raw('(SELECT COUNT(*) FROM mainboxhistory WHERE mainboxhistory.mainboxId = mainbox.id) AS history_count'),
+            'expensecategories.category as category', 'expensecategories.id as expensecategoryId', 'expensecategories.parentId')
             ->join('users', 'users.id', '=', 'mainbox.userId')
+            ->leftjoin('expensecategories', 'expensecategories.id', '=', 'mainbox.expensecategoryId')
             ->leftjoin('incomeconcept', 'incomeconcept.id', '=', 'mainbox.incomeconceptId')
             ->leftjoin('provider', 'provider.id', '=', 'mainbox.providerId')
             ->leftjoin('otherpay', 'otherpay.id', '=', 'mainbox.otherPayId')
@@ -94,7 +99,14 @@ class MainBoxController extends Controller
             $query->where(function($q) {
                 $q->where('mainbox.expense', '>', 0)->orWhere('mainbox.income', '>', 0);
             });  
-        }    
+        }
+        
+        if($movementType == -2) {
+            $query->where('mainbox.expenseType', '<>', 5);
+            $query->where(function($q) {
+                $q->where('mainbox.incomeconceptId', '=', 1)->orWhereNull('mainbox.incomeconceptId');
+            });  
+        }
 
         if($movementType > 0 && $movementType < 3) {
             $query->where('mainbox.movementType', '=', $movementType);
@@ -155,31 +167,29 @@ class MainBoxController extends Controller
         $mainBox->expense = $request->expense;
         $time = Carbon::now()->toTimeString();
         $expenseDate = Carbon::parse($request->expenseDate)->format('Y-m-d') . ' ' . $time;
-        $expenseType = $request->expenseType;
 
-        if ($expenseType == 1) {
+        $expenseCategoryId = $request->subCategoryId;
+        if($expenseCategoryId == "") {
+            $expenseCategoryId = $request->expensecategoryId;
+        }
+        $mainBox->expensecategoryId = $expenseCategoryId;
+
+        if($request->providerId != "") {
             $mainBox->providerId = $request->providerId;
         }
-
-        if ($expenseType == 2) {
+        if($request->serviceId != "") {
             $mainBox->serviceId = $request->serviceId;
         }
-
-        if ($expenseType == 3) {
+        if($request->staffId != "") {
             $mainBox->staffId = $request->staffId;
-            $mainBox->staffPayType = $request->staffPayType;
         }
-
-        if ($expenseType == 4) {
+        if($request->otherPayId != "") {
             $mainBox->otherPayId = $request->otherPayId;
         }
 
-        if($expenseType != 3) {
-            $mainBox->voucherType = $request->voucherType;
-            $mainBox->voucherNumber = $request->voucherNumber;
-        }
-
-        $mainBox->expenseType = $expenseType;
+        $mainBox->voucherType = $request->voucherType;
+        $mainBox->voucherNumber = $request->voucherNumber;
+        $mainBox->expenseType = $request->expenseType;
         $mainBox->description = $request->description;
         $mainBox->userId = Auth::user()->id;
         $mainBox->created_at = $expenseDate;
@@ -200,37 +210,34 @@ class MainBoxController extends Controller
         $mainBox->movementType = 2;
         $mainBox->expense = $newExpense;
 
-        $expenseType = $request->expenseType;
-
         $mainBox->providerId = null;
         $mainBox->serviceId = null;
         $mainBox->staffId = null;
         $mainBox->staffPayType = 0;
         $mainBox->otherPayId = null;
         
-        if ($expenseType == 1) {
+        $expenseCategoryId = $request->subCategoryId;
+        if($expenseCategoryId == "") {
+            $expenseCategoryId = $request->expensecategoryId;
+        }
+        $mainBox->expensecategoryId = $expenseCategoryId;
+
+        if($request->providerId != "") {
             $mainBox->providerId = $request->providerId;
         }
-
-        if ($expenseType == 2) {
+        if($request->serviceId != "") {
             $mainBox->serviceId = $request->serviceId;
         }
-
-        if ($expenseType == 3) {
+        if($request->staffId != "") {
             $mainBox->staffId = $request->staffId;
-            $mainBox->staffPayType = $request->staffPayType;
         }
-
-        if ($expenseType == 4) {
+        if($request->otherPayId != "") {
             $mainBox->otherPayId = $request->otherPayId;
         }
 
-        if($expenseType != 3) {
-            $mainBox->voucherType = $request->voucherType;
-            $mainBox->voucherNumber = $request->voucherNumber;
-        }
-
-        $mainBox->expenseType = $expenseType;
+        $mainBox->voucherType = $request->voucherType;
+        $mainBox->voucherNumber = $request->voucherNumber;
+        $mainBox->expenseType = $request->expenseType;
         $mainBox->description = $request->description;
         $mainBox->userId = Auth::user()->id;
         $mainBox->created_at = $expenseDate;

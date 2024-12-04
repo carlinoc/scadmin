@@ -16,7 +16,9 @@ class OtherPayController extends Controller
      */
     public function index(): View
     {
-        return view('otherpay.index');
+        $categories1 = OtherPay::select()->where('isParent', 1)->get();
+        //$categories2 = OtherPay::select('*')->where('isParent', 1)->get();
+        return view('otherpay.index', ['categories1' => $categories1]);
     }
 
     public function list(Request $request): JsonResponse
@@ -26,9 +28,22 @@ class OtherPayController extends Controller
         return response()->json(['list' => $list]);
     }
 
-    public function add(Request $request): JsonResponse 
+    public function add(Request $request): JsonResponse
     {
+        $isParent = $request->isParent;
+        $parentId = $request->parentId1;
+        $parentId2 = $request->parentId2;
+
+        if($parentId2 != ""){
+            $parentId = $parentId2;
+        }
+
         $otherPay = new OtherPay();
+        if($isParent == ""){
+            $otherPay->parentId = $parentId;
+        }else{
+            $otherPay->isParent = 1;    
+        }
         $otherPay->motive = $request->motive;
         $otherPay->description = $request->description;
         $otherPay->save();
@@ -129,4 +144,33 @@ class OtherPayController extends Controller
             
         return response()->json(['status'=>'success', 'list' => $list, 'totalExpense' => $totalExpense]);    
     }
+
+    public function subcategories(Request $request): JsonResponse
+    {
+        $parentId = $request->parentId;
+        $list = OtherPay::where('parentId', $parentId)->get();
+
+        return response()->json(['status'=>'success', 'list' => $list]);    
+    }
+
+    public function categories(Request $request): JsonResponse
+    {
+        $results = DB::select(
+            DB::raw('
+                with recursive cte (id, motive, parentId, plevel) as (
+            select id, motive, parentId, 1 from otherpay
+            WHERE parentId is null
+            union all
+            select p.id, p.motive, p.parentId, q.plevel + 1 from otherpay p
+            inner join cte q on p.parentId = q.id
+            )
+            SELECT id, motive, plevel, parentId,
+            (SELECT motive FROM otherpay WHERE id = cte.parentId) AS category 
+            from cte;
+            ')
+            ->getValue(DB::connection()->getQueryGrammar())
+        );
+        return response()->json(['status'=>'success', 'list' => $results]);    
+    }
+
 }

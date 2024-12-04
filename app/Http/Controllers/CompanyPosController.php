@@ -11,6 +11,7 @@ use App\Models\Service;
 use App\Models\Provider;
 use App\Models\Staff;
 use App\Models\OtherPay;
+use App\Models\ExpenseCategories;
 
 class CompanyPosController extends Controller
 {
@@ -108,6 +109,8 @@ class CompanyPosController extends Controller
 
         $otherpays = OtherPay::all();
 
-        return view('companypos.detail', ['companyPos' => $companyPos, 'services' => $services, 'staffs' => $staffs, 'providers' => $providers, 'otherpays' => $otherpays]);
+        $categories = ExpenseCategories::where('isParent', 1)->get();
+
+        return view('companypos.detail', ['companyPos' => $companyPos, 'services' => $services, 'staffs' => $staffs, 'providers' => $providers, 'otherpays' => $otherpays, 'categories' => $categories]);
     }
 }

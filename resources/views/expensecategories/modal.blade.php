@@ -1,12 +1,12 @@
 <!-- Modal -->
 <div class="modal fade" id="addModal" aria-labelledby="addModalLabel" aria-hidden="true">
-    <form action="" method="POST" id="frmAddOtherPay">    
+    <form action="" method="POST" id="frmExpenseCategory">    
         @csrf
-        <input type="hidden" id="otherpayId" name="otherpayId">
+        <input type="hidden" id="expenseCategoryId" name="expenseCategoryId">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="addModalLabel">Nuevo Proveedor</h4>
+                    <h4 class="modal-title" id="addModalLabel">Nueva Categoria</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
@@ -25,31 +25,36 @@
                     <div class="row mt-2" id="dCategories" style="display: none;">
                         <div class="col-sm">
                             <label>Categoría Principal</label>
-                            <x-adminlte-select2 id="parentId1" name="parentId1" label-class="text-lightblue" data-placeholder="Seleccione una Categoría" style="width:200px">
+                            <x-adminlte-select2 id="parentId" name="parentId" label-class="text-lightblue" data-placeholder="Seleccione una Categoría" style="width:200px">
                                 <option value=""></option>
-                                @foreach($categories1 as $category)
-                                    <option value="{{$category->id}}">{{$category->motive}}</option>
+                                @foreach($categories as $category)
+                                    <option value="{{$category->id}}">{{$category->category}}</option>
                                 @endforeach
                             </x-adminlte-select2>
                         </div>    
                         <div class="col-sm">
-                            <label>Sub Categoría</label>
-                            <x-adminlte-select2 id="parentId2" name="parentId2" label-class="text-lightblue" data-placeholder="Seleccione Sub Categoría" style="width:200px">
-                                <option value=""></option>
-                            </x-adminlte-select2>
                         </div>
                     </div>
                     <div class="form-group mt-2">
-                        <label> Motivo de pago</label>
-                        <input type="text" class="form-control" id="motive" name="motive" placeholder="Ingresar el motivo de pago">
+                        <label> Categoría</label>
+                        <input type="text" class="form-control" id="category" name="category" placeholder="Ingrese la categoría">
                     </div>
-                    <div class="form-group">
-                        <label class="col-form-label" for="description"><i class="fas fa-check"></i> Descripción</label>
-                        <textarea class="form-control" rows="3" id="description" name="description" placeholder="Breve descripción"></textarea>
+                    <div class="row" id="dExpenseType">
+                        <div class="col-sm">
+                            <label> Grupo</label>
+                            <select class="form-control" name="expenseType" id="expenseType">
+                                <option value="1">Pago a Proveedores</option>
+                                <option value="2">Pago de Servicios</option>
+                                <option value="3">Pago a Personal</option>
+                                <option value="4">Otros Pagos</option>
+                            </select>    
+                        </div>
+                        <div class="col-sm">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="addOtherPay" type="button" class="btn btn-primary">Guardar</button>
+                    <button id="addCategory" type="button" class="btn btn-primary">Guardar</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
                 </div>
             </div>

@@ -69,15 +69,17 @@ class PayBoxExpenseController extends Controller
     public function edit(Request $request): JsonResponse
     {
         $payBoxExpense = PayBoxExpense::find($request->payboxExpenseId);
-        //$payBoxExpense->expenseDate = Carbon::now();
-        //$payBoxExpense->expense = $request->expense;
+        $payBoxExpense->expenseDate = Carbon::now();
+        if($request->payboxState == 1) {
+            $payBoxExpense->expense = $request->expense;
+        }
         $payBoxExpense->description = $request->description;
         $payBoxExpense->expenseType = $request->expenseType;
 
         $payBoxExpense->providerId = null;
         $payBoxExpense->serviceId = null;
         $payBoxExpense->staffId = null;
-        $payBoxExpense->staffPayType = null;
+        $payBoxExpense->staffPayType = 0;
         $payBoxExpense->otherPayId = null;
 
         $expenseType = $request->expenseType;

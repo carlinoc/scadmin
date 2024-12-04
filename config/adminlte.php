@@ -465,6 +465,12 @@ return [
                     'active' => ['service/*'],
                     'icon' => 'fas fa-fw fas fa-lightbulb',
                 ],
+                [
+                    'text' => 'Mant. de Categorias',
+                    'url'  => '/expensecategories',
+                    'active' => ['expensecategories/*'],
+                    'icon' => 'fas fa-fw fas fa-lightbulb',
+                ],
             ],
         ],
     ],

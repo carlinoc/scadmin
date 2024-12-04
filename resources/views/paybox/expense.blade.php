@@ -4,6 +4,7 @@
         @csrf
         <input type="hidden" name="payboxExpenseId" id="payboxExpenseId">
         <input type="hidden" name="payboxId" id="payboxId" value="{{$paybox->id}}">
+        <input type="hidden" name="payboxState" id="payboxState" value="{{$paybox->state}}">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">

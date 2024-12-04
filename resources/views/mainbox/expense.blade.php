@@ -3,6 +3,7 @@
     <form action="" method="POST" id="frmAddExpense">    
         @csrf
         <input type="hidden" name="mainBoxId" id="mainBoxId2">
+        <input type="hidden" name="expenseType" id="expenseType">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-danger">
@@ -12,7 +13,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="row">
+                    {{-- <div class="row">
                         <div class="col-sm">
                             <label>Tipo de Gasto</label>
                             <select class="form-control" name="expenseType" id="expenseType">
@@ -20,7 +21,6 @@
                                 <option value="2">Pago de Servicios</option>
                                 <option value="3">Pago a personal</option>
                                 <option value="4">Otros Pagos</option>
-                                {{-- <option value="5">Saldo Inicial</option> --}}
                             </select>
                         </div>
                         <div class="col-sm">
@@ -34,8 +34,25 @@
                                 </select>
                             </div>
                         </div>
+                    </div> --}}
+                    <div class="row">
+                        <div class="col-sm">
+                            <label>Categoría</label>
+                            <x-adminlte-select2 id="expensecategoryId" name="expensecategoryId" label-class="text-lightblue" data-placeholder="Seleccione una categoría" style="width:200px">
+                                <option value=""></option>
+                                @foreach($categories as $category)
+                                    <option value="{{$category->id}}" data-expenseType="{{$category->expenseType}}" >{{$category->category}}</option>
+                                @endforeach
+                            </x-adminlte-select2>
+                        </div>
+                        <div class="col-sm">
+                            <label>Sub Categoría</label>
+                            <x-adminlte-select2 id="subCategoryId" name="subCategoryId" label-class="text-lightblue" data-placeholder="Seleccione Sub Categoría" style="width:200px">
+                                <option value=""></option>
+                            </x-adminlte-select2>
+                        </div>
                     </div>
-                    <div class="row mt-2">
+                    <div class="row">
                         <div class="col-sm">
                             <div id="pProvider">
                                 <label>Proveedor</label>
@@ -72,16 +89,31 @@
                                         <option value="{{$otherpay->id}}">{{$otherpay->motive}}</option>
                                     @endforeach
                                 </x-adminlte-select2>
+                            </div>    
+                        </div>
+                        <div class="col-sm">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label>Fecha</label>
+                                <div class="input-group date">
+                                    <input type="text" data-date-format="dd-mm-yyyy" id="expenseDate" name="expenseDate" class="form-control datetimepicker-input"/>
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>  
                             </div>
                         </div>
                         <div class="col-sm">
                             <div class="form-group">
                                 <label>Gasto S/</label>
                                 <input type="text" class="form-control" id="expense" name="expense" placeholder="0.00">
-                            </div>            
+                            </div>                      
                         </div>
                     </div>
-                    <div class="row" id="dVoucher">
+                    <div class="row">
                         <div class="col-sm">
                             <label>Tipo de documento</label>
                             <select class="form-control" name="voucherType" id="voucherType">
@@ -95,22 +127,8 @@
                             <input type="text" class="form-control" id="voucherNumber" name="voucherNumber">
                         </div>
                     </div>
-                    <div class="row mt-2">
-                        <div class="col-sm">
-                            <div class="form-group">
-                                <label>Fecha</label>
-                                <div class="input-group date">
-                                    <input type="text" data-date-format="dd-mm-yyyy" id="expenseDate" name="expenseDate" class="form-control datetimepicker-input"/>
-                                    <div class="input-group-append">
-                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                    </div>
-                                </div>  
-                            </div>
-                        </div>
-                        <div class="col-sm">          
-                        </div>
-                    </div>
-                    <div class="form-group">
+                    
+                    <div class="form-group mt-2">
                         <label class="col-form-label" for="description"><i class="fas fa-check"></i> Descripción</label>
                         <textarea class="form-control" rows="3" id="description1" name="description" placeholder="Breve descripción"></textarea>
                     </div>
