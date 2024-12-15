@@ -40,5 +40,9 @@ class CompanyController extends Controller
         return response()->json(['status'=>'success', 'message'=>'Los datos de la empresa fue actualizado']);    
     }
 
-    
+    public function yape()
+    {
+        
+        return view('company.yape');
+    }
 }

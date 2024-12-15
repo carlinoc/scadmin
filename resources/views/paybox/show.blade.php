@@ -300,7 +300,7 @@
                                                     <tr>
                                                         <th style="width:120px">Fecha</th>
                                                         <th style="width:100px">Tipo</th>
-                                                        <th style="width:100px">Se Pago</th>
+                                                        <th style="width:120px">Descripción</th>
                                                         <th style="width:100px">Monto S/</th>
                                                         <th style="width:80px">Opc.</th>
                                                     </tr>
@@ -499,8 +499,7 @@
         let _modalExpense = $("#modalExpense");
         let _payboxExpenseId = $("#payboxExpenseId");
         let _modalExpenseTitle = $("#modalExpenseTitle");
-        let _expenseType = $("#expenseType");
-        let _staffPayType = $("#staffPayType");
+                
         let _providerId = $("#providerId");
         let _serviceId = $("#serviceId");
         let _staffId = $("#staffId");
@@ -514,14 +513,12 @@
         let _pProvider = $("#pProvider");
         let _pService = $("#pService");
         let _pStaff = $("#pStaff");
-        let _dStaff = $("#dStaff");
         let _pOtherPay = $("#pOtherPay");
-        let _dVoucher = $("#dVoucher");
+        
         let _newExpense = $("#newExpense");
         let _tbExpense = $("#tbExpense");
         let _dtExpense = $("#dtExpense");
         let _dsExpense = null;
-
         let _tdIncome = $("#tdIncome");
         let _totalExpenses = $("#totalExpenses");
 
@@ -549,8 +546,55 @@
             _pService.hide();
             _pStaff.hide();
             _pOtherPay.hide();
-            _dVoucher.hide();
 
+            $("#expensecategoryId").on('change', function(e) {            
+                e.preventDefault();
+                let parentId = $(this).val();
+                if(parentId != ""){
+                    fetchSubCategories(parentId);
+                }
+            });
+
+            $("#subCategoryId").on('change', function(e) {            
+                e.preventDefault();
+                let expenseType = $('#expensecategoryId option:selected').attr('data-expensetype');
+                if(expenseType != ""){
+                    switch (expenseType) {
+                        case '1':
+                            _pProvider.show();  
+                            _pService.hide();
+                            _pStaff.hide();
+                            _pOtherPay.hide();
+                            break;
+                        case '2':
+                            _pService.show();  
+                            _pProvider.hide();
+                            _pStaff.hide();
+                            _pOtherPay.hide();    
+                            break;    
+                        case '3':
+                            _pStaff.show();
+                            _pProvider.hide();
+                            _pService.hide();
+                            _pOtherPay.hide();   
+                            break; 
+                        case '4':
+                            _pOtherPay.show();
+                            _pProvider.hide();
+                            _pService.hide();
+                            _pStaff.hide();
+                            break;
+                        default:
+                            _pProvider.hide();
+                            _pService.hide();  
+                            _pStaff.hide();
+                            _pOtherPay.hide();
+                            break;     
+                    }
+                    $("#expenseType").val(expenseType);
+                }
+            });
+            
             fetchPayBoxIncome();
 
             fetchPayBoxExpense();
@@ -629,45 +673,6 @@
                     }
                 });
             });
-
-            _expenseType.on("change", function() {
-                let expenseType = _expenseType.val();
-                switch (expenseType) {
-                    case '1':
-                        _pProvider.show();  
-                        _pService.hide();
-                        _pStaff.hide();
-                        _dStaff.hide();
-                        _pOtherPay.hide();
-                        _dVoucher.show();
-                        break;
-                    case '2':
-                        _pService.show();  
-                        _pProvider.hide();
-                        _pStaff.hide();
-                        _dStaff.hide();
-                        _pOtherPay.hide();    
-                        _dVoucher.show();
-                        break;    
-                    case '3':
-                        _pStaff.show();
-                        _dStaff.show();  
-                        _pProvider.hide();
-                        _pService.hide();
-                        _pOtherPay.hide();   
-                        _dVoucher.hide();
-                        break; 
-                    case '4':
-                        _pOtherPay.show();
-                        _pProvider.hide();
-                        _pService.hide();
-                        _pStaff.hide();
-                        _dStaff.hide();
-                        _dVoucher.hide();
-                        _dVoucher.show();
-                        break;
-                }
-            })
 
             _newIncome.on("click", function() {
                 clearFormIncome();
@@ -776,23 +781,13 @@
             _addPayBoxExpense.on("click", function(e) {
                 e.preventDefault();
 
-                if (_expenseType.val()== 1 && _providerId.val()==null ){
-                    showWarningMsg('Seleccione un proveedor');                            
+                if($("#expensecategoryId").val() == "") {
+                    showWarningMsg("Debes seleccionar la categoría");
                     return;
                 }
 
-                if (_expenseType.val()== 2 && _serviceId.val()=="" ){
-                    showWarningMsg('Seleccione un servicio');                            
-                    return;
-                }
-
-                if (_expenseType.val()== 3 && _staffId.val()=="" ){
-                    showWarningMsg('Seleccione un personal');                            
-                    return;
-                }
-
-                if (_expenseType.val()== 4 && _otherPayId.val()=="" ){
-                    showWarningMsg('Seleccione un concepto de pago');                            
+                if($("#subCategoryId").val() == "") {
+                    showWarningMsg("Debes seleccionar la subcategoría");
                     return;
                 }
 
@@ -837,15 +832,17 @@
                     _payboxExpenseId.val(id);
                     _expense.val(expense);
                     _description2.val(description);
-                    
-                    _expenseType.val(expenseType).change();
+                                        
                     _providerId.val(providerId).change();
                     _voucherType.val(voucherType).change();
                     _voucherNumber.val(voucherNumber);
                     _serviceId.val(serviceId).change();
                     _otherPayId.val(otherPayId).change();
                     _staffId.val(staffId).change();
-                    _staffPayType.val(staffPayType).change();
+                    
+                    $("#expensecategoryId").val(parentId).change();
+                    _subCategoryId = expensecategoryId;
+                    $("#expenseType").val(expenseType);
                     
                 }
                 _modalExpenseTitle.text("Editar Gasto");
@@ -972,7 +969,7 @@
                     who = dr.motive;
                     totalOtherPay += parseFloat(dr.expense);    
                 }
-                addRowExpense(dr.expenseDate, dr.expense, dr.id, $i, dr.expenseType, who, dr.staffPayType);
+                addRowExpense(dr.expenseDate, dr.expense, dr.id, $i, dr.expenseType, who, dr.staffPayType, dr.provider, dr.category, dr.motive, dr.description);
             }
 
             $("#tdExpenseProvider").html(totalProvider.toFixed(2));
@@ -983,7 +980,7 @@
             setTotalExpense(totalExpenses);
         }
 
-        function addRowExpense(vdate, vexpense, vid, vindex, vexpenseType, vwho, vstaffPayType) {
+        function addRowExpense(vdate, vexpense, vid, vindex, vexpenseType, vwho, vstaffPayType, vprovider, vcategory, vmotive, vdescription) {
             let table = document.getElementById("tbExpense");
             let row = document.createElement("tr");
             
@@ -994,8 +991,27 @@
             let c5 = document.createElement("td");
             
             c1.innerText = getOnlytHour(vdate);
-            c2.innerHTML = getExpenseType(vexpenseType) + getStaffPayType(vstaffPayType);
-            c3.innerText = vwho;
+            let concept = "";
+            if(vexpenseType == 1){
+                concept = " <small class='badge badge-warning'>" + vprovider + "</small>";
+            }   
+            if(vexpenseType == 3){
+                concept = getStaffPayType(vstaffPayType);
+            }
+            if(vexpenseType == 4){
+                concept = " <small class='badge badge-warning'>" + vmotive + "</small>";
+            }
+            if(vcategory != null){
+                concept = " <small class='badge badge-light'>" + vcategory + "</small>";
+            }
+            c2.innerHTML = getExpenseType(vexpenseType) + concept;
+            let description = "";
+            if(vdescription != null && vdescription.length > 26){
+                description = vdescription.substring(0,26) + "...";      
+            }else{
+                description = vdescription;
+            }
+            c3.innerHTML = description;
             c4.innerText = vexpense;
             c5.innerHTML = '<a href="#" data-index="'+vindex+'" class="btn btn-xs btn-info editItem"><i class="far fa-edit"></i></a> <a href="#" data-id="'+vid+'" class="btn btn-xs btn-danger removeItem"><i class="far fa-trash-alt"></i></a>';
                         
@@ -1024,12 +1040,14 @@
             _serviceId.val("").change();
             _staffId.val("").change();
             _otherPayId.val("").change();
-            
-            _expenseType.val(1).change();
+                        
             _voucherType.val(0).change();
             _voucherNumber.val("");
 
-            _staffPayType.val(0).change();
+            _subCategoryId = "";
+            $("#expensecategoryId").val("").change();
+            $("#subCategoryId").val("").change();
+            $("#expenseType").val("");
         }
 
         async function fetchSalesCash() {
@@ -1284,5 +1302,21 @@
                 }
             });
         }
+
+        async function fetchSubCategories(parentId) {
+            const response = await fetch("/expensecategories/subcategories/" + parentId, {method: 'GET'});
+            if(!response.ok){
+                throw new Error("Error fetch subcategories");       
+            }                    
+            const data = await response.json();
+            $("#subCategoryId").empty();
+            $("#subCategoryId").append('<option value=""></option>');
+            for(let i = 0; i < data.list.length; i++) {
+                $("#subCategoryId").append('<option value="' + data.list[i].id + '">' + data.list[i].category + '</option>');
+            }
+            if(_subCategoryId != "") {
+                $("#subCategoryId").val(_subCategoryId).change();
+            }
+        }    
     </script>
 @stop

@@ -422,12 +422,18 @@ return [
                     'icon' => 'fas fa-fw fas fa-money-bill',
                 ],
                 [
-                    'text' => 'Gráfico de Productos',
+                    'text' => 'Reporte de Productos',
                     'url'  => '/report/productchart',
                     'icon' => 'fas fa-fw fas fa-chart-line',
                 ],
                 [
-                    'text' => 'Gráfico de Ingresos y Gastos',
+                    'text' => 'Reporte de Gastos',
+                    'url'  => '/report/expenses',
+                    'active' => ['report/expenses/*'],
+                    'icon' => 'fas fa-fw fas fa-chart-line',
+                ],
+                [
+                    'text' => 'Reporte de Ingresos',
                     'url'  => '/report/saleschart',
                     'icon' => 'fas fa-fw fas fa-chart-bar',
                 ],

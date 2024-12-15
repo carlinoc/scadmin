@@ -31,6 +31,7 @@ use App\Http\Controllers\SaleSplitController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TipsPercentController;
+use App\Http\Controllers\YapeExpenseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -136,7 +137,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/report/salesreport3', [ReportController::class, 'salesreport3'])->name('report.salesreport3');
     Route::get('/report/expensechart', [ReportController::class, 'expensechart'])->name('report.expensechart');
     Route::post('/report/expensereport', [ReportController::class, 'expensereport'])->name('report.expensereport');
-
+    Route::get('/report/expenses', [ReportController::class, 'expenses'])->name('report.expenses');
+    Route::post('/report/expenselist', [ReportController::class, 'expenselist'])->name('report.expenselist');
+    Route::post('/report/topexpense', [ReportController::class, 'topexpense'])->name('report.topexpense');
     
     Route::get('/user', [UserController::class, 'index'])->name('user.index');
     Route::get('/user/list', [UserController::class, 'list'])->name('user.list');
@@ -201,7 +204,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/company', [CompanyController::class, 'index'])->name('company.index');
     Route::post('/company/add', [CompanyController::class, 'add'])->name('company.add');
     Route::post('/company/store', [CompanyController::class, 'store'])->name('company.store');
-    
+        
     Route::get('/companyserial/list/{serietype}', [CompanySerialController::class, 'list'])->name('companyserial.list');
     Route::post('/companyserial/store', [CompanySerialController::class, 'store'])->name('companyserial.store');
     Route::post('/companyserial/adddebug', [CompanySerialController::class, 'adddebug'])->name('companyserial.adddebug');
@@ -271,6 +274,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/expensecategories/list', [ExpenseCategoriesController::class, 'list'])->name('expensecategories.list');
     Route::post('/expensecategories/remove/{expenseCategoryId}', [ExpenseCategoriesController::class, 'remove'])->name('expensecategories.remove');
     Route::get('/expensecategories/subcategories/{parentId}', [ExpenseCategoriesController::class, 'subcategories'])->name('expensecategories.subcategories');
+
+    Route::get('/yapeexpense', [YapeExpenseController::class, 'index'])->name('yapeexpense.index');
 });
 
 require __DIR__.'/auth.php';

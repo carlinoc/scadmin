@@ -22,6 +22,9 @@ use App\Models\Staff;
 use App\Models\Provider;
 use App\Models\Service;
 use App\Models\OtherPay;
+use App\Models\ExpenseCategories;
+use Illuminate\Http\JsonResponse;
+
 class ReportController extends Controller
 {
     public function sales(): View
@@ -1071,4 +1074,179 @@ class ReportController extends Controller
 
         return response()->json(['status'=>'success', 'list' => $list]);
     }
+
+    public function expenses(): View
+    {
+        $categories = ExpenseCategories::where('isParent', 1)->get();
+        return view('reports.expenses', ['categories' => $categories]);
+    }
+
+    public function expenselist(Request $request): JsonResponse
+    {
+        $dateFilter = $request->dateRange;
+        $categoryId = $request->categoryId;
+        $subCategoryId = $request->subCategoryId;
+        
+        $expense1 = MainBox::select('mainbox.created_at', 'expense', DB::raw('1 as boxType'))
+                ->join('expensecategories', 'expensecategories.id', '=', 'mainbox.expensecategoryId') 
+                ->where('mainbox.movementType', '=', 2)
+                ->where('mainbox.state', '=', 0);
+
+        if($categoryId > 0 && $subCategoryId == 0) {
+            $expense1->where('expensecategories.parentId', '=', $categoryId);
+        }
+        if($subCategoryId > 0) {
+            $expense1->where('mainbox.expensecategoryId', '=', $subCategoryId);
+        }
+        
+        $expense2 = PayBoxExpense::select('expenseDate as created_at', 'expense', DB::raw('2 as boxType'))
+                ->join('expensecategories', 'expensecategories.id', '=', 'payboxexpense.expensecategoryId'); 
+
+        if($categoryId > 0 && $subCategoryId == 0) {
+            $expense2->where('expensecategories.parentId', '=', $categoryId);
+        }
+        if($subCategoryId > 0) {
+            $expense2->where('payboxexpense.expensecategoryId', '=', $subCategoryId);
+        }
+
+        $expense3 = PosExpense::select('expenseDate as created_at', 'expense', DB::raw('3 as boxType'))
+                ->join('expensecategories', 'expensecategories.id', '=', 'posexpense.expensecategoryId'); 
+
+        if($categoryId > 0 && $subCategoryId == 0) {
+            $expense3->where('expensecategories.parentId', '=', $categoryId);
+        }
+        if($subCategoryId > 0) {
+            $expense3->where('posexpense.expensecategoryId', '=', $subCategoryId);
+        }
+
+        $expense1->union($expense2)->union($expense3);
+
+        $query = DB::query()
+                ->fromSub($expense1, 'union_query')
+                ->select(DB::raw('DATE(created_at) as date'), DB::raw('sum(expense) as total'), DB::raw('boxType'));
+
+        switch($dateFilter){
+            case 'this_week':
+                $query->whereBetween('created_at', [Carbon::now()->startOfWeek(Carbon::MONDAY), Carbon::now()->endOfWeek(Carbon::MONDAY)]);
+                break;
+            case 'last_week':
+                $fromDate = Carbon::now()->subWeek()->startOfWeek(Carbon::MONDAY)->toDateString();
+                $toDate = Carbon::now()->subWeek()->endOfWeek(Carbon::MONDAY)->toDateString();
+                
+                $query->whereBetween('created_at', [$fromDate, $toDate]);
+                break;
+            case 'this_month':
+                $query->whereMonth('created_at',Carbon::now()->month)->whereYear('created_at', Carbon::now()->year);
+                break;
+            case 'last_month':
+                $query->whereMonth('created_at', Carbon::now()->subMonth()->month)->whereYear('created_at', Carbon::now()->year);
+
+                break;
+            case 'custom':
+                $start_date = Carbon::parse($request->input('startDate'));
+                $end_date = Carbon::parse($request->input('endDate'));
+
+                if ($end_date->greaterThan($start_date)) {
+                    $query->whereBetween('created_at', [$start_date, $end_date]);
+                } else {
+                    $query->whereDate('created_at', Carbon::today());
+                }
+                break;
+        }
+
+        $query->groupBy(DB::raw('Date(created_at)'), DB::raw('boxType'))
+            ->orderBy('created_at');
+
+        $list = [];
+        $list = $query->get();
+    
+        return response()->json(['status'=>'success', 'list' => $list]);
+    }
+
+    public function topexpense(Request $request): JsonResponse
+    {
+        $dateFilter = $request->dateRange;
+        $categoryId = $request->categoryId;
+        $subCategoryId = $request->subCategoryId;
+
+        $expense1 = MainBox::select('mainbox.created_at', 'expense', 'description', 'mainbox.expenseType', 'expensecategories.category', DB::raw('1 as boxType'))
+                ->join('expensecategories', 'expensecategories.id', '=', 'mainbox.expensecategoryId') 
+                ->where('mainbox.movementType', '=', 2)
+                ->where('mainbox.state', '=', 0)
+                ->where('mainbox.expenseType', '<>', 5);
+
+        if($categoryId > 0 && $subCategoryId == 0) {
+            $expense1->where('expensecategories.parentId', '=', $categoryId);
+        }
+        if($subCategoryId > 0) {
+            $expense1->where('mainbox.expensecategoryId', '=', $subCategoryId);
+        }
+
+        $expense2 = PayBoxExpense::select('expenseDate as created_at', 'expense', 'description', 'payboxexpense.expenseType', 'expensecategories.category', DB::raw('2 as boxType'))
+                ->join('expensecategories', 'expensecategories.id', '=', 'payboxexpense.expensecategoryId'); 
+
+        if($categoryId > 0 && $subCategoryId == 0) {
+            $expense2->where('expensecategories.parentId', '=', $categoryId);
+        }
+        if($subCategoryId > 0) {
+            $expense2->where('payboxexpense.expensecategoryId', '=', $subCategoryId);
+        }
+
+        $expense3 = PosExpense::select('expenseDate as created_at', 'expense', 'description', 'posexpense.expenseType', 'expensecategories.category', DB::raw('3 as boxType'))
+                ->join('expensecategories', 'expensecategories.id', '=', 'posexpense.expensecategoryId'); 
+
+        if($categoryId > 0 && $subCategoryId == 0) {
+            $expense3->where('expensecategories.parentId', '=', $categoryId);
+        }
+        if($subCategoryId > 0) {
+            $expense3->where('posexpense.expensecategoryId', '=', $subCategoryId);
+        }
+
+        $expense1->union($expense2)->union($expense3);
+
+        $query = DB::query()
+                ->fromSub($expense1, 'union_query')
+                ->select(DB::raw('DATE(created_at) as date'), DB::raw('expense as total'), DB::raw('description'), DB::raw('expenseType'), DB::raw('category'), DB::raw('boxType'));
+
+        switch($dateFilter){
+            case 'today':
+                $query->whereDate('created_at', Carbon::today());
+                break;
+            case 'yesterday':
+                $query->wheredate('created_at', Carbon::yesterday());
+                break;
+            case 'this_week':
+                $query->whereBetween('created_at', [Carbon::now()->startOfWeek(Carbon::MONDAY), Carbon::now()->endOfWeek(Carbon::MONDAY)]);
+                break;
+            case 'last_week':
+                $fromDate = Carbon::now()->subWeek()->startOfWeek(Carbon::MONDAY)->toDateString();
+                $toDate = Carbon::now()->subWeek()->endOfWeek(Carbon::MONDAY)->toDateString();
+                $query->whereBetween('created_at', [$fromDate, $toDate]);
+                break;
+            case 'this_month':
+                $query->whereMonth('created_at',Carbon::now()->month)->whereYear('created_at', Carbon::now()->year);
+                break;
+            case 'last_month':
+                $query->whereMonth('created_at', Carbon::now()->subMonth()->month)->whereYear('created_at', Carbon::now()->year);
+                break;
+            case 'this_year':
+                $query->whereYear('created_at', Carbon::now()->year);
+                break;
+            case 'custom':
+                $start_date = Carbon::parse($request->input('startDate'));
+                $end_date = Carbon::parse($request->input('endDate'));
+
+                if ($end_date->greaterThan($start_date)) {
+                    $query->whereBetween('created_at', [$start_date, $end_date]);
+                } else {
+                    $query->whereDate('created_at', Carbon::today());
+                }
+                break;
+        }
+        
+        $query->orderBy('expense', 'desc')->limit(50);
+        $list = $query->get();
+
+        return response()->json(['status'=>'success', 'list' => $list]);        
+    } 
 }

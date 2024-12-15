@@ -132,6 +132,17 @@ function getExpenseType($expenseType) {
   }
 }
 
+function getBoxType($boxType) {
+  switch ($boxType) {
+      case 1:
+          return '<small class="badge badge-danger">Caja Principal</small>';
+      case 2:
+          return '<small class="badge badge-primary">Caja Diaria</small>';
+      case 3:
+        return '<small class="badge badge-warning">Cuenta POS</small>';    
+  }
+}
+
 function getStaffPayType($staffPayType) {
   switch ($staffPayType) {
       case 1:

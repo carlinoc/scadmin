@@ -384,6 +384,17 @@
 
         $("#addExpense").on("click", function(e) {
             e.preventDefault();
+
+            if($("#expensecategoryId").val() == "") {
+                showWarningMsg("Debes seleccionar la categoría");
+                return;
+            }
+
+            if($("#subCategoryId").val() == "") {
+                showWarningMsg("Debes seleccionar la subcategoría");
+                return;
+            }
+
             let elements = [
                 ['expense', 'Ingrese el monto del gasto'],
                 ['expenseDate', 'Ingrese la fecha'],

@@ -5,6 +5,7 @@
         <input type="hidden" name="payboxExpenseId" id="payboxExpenseId">
         <input type="hidden" name="payboxId" id="payboxId" value="{{$paybox->id}}">
         <input type="hidden" name="payboxState" id="payboxState" value="{{$paybox->state}}">
+        <input type="hidden" name="expenseType" id="expenseType">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -16,25 +17,19 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-sm">
-                            <label>Tipo de Gasto</label>
-                            <select class="form-control" name="expenseType" id="expenseType">
-                                <option value="1">Pago a proveedores</option>
-                                <option value="2">Pago de Servicios</option>
-                                <option value="3">Pago a personal</option>
-                                <option value="4">Otros Pagos</option>
-                            </select>
+                            <label>Categoría</label>
+                            <x-adminlte-select2 id="expensecategoryId" name="expensecategoryId" label-class="text-lightblue" data-placeholder="Seleccione una categoría" style="width:200px">
+                                <option value=""></option>
+                                @foreach($categories as $category)
+                                    <option value="{{$category->id}}" data-expenseType="{{$category->expenseType}}" >{{$category->category}}</option>
+                                @endforeach
+                            </x-adminlte-select2>
                         </div>
                         <div class="col-sm">
-                            <div id="dStaff">
-                                <label>Concepto</label>
-                                <select class="form-control" name="staffPayType" id="staffPayType">
-                                    <option value="0">- Seleccione -</option>
-                                    <option value="1">Adelanto de Sueldo</option>
-                                    <option value="2">Sueldo</option>
-                                    <option value="3">Horas Extras</option>
-                                    <option value="4">Otros</option>
-                                </select>
-                            </div>
+                            <label>Sub Categoría</label>
+                            <x-adminlte-select2 id="subCategoryId" name="subCategoryId" label-class="text-lightblue" data-placeholder="Seleccione Sub Categoría" style="width:200px">
+                                <option value=""></option>
+                            </x-adminlte-select2>
                         </div>
                     </div>
                     <div class="row mt-2">
@@ -83,7 +78,7 @@
                             </div>            
                         </div>
                     </div>
-                    <div class="row" id="dVoucher">
+                    <div class="row">
                         <div class="col-sm">
                             <label>Tipo de documento</label>
                             <select class="form-control" name="voucherType" id="voucherType">

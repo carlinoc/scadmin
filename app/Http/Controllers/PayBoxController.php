@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use App\Models\ExpenseCategories;
 
 class PayBoxController extends Controller
 {
@@ -123,6 +124,8 @@ class PayBoxController extends Controller
         $staffs = Staff::all();
         $services = Service::all();
         $otherpays = OtherPay::all();
+
+        $categories = ExpenseCategories::where('isParent', 1)->get();
         
         //$payBox = PayBox::find($request->payboxId);
 
@@ -143,7 +146,7 @@ class PayBoxController extends Controller
         $totalTips = $totalCash + $totalCard;        
 
         return view('paybox.show', ['paybox' => $payBox, 'totalCash' => $totalCash, 'totalTips' => $totalTips, 
-            'totalCard' => $totalCard, 'incomeConcepts' => $incomeConcepts, 'providers' => $providers, 'staffs' => $staffs, 'services' => $services, 'otherpays' => $otherpays]);
+            'totalCard' => $totalCard, 'incomeConcepts' => $incomeConcepts, 'providers' => $providers, 'staffs' => $staffs, 'services' => $services, 'otherpays' => $otherpays, 'categories' => $categories]);
     }
 
     public function close(Request $request)

@@ -520,8 +520,6 @@
                 let index = $(this).data('index');
                 let rw = _dsExpense[index];
                 with (rw) {
-                    console.log(rw);
-                    
                     _posExpenseId.val(id);
                     $("#expensecategoryId").val(parentId).change();
                     _subCategoryId = expensecategoryId;
