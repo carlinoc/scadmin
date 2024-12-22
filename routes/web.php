@@ -239,8 +239,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/otherpay/list', [OtherPayController::class, 'list'])->name('otherpay.list');
     Route::get('/otherpay/detail/{otherpayId}', [OtherPayController::class, 'detail'])->name('otherpay.detail');
     Route::post('/otherpay/listexpense', [OtherPayController::class, 'listexpense'])->name('otherpay.listexpense');
-    Route::get('/otherpay/subcategories/{parentId}', [OtherPayController::class, 'subcategories'])->name('otherpay.subcategories');
-    Route::get('/otherpay/categories', [OtherPayController::class, 'categories'])->name('otherpay.categories');
     
     Route::post('/payboxincome/add', [PayBoxIncomeController::class, 'add'])->name('payboxincome.add');
     Route::post('/payboxincome/edit', [PayBoxIncomeController::class, 'edit'])->name('payboxincome.edit');
@@ -276,6 +274,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/expensecategories/subcategories/{parentId}', [ExpenseCategoriesController::class, 'subcategories'])->name('expensecategories.subcategories');
 
     Route::get('/yapeexpense', [YapeExpenseController::class, 'index'])->name('yapeexpense.index');
+    Route::post('/yapeexpense/incomelist', [YapeExpenseController::class, 'incomelist'])->name('yapeexpense.incomelist');
+    Route::post('/yapeexpense/expenselist', [YapeExpenseController::class, 'expenselist'])->name('yapeexpense.expenselist');
+    Route::post('/yapeexpense/add', [YapeExpenseController::class, 'add'])->name('yapeexpense.add');
+    Route::post('/yapeexpense/edit', [YapeExpenseController::class, 'edit'])->name('yapeexpense.edit');
+    Route::post('/yapeexpense/remove/{yapeexpenseId}', [YapeExpenseController::class, 'remove'])->name('yapeexpense.remove');
 });
 
 require __DIR__.'/auth.php';

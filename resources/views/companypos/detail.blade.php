@@ -361,8 +361,7 @@
             fetchPosExpense();
 
             _incomeDate.datepicker().datepicker("setDate", "today");
-            _expenseDate.datepicker().datepicker("setDate", "today");
-
+            
             _incomeDate.on('changeDate', function(ev){
                 $(this).datepicker('hide');
             });
@@ -625,7 +624,7 @@
 
         function clearFormIncome(){
             _posIncomeId.val("");
-            _incomeDate.val("");
+            _incomeDate.datepicker().datepicker("setDate", "today");
             _income.val("");
             _description.val("");
             _operationNumber.val("");
@@ -633,7 +632,7 @@
 
         function clearFormExpense() {
             _posExpenseId.val("");
-            _expenseDate.val("");
+            _expenseDate.datepicker().datepicker("setDate", "today");
             _expense.val("");
             _description1.val("");
 

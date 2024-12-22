@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Mantenimiento de Categorias de Pago')
+@section('title', 'Mantenimiento de Otros de Pagos')
 
 @section('content_header')
-    <h1>Mantenimiento de Categorias de Pago</h1>
+    <h1>Mantenimiento de Otros de Pagos</h1>
 @stop
 
 @section('content')
@@ -11,7 +11,7 @@
     <div>
         <div class="row">
             <div class="form-group col-md-6">
-                <a href="#" id="newOtherPay" class="btn btn-primary">Nueva Categoría de Pago</a>
+                <a href="#" id="newOtherPay" class="btn btn-primary">Nuevo Motivo de Pago</a>
             </div>    
         </div>
     </div>
@@ -62,30 +62,12 @@
 
     $(document).ready(function() {
 
-        //fetchOtherPay();
-        fetchCategories();
-
-        $("#parentId1").on('change', function(e) {            
-            e.preventDefault();
-            var parentId = $(this).val();
-            fetchSubCategories(parentId);
-        });
-
-        $("#isParent").on('change', function(e) {
-            e.preventDefault();
-            var isChecked = $(this).is(":checked");
-            if(isChecked) {
-                $('#dCategories').hide();
-                _motive.focus();
-            }else{
-                $('#dCategories').show();
-            }
-        })
+        fetchOtherPay();
 
         $('#newOtherPay').on('click', function(e) {
             e.preventDefault();
             clearForm();
-            _modalLabel.text("Nueva Categoría de Pago");
+            _modalLabel.text("Nuevo Motivo de Pago");
             _modal.modal('show');
             
             setTimeout(function(){
@@ -138,7 +120,7 @@
                 _description.val(description);
             }
             
-            _modalLabel.text("Editar Categoría de Pago");
+            _modalLabel.text("Editar Motivo de Pago");
             _modal.modal('show');
         });
 
@@ -176,15 +158,6 @@
             });
         });
     });
-
-    async function fetchCategories() {
-        const response = await fetch("/otherpay/categories", {method: 'GET'});
-        if(!response.ok){
-            throw new Error("Error fetch categories");       
-        }                    
-        const data = await response.json();
-        console.log(data);
-    }
     
     async function fetchOtherPay() {
         const response = await fetch("/otherpay/list", {method: 'GET'});
@@ -221,19 +194,6 @@
                 }
             ]
         });    
-    }
-
-    async function fetchSubCategories(parentId) {
-        const response = await fetch("/otherpay/subcategories/" + parentId, {method: 'GET'});
-        if(!response.ok){
-            throw new Error("Error fetch subcategories");       
-        }                    
-        const data = await response.json();
-        $("#parentId2").empty();
-        $("#parentId2").append('<option value=""></option>');
-        for(let i = 0; i < data.list.length; i++) {
-            $("#parentId2").append('<option value="' + data.list[i].id + '">' + data.list[i].motive + '</option>');
-        }
     }
 
     function clearForm() {

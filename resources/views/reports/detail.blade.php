@@ -9,11 +9,11 @@
     </div>
     <div class="col">
         @php
-        $url = explode("/", $_SERVER['HTTP_REFERER']);
-        $back = "/report/lastorders";
-        if($url[4]=="sales"){
-            $back = "/report/sales";
-        }
+        //$url = explode("/", $_SERVER['HTTP_REFERER']);
+        $back = "/report/sales";
+        // if($url[4]=="sales"){
+        //     $back = "/report/sales";
+        // }
         @endphp
         <a href="{{$back}}" class="btn btn-outline-dark" role="button">Atras</a>
     </div>

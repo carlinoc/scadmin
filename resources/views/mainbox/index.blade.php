@@ -52,7 +52,7 @@
                                 <button id="showReport" type="submit" class="btn btn-primary">Ver Reporte</button>
                             </div>
                             <div class="col">
-                                <button id="newIncome" type="button" class="btn btn-success mr-2">+ Ingreso</button> 
+                                <button id="newIncome" type="button" class="btn btn-success mr-2">+ Ingreso</button>
                                 <button id="newExpense" type="button" class="btn btn-danger">+ Gasto</button>
                             </div>
                         </div>
@@ -74,10 +74,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>    
-                </form>        
+                    </div>
+                </form>
             </div>
-        </div> 
+        </div>
     </div>
 
     <div class="row">
@@ -128,18 +128,18 @@
                             </tr>
                         </thead>
                     </table>
-                </x-adminlte-card>    
-            </div>        
+                </x-adminlte-card>
+            </div>
         </div>
     </div>
 
     @include('mainbox.income')
     @include('mainbox.expense')
-@endrole   
+@endrole
 
 @role(['Mozo', 'Maitre'])
     <p style="color: red">No tiene permisos para esta sección</p>
-@endrole 
+@endrole
 @stop
 
 @section('css')
@@ -210,7 +210,7 @@
     let _lTotal = $("#lTotal");
     let _ds = null;
     let _subCategoryId = "";
-        
+
     $(function() {
         $("#startDate").datepicker({
             "dateFormat": "yy-mm-dd"
@@ -222,7 +222,7 @@
             "dateFormat": "yy-mm-dd"
         });
     });
-        
+
     $(document).ready(function() {
         let dateRange = localStorage.getItem("mainbox_daterange");
         if(dateRange == null) dateRange = "today";
@@ -244,7 +244,7 @@
             localStorage.setItem("mainbox_movementType", type);
         });
 
-        $("#expensecategoryId").on('change', function(e) {            
+        $("#expensecategoryId").on('change', function(e) {
             e.preventDefault();
             let parentId = $(this).val();
             if(parentId != ""){
@@ -252,29 +252,29 @@
             }
         });
 
-        $("#subCategoryId").on('change', function(e) {            
+        $("#subCategoryId").on('change', function(e) {
             e.preventDefault();
             let expenseType = $('#expensecategoryId option:selected').attr('data-expensetype');
             if(expenseType != ""){
                 switch (expenseType) {
                     case '1':
-                        _pProvider.show();  
+                        _pProvider.show();
                         _pService.hide();
                         _pStaff.hide();
                         _pOtherPay.hide();
                         break;
                     case '2':
-                        _pService.show();  
+                        _pService.show();
                         _pProvider.hide();
                         _pStaff.hide();
-                        _pOtherPay.hide();    
-                        break;    
+                        _pOtherPay.hide();
+                        break;
                     case '3':
                         _pStaff.show();
                         _pProvider.hide();
                         _pService.hide();
-                        _pOtherPay.hide();   
-                        break; 
+                        _pOtherPay.hide();
+                        break;
                     case '4':
                         _pOtherPay.show();
                         _pProvider.hide();
@@ -283,10 +283,10 @@
                         break;
                     default:
                         _pProvider.hide();
-                        _pService.hide();  
+                        _pService.hide();
                         _pStaff.hide();
                         _pOtherPay.hide();
-                        break;     
+                        break;
                 }
                 $("#expenseType").val(expenseType);
             }
@@ -312,12 +312,12 @@
             localStorage.setItem("mainbox_daterange", range);
 
             if(range=="custom"){
-                $("#rowDates").show();    
+                $("#rowDates").show();
             }else{
-                $("#rowDates").hide();    
+                $("#rowDates").hide();
             }
         });
-        
+
         $('#showReport').on('click', function(e) {
             e.preventDefault();
             var range = $("#dateRange").val();
@@ -328,17 +328,19 @@
                     alert("Las fechas son requeridas");
                 } else {
                     fetchMainBox();
-                }    
+                }
             }else{
                 fetchMainBox();
             }
         });
-        
+
         $("#newIncome").on("click", function(e) {
             e.preventDefault();
-            clearFormIncome();
-            _incomeModalTitle.text("Agregar Ingreso");
-            _incomeModal.modal("show");
+            _dtMainBox.DataTable().clear().draw();
+            _dtMainBox.DataTable().destroy();
+            // clearFormIncome();
+            // _incomeModalTitle.text("Agregar Ingreso");
+            // _incomeModal.modal("show");
         })
 
         $("#addIncome").on("click", function(e) {
@@ -350,7 +352,7 @@
 
             if(emptyfy(elements)) {
                 let mainBoxId = _mainBoxId.val();
-                
+
                 let route = "{{ route('mainbox.add') }}";
                 if(mainBoxId!="") {
                     route = "{{ route('mainbox.edit') }}";
@@ -402,7 +404,7 @@
 
             if(emptyfy(elements)) {
                 let mainBoxId = _mainBoxId2.val();
-                
+
                 let route = "{{ route('mainbox.addexpense') }}";
                 if(mainBoxId!="") {
                     route = "{{ route('mainbox.editexpense') }}";
@@ -426,12 +428,11 @@
                 })
             }
         })
-        
+
         _dtMainBox.on('click', '.itemEdit', function (e) {
             e.preventDefault();
             let index = $(this).data('index');
             let rw = _ds[index];
-            console.log(rw);
             
             with (rw) {
                 if(movementType == 1) {
@@ -440,8 +441,8 @@
                     _mainBoxId.val(id);
                     _incomeconceptId.val(incomeconceptId).change();
                     _income.val(income);
-                    _description.val(description);      
-                    
+                    _description.val(description);
+
                     _incomeModalTitle.text("Editar Ingreso");
                     _incomeModal.modal("show");
                 }
@@ -460,14 +461,14 @@
                     _voucherType.val(voucherType).change();
                     _voucherNumber.val(voucherNumber);
                     _description1.val(description);
-                    
+
                     $("#expenseDate").val(expenseDate);
-                    
+
                     _modalExpenseTitle.text("Editar Gasto");
                     _modalExpense.modal("show");
                 }
             }
-            
+
         });
 
         _dtMainBox.on('click', '.itemRemove', function (e) {
@@ -506,7 +507,7 @@
     });
 
     function fetchMainBox() {
-        let route = "{{ route('mainbox.list') }}";        
+        let route = "{{ route('mainbox.list') }}";
         let data = getFormParams('frmListMainBox');
 
         fetch(route, {
@@ -516,16 +517,16 @@
         .then(response => response.json())
         .then(result => {
             if(result.status=="success") {
-                let _pageLength = localStorage.getItem("mainbox_pageLength");
-                if(_pageLength == null) _pageLength = 10;
-
+                // let _pageLength = localStorage.getItem("mainbox_pageLength");
+                // if(_pageLength == null) _pageLength = 10;
                 _ds = result.list;
-                _dtMainBox.DataTable().destroy();    
+                _dtMainBox.DataTable().clear().draw();
+                _dtMainBox.DataTable().destroy();
                 _dtMainBox.DataTable({
                     "data": result.list,
                     "responsive": true,
                     order: [[0, 'desc']],
-                    pageLength: _pageLength,
+                    pageLength: 50,
                     "columns": [
                         {
                             "render": function(data, type, row, meta) {
@@ -540,18 +541,18 @@
                         {
                             "render": function(data, type, row, meta) {
                                 if(row.incomeConcept != null){
-                                    return "<small class='badge badge-success'>" + row.incomeConcept + "</small>";    
+                                    return "<small class='badge badge-success'>" + row.incomeConcept + "</small>";
                                 }else{
                                     return "";
                                 }
-                                
+
                             }
                         },
                         {
                             "render": function(data, type, row, meta) {
                                 if(row.income > 0){
                                     return "<span class='text-success'>" + row.income + "</span>";
-                                }else{  
+                                }else{
                                     return row.income;
                                 }
                             }
@@ -561,7 +562,7 @@
                                 let concept = "";
                                 if(row.expenseType == 1){
                                     concept = " <small class='badge badge-warning'>" + row.providerName + "</small>";
-                                }   
+                                }
                                 if(row.expenseType == 3){
                                     concept = getStaffPayType(row.staffPayType);
                                 }
@@ -569,7 +570,7 @@
                                     concept = " <small class='badge badge-warning'>" + row.otherPayMotive + "</small>";
                                 }
                                 if(row.expenseType == 5){
-                                    concept = "<small class='badge badge-danger'>Saldo Inicial</small>";  
+                                    concept = "<small class='badge badge-danger'>Saldo Inicial</small>";
                                 }
                                 if(row.category != null){
                                     concept = " <small class='badge badge-light'>" + row.category + "</small>";
@@ -582,7 +583,7 @@
                             "render": function(data, type, row, meta) {
                                 if(row.expense > 0){
                                     return "<span class='text-danger'>" + row.expense + "</span>";
-                                }else{  
+                                }else{
                                     return row.expense;
                                 }
                             }
@@ -590,7 +591,7 @@
                         {
                             "render": function(data, type, row, meta) {
                                 if(row.description != null && row.description.length > 26){
-                                    return row.description.substring(0,26) + "...";      
+                                    return row.description.substring(0,26) + "...";
                                 }else{
                                     if(row.payboxId != null){
                                         return "<a href='/paybox/show/" + row.payboxId + "' target='_blank'>" + row.description + "</a>";
@@ -607,17 +608,15 @@
                         {
                             "render": function(data, type, row, meta) {
                                 if(row.history_count > 0){
-                                    return '<a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-info itemEdit"><i class="far fa-edit"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-sm btn-danger itemRemove"><i class="far fa-trash-alt"></i></a> <a href="/report/history/'+row.id+'" class="btn btn-sm btn-success historysale"><i class="fas fa-history"></i></a>';    
+                                    return '<a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-info itemEdit"><i class="far fa-edit"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-sm btn-danger itemRemove"><i class="far fa-trash-alt"></i></a> <a href="/report/history/'+row.id+'" class="btn btn-sm btn-success historysale"><i class="fas fa-history"></i></a>';
                                 }else{
                                     return '<a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-info itemEdit"><i class="far fa-edit"></i></a> <a href="#" data-id="'+row.id+'" class="btn btn-sm btn-danger itemRemove"><i class="far fa-trash-alt"></i></a>';
                                 }
-                                
+
                             }
                         }
                     ]
                 });
-
-                //$('#lYape').html('S/ ' + formatMoney(result.withYape));
 
                 _lIncome.text("S/ " + formatMoney(result.totalIncome));
                 _lExpense.text("S/ " + formatMoney(result.totalExpense));
@@ -625,19 +624,19 @@
                 total = parseFloat(result.totalIncome) - parseFloat(result.totalExpense);
                 _lTotal.text("S/ " + formatMoney(total.toFixed(2)));
 
-                $("#dtMainBox_length select").on('change', function(e) {
-                    var myvalue = $(this).val();
-                    localStorage.setItem("mainbox_pageLength", myvalue);
-                });
+                // $("#dtMainBox_length select").on('change', function(e) {
+                //     var myvalue = $(this).val();
+                //     localStorage.setItem("mainbox_pageLength", myvalue);
+                // });
             }
-        });    
+        });
     }
 
     function clearFormIncome(){
         _mainBoxId.val("");
         _incomeconceptId.val("").change();
         _income.val("");
-        _description.val("");  
+        _description.val("");
     }
 
     function clearFormExpense(){
@@ -650,7 +649,7 @@
         _voucherType.val(0).change();
         _voucherNumber.val("");
         _description1.val("");
-        
+
         $("#expenseDate").val("");
 
         _subCategoryId = "";
@@ -662,8 +661,8 @@
     async function fetchSubCategories(parentId) {
         const response = await fetch("/expensecategories/subcategories/" + parentId, {method: 'GET'});
         if(!response.ok){
-            throw new Error("Error fetch subcategories");       
-        }                    
+            throw new Error("Error fetch subcategories");
+        }
         const data = await response.json();
         $("#subCategoryId").empty();
         $("#subCategoryId").append('<option value=""></option>');
@@ -673,6 +672,6 @@
         if(_subCategoryId != "") {
             $("#subCategoryId").val(_subCategoryId).change();
         }
-    }    
-</script>    
-@stop    
+    }
+</script>
+@stop

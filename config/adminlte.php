@@ -396,6 +396,12 @@ return [
                     'active' => ['mainbox/*'],
                     'icon' => 'fas fa-fw fas fa-coins',
                 ],
+                [
+                    'text' => 'Yape',
+                    'url'  => '/yapeexpense',
+                    'active' => ['yapeexpense/*'],
+                    'icon' => 'fas fa-fw fas fa-wallet',
+                ],
             ],
         ],
         [
