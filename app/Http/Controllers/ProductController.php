@@ -10,6 +10,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Js;
+use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
@@ -160,5 +162,16 @@ class ProductController extends Controller
             return "images/movie-default.jpg";
         }
         return $image;
+    }
+
+    public function list(Request $request): JsonResponse
+    {
+        $categoryId = $request->categoryId;
+
+        $list = Product::select('id', 'name')
+            ->where('categoryId', $categoryId)
+            ->get();
+                        
+        return response()->json(['status'=>'success', 'list' => $list]);
     }
 }

@@ -23,6 +23,7 @@ use App\Models\Provider;
 use App\Models\Service;
 use App\Models\OtherPay;
 use App\Models\ExpenseCategories;
+use App\Models\Category;
 use Illuminate\Http\JsonResponse;
 
 class ReportController extends Controller
@@ -452,23 +453,36 @@ class ReportController extends Controller
 
     public function productchart(): View
     {
-        $products = Product::all();
-        return view('reports.productchart', ['products' => $products]);
+        $categories = Category::all();
+        return view('reports.productchart', ['categories' => $categories]);
     }
 
     public function productlist(Request $request)
     {
         $dateFilter = $request->dateRange;
         $productId = $request->productId;
+        $categoryId = $request->categoryId;
 
-        if($productId == 0){
-            $query = SalesDetail::select(DB::raw('DATE(sales_detail.updated_at) as date'), DB::raw('count(*) as total'))
+        if($productId == 0 && $categoryId == 0){
+            $query = SalesDetail::select(DB::raw('DATE(sales_detail.updated_at) as date'), DB::raw('sum(sales_detail.quantity) as total'))
                 ->join('sales', 'sales.id', '=', 'sales_detail.saleId')
                 ->where('sales.status','=', 1);
-        }else{
-            $query = SalesDetail::select(DB::raw('DATE(sales_detail.updated_at) as date'), DB::raw('count(*) as total'))
+        }
+
+        if($categoryId > 0){
+            $query = SalesDetail::select(DB::raw('DATE(sales_detail.updated_at) as date'), DB::raw('sum(sales_detail.quantity) as total'))
                 ->join('sales', 'sales.id', '=', 'sales_detail.saleId')
+                ->join('products', 'products.id', '=', 'sales_detail.productId')
                 ->where('sales.status','=', 1)
+                ->where('products.categoryId', $categoryId);
+        }
+
+        if($categoryId > 0 && $productId > 0){
+            $query = SalesDetail::select(DB::raw('DATE(sales_detail.updated_at) as date'), DB::raw('sum(sales_detail.quantity) as total'))
+                ->join('sales', 'sales.id', '=', 'sales_detail.saleId')
+                ->join('products', 'products.id', '=', 'sales_detail.productId')
+                ->where('sales.status','=', 1)
+                ->where('products.categoryId', $categoryId)
                 ->where('sales_detail.productId', $productId);
         }
 

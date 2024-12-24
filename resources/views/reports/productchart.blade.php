@@ -25,11 +25,16 @@
                                 </select>
                             </div>
                             <div class="col-auto">
-                                <x-adminlte-select2 name="productId" data-placeholder="- Todos los productos -">
-                                    <option value="0">- Todos los productos -</option>
-                                    @foreach($products as $product)
-                                        <option value="{{$product->id}}">{{$product->name}}</option>
+                                <x-adminlte-select2 name="categoryId" id="categoryId" data-placeholder="- Todos las categorias -" style="width: 200px">
+                                    <option value="0">- Todos las categorias -</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{$category->id}}">{{$category->Name}}</option>
                                     @endforeach
+                                </x-adminlte-select2>        
+                            </div>
+                            <div class="col-auto">
+                                <x-adminlte-select2 name="productId" id="productId" data-placeholder="- Todos los productos -" style="width:200px">
+                                    <option value="0">- Todos los productos -</option>
                                 </x-adminlte-select2>        
                             </div>
                             <div class="col">
@@ -72,9 +77,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row mt-4">
+                        {{-- <div class="row mt-4">
                             <canvas id="salesChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%; display: block; width: 396px;"></canvas>    
-                        </div>
+                        </div> --}}
                     </div>    
                 </form>        
             </div>
@@ -114,7 +119,15 @@
 
         fetchProducts();
 
-        fetchSales();
+        //fetchSales();
+
+        $("#categoryId").on('change', function(e) {
+            e.preventDefault();
+            let categoryId = $(this).val();
+            if(categoryId != ""){
+                fetchList(categoryId);
+            }    
+        });    
 
         $("#startDate").on('changeDate', function(ev){
             $(this).datepicker('hide');
@@ -145,13 +158,11 @@
                     showWarningMsg("Las fechas son requeridas");
                 } else {
                     fetchProducts();
-
-                    fetchSales();
+                    //fetchSales();
                 }    
             }else{
                 fetchProducts();
-
-                fetchSales();
+                //fetchSales();
             }
         });
     });
@@ -243,6 +254,19 @@
                 });
             }
         });
+    }
+
+    async function fetchList(categoryId){
+        const response = await fetch("/products/list/" + categoryId, {method: 'GET'});
+        if(!response.ok){
+            throw new Error("Error fetch products");
+        }
+        const data = await response.json();
+        $("#productId").empty();
+        $("#productId").append('<option value="0">- Todos los productos -</option>');
+        for(let i = 0; i < data.list.length; i++) {
+            $("#productId").append('<option value="' + data.list[i].id + '">' + data.list[i].name + '</option>');
+        }
     }
 </script>    
 @stop    

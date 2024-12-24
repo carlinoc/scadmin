@@ -69,6 +69,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('/products', ProductController::class)->names('products');    
 
     Route::resource('/sales', SaleController::class)->names('sales');
+
+    Route::get('/products/list/{categoryId}', [ProductController::class, 'list'])->name('salesdetail.list');
     
     Route::get('/sale/available', [SaleController::class, 'available'])->name('sales.available');    
     Route::get('/sale/tablelist', [SaleController::class, 'tablelist'])->name('sales.tablelist');  

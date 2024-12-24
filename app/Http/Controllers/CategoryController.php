@@ -80,5 +80,5 @@ class CategoryController extends Controller
         }else{
             return redirect()->route('categories.index')->with('error', 'No se puede elimiar una categoría con productos');
         }   
-    }
+    } 
 }
