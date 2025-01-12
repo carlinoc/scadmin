@@ -635,6 +635,32 @@ class SaleController extends Controller
         return view('reports.detail', ['sale' => $sale, 'products' => $products, 'salesDetails' => $salesDetails, 'clients' => $clients, 'companyPosList' => $companyPosList, 'urllocal' => $urllocal]);
     }
 
+    public function detalleorder(Request $request): View
+    {
+        $sale = Sale::select('sales.id as saleId', 'subtotal', 'sales.discount', 'total', 'status', 'withCash', 'sales.created_at', 'sales.clientId', 'sales.updated_at',
+            'tables.name as table', 'clients.name as client', 'users.name as user', 'paybox.state as payboxState', 'sales.companyPosId', 'sales.splitNumber', 'sunat', 
+            'voucherType','voucherNumber', 'voucherSerie')
+             ->join('tables', 'tables.id','=','sales.tableId')
+             ->join('clients', 'clients.id','=','sales.clientId')
+             ->join('users', 'users.id','=','sales.userId')
+             ->leftjoin('paybox', 'paybox.id','=','sales.payboxId')
+             ->where('sales.id', $request->saleId)->first();
+
+        $products = Product::all();
+
+        $clients = Client::all();
+
+        $salesDetails = SalesDetail::select('sales_detail.id','sales_detail.price', 'quantity', 'total', 'products.name as product', 'products.id as productId')
+            ->join('products', 'products.id','=','sales_detail.productId')
+            ->where('sales_detail.saleId', $request->saleId)->get();
+
+        $companyPosList = CompanyPos::all();
+        
+        $urllocal = env('DATA_URL_LOCAL','http://127.0.0.1:8000');
+
+        return view('reports.detalle', ['sale' => $sale, 'products' => $products, 'salesDetails' => $salesDetails, 'clients' => $clients, 'companyPosList' => $companyPosList, 'urllocal' => $urllocal]);
+    }
+
     public function cancelsale(Request $request): JsonResponse
     {
         $sale = Sale::find($request->saleId);

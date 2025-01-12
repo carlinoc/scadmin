@@ -108,6 +108,7 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/detail/{saleId}', [SaleController::class, 'detail'])->name('salelist.detail');
     Route::get('/report/detail/{saleId}', [SaleController::class, 'detailorder'])->name('reports.detail');
+    Route::get('/report/detalle/{saleId}', [SaleController::class, 'detalleorder'])->name('reports.detalle');
     Route::get('/report/split/{saleId}', [SaleController::class, 'split'])->name('reports.split');
     Route::get('/report/history/{saleId}', [SaleController::class, 'history'])->name('reports.history');
 

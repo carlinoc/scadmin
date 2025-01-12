@@ -107,7 +107,7 @@ class ReportController extends Controller
                 $query->whereMonth('sales.created_at',Carbon::now()->month)->whereYear('sales.created_at', Carbon::now()->year);
                 break;
             case 'last_month':
-                $query->whereMonth('sales.created_at',Carbon::now()->subMonth()->month)->whereYear('sales.created_at',Carbon::now()->year);
+                $query->whereMonth('sales.created_at',Carbon::now()->subMonth()->month); //->whereYear('sales.created_at', Carbon::now()->year);
                 break;
             case 'this_year':
                 $query->whereYear('sales.created_at',Carbon::now()->year);
