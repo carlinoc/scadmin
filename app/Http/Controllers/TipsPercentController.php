@@ -18,16 +18,18 @@ class TipsPercentController extends Controller
 
     public function list(Request $request): JsonResponse
     {
-        $list = TipsPercent::all();  
-
+        $list = TipsPercent::orderBy('points', 'desc')->get();
+            
         return response()->json(['list' => $list]);
     }
 
     public function add(Request $request): JsonResponse 
     {
         $tipsPercent = new TipsPercent();
+        $tipsPercent->area = $request->area;
         $tipsPercent->employ = $request->employ;
-        $tipsPercent->percent = $request->percent;
+        $tipsPercent->points = $request->points;
+
         $tipsPercent->save();
 
         return response()->json(['status'=>'success', 'message'=>'El porcentaje fue agregado']);    
@@ -36,8 +38,9 @@ class TipsPercentController extends Controller
     public function edit(Request $request): JsonResponse
     {
         $tipsPercent = TipsPercent::find($request->tipsPercentId);
+        $tipsPercent->area = $request->area;
         $tipsPercent->employ = $request->employ;
-        $tipsPercent->percent = $request->percent;
+        $tipsPercent->points = $request->points;
         $tipsPercent->update();
 
         return response()->json(['status'=>'success', 'message'=>'El porcentaje fue actualizado']);    

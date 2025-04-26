@@ -151,7 +151,7 @@
                             aria-labelledby="custom-tabs-four-tips-tab">
                             <div class="row mb-2">
                                 <div class="col">
-                                    <span id="totalPercent" class="text-success">Total Porcentajes: 0%</span>
+                                    {{-- <span id="totalPercent" class="text-success">Total Porcentajes: 0%</span> --}}
                                 </div>
                                 <div class="col">
                                     <button type="button" id="newTipsPercent" class="btn btn-success float-right">+ Nuevo</button>
@@ -162,9 +162,10 @@
                                     <thead>
                                         <tr>
                                             <td>Id</td>
-                                            <td>Concepto</td>
-                                            <td>Porcentaje %</td>
-                                            <th>Opciones</th>
+                                            <td>Area</td>
+                                            <td>Puesto</td>
+                                            <th>Puntos</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -261,7 +262,9 @@
     let _modalTipsPercent = $("#tipsPercentModal");
     let _tipsPercentId = $("#tipsPercentId");
     let _employ = $("#employ");
-    let _percent = $("#percent");
+    let _area = $("#area");
+    let _points = $("#points");
+    
     let _addTipsPercent = $("#addTipsPercent");
     let _ds=null;
     let _totalPercent = $("#totalPercent");
@@ -308,20 +311,16 @@
             e.preventDefault();
             _tipsPercentId.val("");
             _employ.val("");
-            _percent.val("");
+            _area.val(0).change();
+            _points.val(1).change();
             _titlemodal.text("Agregar Porcentaje");
             _modalTipsPercent.modal("show");
-
-            setTimeout(function(){
-                _employ.focus();
-            }, 300);
         });
 
         _addTipsPercent.on("click", function(e){
             e.preventDefault();
             let elements = [
-                ['employ', 'Ingrese el puesto o cargo'],
-                ['percent', 'Ingrese el porcentaje']
+                ['employ', 'Ingrese el puesto o cargo']
             ];
 
             if(emptyfy(elements)) {
@@ -424,7 +423,8 @@
             with (rw) {
                 _tipsPercentId.val(id);
                 _employ.val(employ);
-                _percent.val(percent);
+                _area.val(area).change();
+                _points.val(points).change();
             }
             _titlemodal.text("Editar Porcentaje");
             _modalTipsPercent.modal('show');
@@ -505,12 +505,24 @@
                 },
                 {
                     "render": function(data, type, row, meta) {
+                        let area = 'Salón';
+                        if(row.area == 1) {
+                            area = 'Producción';
+                        }
+                        if(row.area == 2) {
+                            area = 'Otros';
+                        }
+                        return area;
+                    }
+                },
+                {
+                    "render": function(data, type, row, meta) {
                         return row.employ;
                     }
                 },
                 {
                     "render": function(data, type, row, meta) {
-                        return row.percent + "%";
+                        return row.points;
                     }
                 },
                 {
@@ -521,11 +533,11 @@
             ]
         });
         
-        let _total = 0.0;
-        for($i = 0; $i < _ds.length; $i++) {
-            _total += parseFloat(_ds[$i].percent);
-        }
-        _totalPercent.html('Total Procentaje: ' + _total + '%');
+        // let _total = 0.0;
+        // for($i = 0; $i < _ds.length; $i++) {
+        //     _total += parseFloat(_ds[$i].percent);
+        // }
+        // _totalPercent.html('Total Procentaje: ' + _total + '%');
     }
 
     async function verifyNumber() {

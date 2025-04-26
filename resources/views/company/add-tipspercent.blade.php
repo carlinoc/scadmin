@@ -15,15 +15,34 @@
                     <div class="row">
                         <div class="col-sm">
                             <div class="form-group">
+                                <label> Area</label>
+                                <select class="form-control" name="area" id="area">
+                                    <option value="0">Salón</option>
+                                    <option value="1">Producción</option>
+                                    <option value="2">Otros</option>
+                                </select>    
+                            </div>                        
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-group">
                                 <label>Puesto o cargo</label>
                                 <input type="text" class="form-control" id="employ" name="employ">
                             </div>            
                         </div>
+                    </div>
+                    <div class="row">
                         <div class="col-sm">
                             <div class="form-group">
-                                <label>Porcentaje %</label>
-                                <input type="text" class="form-control" id="percent" name="percent">
+                                <label> Puntos</label>
+                                <select class="form-control" name="points" id="points">
+                                    @for ($i = 1; $i <= 10; $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                    @endfor  
+                                </select>
                             </div>                        
+                        </div>
+                        <div class="col-sm">
+                            
                         </div>
                     </div>
                 </div>

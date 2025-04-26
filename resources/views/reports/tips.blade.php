@@ -132,6 +132,9 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="card-footer">
+                    <h6>Total Propinas S/ <span id="totalTips2">0.00</span></h6>
+                </div>
             </div>
         </div>
     </div>
@@ -297,10 +300,22 @@
                 $("#tableBody").empty();
                 if(tTips > 0) {
                     let _ds = $.parseJSON('[' + _percentList.val() + ']');
+                    let tPoints = 0;
+                    let valuePoint = 0.0;
                     for($i = 0; $i < _ds[0].length; $i++) {
-                        percent = (tTips * _ds[0][$i].percent) / 100
+                        tPoints += _ds[0][$i].points; 
+                    }
+                    
+                    valuePoint = (tTips / tPoints);
+                                        
+                    let percent = 0.0;
+                    let totalTips = 0.0;
+                    for($i = 0; $i < _ds[0].length; $i++) {
+                        percent = (valuePoint * _ds[0][$i].points)
+                        totalTips += percent;
                         addRow(_ds[0][$i].employ, percent);
                     }
+                    $("#totalTips2").html(totalTips.toFixed(2));
                 }        
             }
         });    
