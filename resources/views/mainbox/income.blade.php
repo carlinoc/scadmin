@@ -1,6 +1,6 @@
 <!-- Modal -->
 <div class="modal fade" id="incomeModal" aria-labelledby="addModalLabel" aria-hidden="true">
-    <form action="" method="POST" id="frmAddIncome">    
+    <form action="" method="POST" id="frmAddIncome">
         @csrf
         <input type="hidden" name="mainBoxId" id="mainBoxId">
         <div class="modal-dialog">
@@ -15,6 +15,21 @@
                     <div class="row">
                         <div class="col-sm">
                             <div class="form-group">
+                                <label>Fecha:</label>
+                                <div class="input-group date">
+                                    <input type="text" data-date-format="dd-mm-yyyy" id="incomeDate" name="incomeDate" class="form-control datetimepicker-input"/>
+                                    <div class="input-group-append">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="form-group">
                                 <label>Concepto</label>
                                 <x-adminlte-select2 id="incomeconceptId" name="incomeconceptId" label-class="text-lightblue" data-placeholder="Seleccione un concepto">
                                     <option value=""></option>
@@ -22,13 +37,13 @@
                                         <option value="{{$incomeConcept->id}}">{{$incomeConcept->name}}</option>
                                     @endforeach
                                 </x-adminlte-select2>
-                            </div>            
+                            </div>
                         </div>
                         <div class="col-sm">
                             <div class="form-group">
                                 <label>Importe S/</label>
                                 <input type="text" class="form-control" id="income" name="income" placeholder="0.00">
-                            </div>            
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -42,5 +57,5 @@
                 </div>
             </div>
         </div>
-    </form>    
+    </form>
 </div>

@@ -143,6 +143,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/report/expenses', [ReportController::class, 'expenses'])->name('report.expenses');
     Route::post('/report/expenselist', [ReportController::class, 'expenselist'])->name('report.expenselist');
     Route::post('/report/topexpense', [ReportController::class, 'topexpense'])->name('report.topexpense');
+    Route::post('/report/productdetaillist', [ReportController::class, 'productdetaillist'])->name('report.productdetaillist');
     
     Route::get('/user', [UserController::class, 'index'])->name('user.index');
     Route::get('/user/list', [UserController::class, 'list'])->name('user.list');

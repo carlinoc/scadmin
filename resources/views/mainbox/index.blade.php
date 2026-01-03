@@ -221,6 +221,9 @@
         $("#expenseDate").datepicker({
             "dateFormat": "yy-mm-dd"
         });
+        $("#incomeDate").datepicker({
+            "dateFormat": "yy-mm-dd"
+        });
     });
 
     $(document).ready(function() {
@@ -306,6 +309,10 @@
             $(this).datepicker('hide');
         });
 
+        $("#incomeDate").on('changeDate', function(ev){
+            $(this).datepicker('hide');
+        });
+
         $('#dateRange').on('change', function(e) {
             e.preventDefault();
             var range = this.value;
@@ -336,11 +343,9 @@
 
         $("#newIncome").on("click", function(e) {
             e.preventDefault();
-            _dtMainBox.DataTable().clear().draw();
-            _dtMainBox.DataTable().destroy();
-            // clearFormIncome();
-            // _incomeModalTitle.text("Agregar Ingreso");
-            // _incomeModal.modal("show");
+            clearFormIncome();
+            _incomeModalTitle.text("Agregar Ingreso");
+            _incomeModal.modal("show");
         })
 
         $("#addIncome").on("click", function(e) {
@@ -433,7 +438,7 @@
             e.preventDefault();
             let index = $(this).data('index');
             let rw = _ds[index];
-            
+
             with (rw) {
                 if(movementType == 1) {
                     clearFormIncome();

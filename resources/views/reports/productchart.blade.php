@@ -17,6 +17,8 @@
                         <div class="row">
                             <div class="col-auto">
                                 <select class="form-control" name="dateRange" id="dateRange" required>
+                                    <option value="today">Solo Hoy</option>
+                                    <option value="yesterday">Solo Ayer</option>
                                     <option value="this_week">Esta Semana</option>
                                     <option value="last_week">La Semana Pasada</option>
                                     <option value="this_month">Este Mes</option>
@@ -75,6 +77,21 @@
                                     <div class="small-box-footer p-1">
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4" id="dProducts">
+                            <div class="col-10">
+                                <h5 class="text-info text-center">Detalle de productos vendidos</h5>
+                                <table id="detailProducts" class="table table-striped" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 30px;">Nro</th>
+                                            <th style="width: 100px;">Fecha</th>
+                                            <th style="width: 120px;">Producto</th>
+                                            <th style="width: 80px;">Cantidad</th>
+                                        </tr>
+                                    </thead>
+                                </table>
                             </div>
                         </div>
                         {{-- <div class="row mt-4">
@@ -209,6 +226,65 @@
                         }]
                     }
                 });
+            }
+        });
+    }
+
+    async function fetchDetailProducts(){
+        let route = "{{ route('report.productdetaillist') }}";        
+        let dt = getFormParams('frmChartList');
+
+        fetch(route, {
+            method: 'post',
+            body: dt,
+        })
+        .then(response => response.json())
+        .then(result => {
+            if(result.status=="success"){
+                console.log(result);
+                
+                //$("#topExpenses").show();
+                _dtExpenses.DataTable().destroy();    
+                // _dtExpenses.DataTable({
+                //     "data": result.list,
+                //     "responsive": true,
+                //     "columns": [
+                //         {
+                //             "render": function(data, type, row, meta) {
+                //                 return (meta.row + 1);
+                //             }
+                //         },
+                //         {
+                //             "render": function(data, type, row, meta) {
+                //                 return row.date;
+                //             }
+                //         },
+                //         {
+                //             "render": function(data, type, row, meta) {
+                //                 let concept = "";
+                //                 if(row.category != null){
+                //                     concept = " <small class='badge badge-light'>" + row.category + "</small>";
+                //                 }
+                //                 return getExpenseType(row.expenseType) + concept;
+                //             }
+                //         },
+                //         {
+                //             "render": function(data, type, row, meta) {
+                //                 return row.description;
+                //             }
+                //         },
+                //         {
+                //             "render": function(data, type, row, meta) {
+                //                 return  getBoxType(row.boxType);
+                //             }
+                //         },
+                //         {
+                //             "render": function(data, type, row, meta) {
+                //                 return  formatMoney(row.total);
+                //             }
+                //         }
+                //     ]
+                // });
             }
         });
     }

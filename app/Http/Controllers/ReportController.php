@@ -530,6 +530,79 @@ class ReportController extends Controller
         return response()->json(['status'=>'success', 'list' => $list]);
     }
 
+    public function productdetaillist(Request $request)
+    {
+        $dateFilter = $request->dateRange;
+        $productId = $request->productId;
+        $categoryId = $request->categoryId;
+
+        if($productId == 0 && $categoryId == 0){
+            $query = SalesDetail::select('sales_detail.*', 'products.name as product', 'sales.updated_at as saleDate')
+                ->join('sales', 'sales.id', '=', 'sales_detail.saleId')
+                ->join('products', 'products.id', '=', 'sales_detail.productId')
+                ->where('sales.status','=', 1);
+        }
+
+        if($categoryId > 0){
+            $query = SalesDetail::select(DB::raw('DATE(sales_detail.updated_at) as date'), DB::raw('sum(sales_detail.quantity) as total'))
+                ->join('sales', 'sales.id', '=', 'sales_detail.saleId')
+                ->join('products', 'products.id', '=', 'sales_detail.productId')
+                ->where('sales.status','=', 1)
+                ->where('products.categoryId', $categoryId);
+        }
+
+        if($categoryId > 0 && $productId > 0){
+            $query = SalesDetail::select(DB::raw('DATE(sales_detail.updated_at) as date'), DB::raw('sum(sales_detail.quantity) as total'))
+                ->join('sales', 'sales.id', '=', 'sales_detail.saleId')
+                ->join('products', 'products.id', '=', 'sales_detail.productId')
+                ->where('sales.status','=', 1)
+                ->where('products.categoryId', $categoryId)
+                ->where('sales_detail.productId', $productId);
+        }
+
+        switch($dateFilter){
+            case 'today':
+                $query->whereDate('sales_detail.updated_at', Carbon::today());
+                break;
+            case 'yesterday':
+                $query->wheredate('sales_detail.updated_at', Carbon::yesterday());
+                break;
+            case 'this_week':
+                $query->whereBetween('sales_detail.updated_at', [Carbon::now()->startOfWeek(Carbon::MONDAY), Carbon::now()->endOfWeek(Carbon::MONDAY)]);
+                break;
+            case 'last_week':
+                $fromDate = Carbon::now()->subWeek()->startOfWeek(Carbon::MONDAY)->toDateString();
+                $toDate = Carbon::now()->subWeek()->endOfWeek(Carbon::MONDAY)->toDateString();
+                $query->whereBetween('sales_detail.updated_at', [$fromDate, $toDate]);
+                break;
+            case 'this_month':
+                $query->whereMonth('sales_detail.updated_at',Carbon::now()->month)->whereYear('sales_detail.updated_at', Carbon::now()->year);
+                break;
+            case 'last_month':
+                $query->whereMonth('sales_detail.updated_at', Carbon::now()->subMonth()->month)->whereYear('sales_detail.updated_at', Carbon::now()->year);
+                break;
+            case 'this_year':
+                $query->whereYear('sales_detail.updated_at', Carbon::now()->year);
+                break;
+            case 'custom':
+                $start_date = Carbon::parse($request->input('startDate'));
+                $end_date = Carbon::parse($request->input('endDate'));
+
+                if ($end_date->greaterThan($start_date)) {
+                    $query->whereBetween('sales_detail.updated_at', [$start_date, $end_date]);
+                } else {
+                    $query->whereDate('sales_detail.updated_at', Carbon::today());
+                }
+                break;
+        }
+
+        $query->orderBy('sales_detail.quantity');
+
+        $list = $query->get();
+
+        return response()->json(['status'=>'success', 'list' => $list]);
+    }
+
     public function saleschartlist(Request $request)
     {
         $dateFilter = $request->dateRange;

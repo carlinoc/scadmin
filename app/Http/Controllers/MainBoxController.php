@@ -36,12 +36,16 @@ class MainBoxController extends Controller
 
     public function add(Request $request): JsonResponse
     {
+        $time = Carbon::now()->toTimeString();
+        $incomeDate = Carbon::parse($request->incomeDate)->format('Y-m-d') . ' ' . $time;
         $mainBox = new MainBox();
         $mainBox->movementType = 1;
         $mainBox->incomeconceptId = $request->incomeconceptId;
         $mainBox->income = $request->income;
         $mainBox->description = $request->description;
         $mainBox->userId = Auth::user()->id;
+        $mainBox->created_at = $incomeDate;
+        $mainBox->updated_at = $incomeDate;
         $mainBox->save();
 
         return response()->json(['status'=>'success', 'message'=>'El ingreso fue agregado']);
@@ -49,6 +53,8 @@ class MainBoxController extends Controller
 
     public function edit(Request $request): JsonResponse
     {
+        $time = Carbon::now()->toTimeString();
+        $incomeDate = Carbon::parse($request->incomeDate)->format('Y-m-d') . ' ' . $time;
         $mainBox = MainBox::find($request->mainBoxId);
         $lastIncome = $mainBox->income;
         $newIncome = $request->income;
@@ -58,6 +64,7 @@ class MainBoxController extends Controller
         $mainBox->income = $newIncome;
         $mainBox->description = $request->description;
         $mainBox->userId = Auth::user()->id;
+        $mainBox->updated_at = $incomeDate;
         $mainBox->update();
 
         $mainBoxHistory = new MainBoxHistory();
@@ -80,7 +87,7 @@ class MainBoxController extends Controller
         if($movementType == 3) {
             $state = 1;
         }
-        
+
         $query = MainBox::select('mainbox.id', 'mainbox.movementType', 'mainbox.income', 'mainbox.expense', 'mainbox.expenseType', 'mainbox.staffPayType',
             DB::raw("DATE_FORMAT(mainbox.created_at, '%d %b %Y %H:%i') as createdDate"), 'mainbox.description', 'mainbox.userId', 'incomeconcept.name as incomeConcept',
             DB::raw("DATE_FORMAT(mainbox.created_at, '%d-%m-%Y') as expenseDate"),
@@ -93,19 +100,19 @@ class MainBoxController extends Controller
             ->leftjoin('incomeconcept', 'incomeconcept.id', '=', 'mainbox.incomeconceptId')
             ->leftjoin('provider', 'provider.id', '=', 'mainbox.providerId')
             ->leftjoin('otherpay', 'otherpay.id', '=', 'mainbox.otherPayId')
-            ->where('mainbox.state', '=', $state);    
+            ->where('mainbox.state', '=', $state);
 
         if($movementType == -1) {
             $query->where(function($q) {
                 $q->where('mainbox.expense', '>', 0)->orWhere('mainbox.income', '>', 0);
-            });  
+            });
         }
-        
+
         if($movementType == -2) {
             $query->where('mainbox.expenseType', '<>', 5);
             $query->where(function($q) {
                 $q->where('mainbox.incomeconceptId', '=', 1)->orWhereNull('mainbox.incomeconceptId');
-            });  
+            });
         }
 
         if($movementType > 0 && $movementType < 3) {
@@ -206,7 +213,7 @@ class MainBoxController extends Controller
         $newExpense = $request->expense;
         $time = Carbon::now()->toTimeString();
         $expenseDate = Carbon::parse($request->expenseDate)->format('Y-m-d') . ' ' . $time;
-        
+
         $mainBox->movementType = 2;
         $mainBox->expense = $newExpense;
 
@@ -215,7 +222,7 @@ class MainBoxController extends Controller
         $mainBox->staffId = null;
         $mainBox->staffPayType = 0;
         $mainBox->otherPayId = null;
-        
+
         $expenseCategoryId = $request->subCategoryId;
         if($expenseCategoryId == "") {
             $expenseCategoryId = $request->expensecategoryId;
@@ -252,9 +259,9 @@ class MainBoxController extends Controller
             $mainBoxHistory->newExpense = $newExpense;
             $mainBoxHistory->userId = Auth::user()->id;
             $mainBoxHistory->mainBoxId = $request->mainBoxId;
-            $mainBoxHistory->save();    
+            $mainBoxHistory->save();
         }
-        
+
         return response()->json(['status'=>'success', 'message'=>'El gasto fue actualizado']);
     }
 
