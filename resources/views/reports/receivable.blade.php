@@ -27,29 +27,29 @@
                                     <option value="custom">Seleccionar Fechas</option>
                                 </select>
                             </div>
-                            <div class="col">
-                                <x-adminlte-select2 id="clientId" name="clientId" label-class="text-lightblue" data-placeholder="Cliente">
+                            <div class="col contefilter">
+                                <x-adminlte-select2 id="clientId" name="clientId" label-class="text-lightblue" data-placeholder="Cliente" style="padding: 0px;">
                                     <option value="0"> - Todos - </option>
                                     @foreach($list as $client)
                                         <option value="{{$client->id}}" >{{$client->name}}</option>
                                     @endforeach
                                 </x-adminlte-select2>
-                            </div>    
+                            </div>
                             <div class="col">
                                 <button id="showReport" type="submit" class="btn btn-primary">Ver Reporte</button>
                             </div>
                         </div>
                         <div id="rowDates" class="row mt-2" style="display:none;">
-                            <div class="col-6">
-                                <div class="input-group mb-3">
+                            <div class="col-3">
+                                <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text btn btn-primary text-white" id="basic-addon1"><i class="fas fa-calendar-alt"></i></span>
                                     </div>
                                     <input type="text" class="form-control" id="startDate" name="startDate" placeholder="Fecha Inicio">
                                 </div>
                             </div>
-                            <div class="col-6">
-                                <div class="input-group mb-3">
+                            <div class="col-3">
+                                <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text btn btn-primary text-white" id="basic-addon1"><i class="fas fa-calendar-alt"></i></span>
                                     </div>
@@ -57,10 +57,29 @@
                                 </div>
                             </div>
                         </div>
-                    </div>    
-                </form>        
+                    </div>
+                </form>
             </div>
-        </div> 
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-2">
+            <div class="info-box bg-gradient-success">
+                <div class="info-box-content">
+                    <span class="info-box-text text-center">Total Sin Descuento</span>
+                    <span id="lSubtotal" class="info-box-number text-center">s/ 0.00</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-2">
+            <div class="info-box bg-gradient-danger">
+                <div class="info-box-content">
+                    <span class="info-box-text text-center">Total con descuento</span>
+                    <span id="lTotal" class="info-box-number text-center">s/ 0.00</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row">
@@ -82,24 +101,48 @@
                             </tr>
                         </thead>
                     </table>
-                </x-adminlte-card>    
-            </div>        
+                </x-adminlte-card>
+            </div>
         </div>
     </div>
 
     @include('reports.add-pay')
-    @endrole   
-    
+    @endrole
+
     @role('Mozo')
     <p style="color: red">No tiene permisos para esta sección</p>
-    @endrole 
+    @endrole
 @stop
 
 @section('css')
 <link href="/vendor/datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet"/>
 <link rel="stylesheet" href="/vendor/admin/main.css">
 <style>
-    
+    .info-box{
+        min-height: 60px!important;
+        padding: .2rem!important;
+    }
+    .info-box-text{
+        padding: 0px!important;
+        margin: 0px!important;
+        line-height: 18px!important;
+    }
+    .info-box-number{
+        margin-top: 0px!important;
+    }
+    .info-box-number2{
+        margin-top: 0px!important;
+        display: block!important;
+        font-weight: 500!important;
+    }
+    .col-vercent{
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .contefilter .form-group{
+        margin-bottom: 0px!important;
+    }
 </style>
 @stop
 
@@ -120,8 +163,10 @@
     let _amount = $("#amount");
     let _lPOS = $("#lPOS");
     let _sClient = $("#sClient");
-    let _sAmount = $("#sAmount");   
-        
+    let _sAmount = $("#sAmount");
+    let _lSubtotal = $("#lSubtotal");
+    let _lTotal = $("#lTotal");
+
     $(function() {
         $("#startDate").datepicker({
             "dateFormat": "yy-mm-dd"
@@ -132,7 +177,7 @@
     });
 
     function fetchReport() {
-        let route = "{{ route('report.receivablelist') }}";        
+        let route = "{{ route('report.receivablelist') }}";
         let data = getFormParams('frmListOrders');
 
         fetch(route, {
@@ -142,8 +187,10 @@
         .then(response => response.json())
         .then(result => {
             if(result.status=="success"){
+                _lSubtotal.html('s/ ' + parseFloat(result.sumSubtotal).toFixed(2));
+                _lTotal.html('s/ ' + parseFloat(result.sumTotal).toFixed(2));
                 _ds = result.sales;
-                _dtSales.DataTable().destroy();    
+                _dtSales.DataTable().destroy();
                 _dtSales.DataTable({
                     "data": result.sales,
                     "responsive": true,
@@ -195,14 +242,14 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return '<a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-success item_pay"><i class="fas fa-dollar-sign"></i></a>';
+                                return '<a href="#" data-index="'+meta.row+'" class="btn btn-sm btn-success item_pay"><i class="fas fa-dollar-sign"></i></a>  <a href="{{ url("report/receivabledetail") }}/'+row.id+'" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>';
                             }
                         }
                     ]
                 });
             }
         });
-    }    
+    }
 
     $(document).ready(function(){
 
@@ -223,14 +270,14 @@
                 confirmButtonText: "Aceptar"
                 }).then((result) => {
                 if (result.isConfirmed) {
-            
+
                     let elements = [
                         ['amount', 'Ingrese el monto a pagar']
                     ];
 
                     if(emptyfy(elements)) {
                         let route = "{{ route('report.receivableadd') }}";
-                        
+
                         let data = getFormParams('frmAddPay');
                         fetch(route, {
                             method: 'post',
@@ -241,14 +288,14 @@
                             if(result.status=="success"){
                                 _addModalPay.modal('hide');
                                 showSuccessMsg(result.message);
-                                fetchReport(); 
+                                fetchReport();
                             }
                             if(result.status=="error"){
                                 showErrorMsg(result.message);
                             }
                         })
                     }
-                    
+
                 }
             });
         })
@@ -267,7 +314,7 @@
                 _amount.focus();
             }, 300);
         });
-        
+
         $("#startDate").on('changeDate', function(ev){
             $(this).datepicker('hide');
         });
@@ -280,12 +327,12 @@
             e.preventDefault();
             var range = this.value;
             if(range=="custom"){
-                $("#rowDates").show();    
+                $("#rowDates").show();
             }else{
-                $("#rowDates").hide();    
+                $("#rowDates").hide();
             }
         });
-        
+
         $('#showReport').on('click', function(e) {
             e.preventDefault();
             var range = $("#dateRange").val();
@@ -297,7 +344,7 @@
                 } else {
                     $('#dtsales').DataTable().destroy();
                     fetchReport();
-                }    
+                }
             }else{
                 $('#dtsales').DataTable().destroy();
                 fetchReport();
@@ -317,5 +364,5 @@
             _addModalPay.modal('show');
         });
     });
-</script>    
-@stop    
+</script>
+@stop

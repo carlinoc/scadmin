@@ -60,24 +60,24 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('/categories', CategoryController::class)->names('categories');    
+    Route::resource('/categories', CategoryController::class)->names('categories');
 
-    Route::resource('/places', PlaceController::class)->names('places');    
+    Route::resource('/places', PlaceController::class)->names('places');
 
-    Route::resource('/tables', TableController::class)->names('tables');    
+    Route::resource('/tables', TableController::class)->names('tables');
 
-    Route::resource('/products', ProductController::class)->names('products');    
+    Route::resource('/products', ProductController::class)->names('products');
 
     Route::resource('/sales', SaleController::class)->names('sales');
 
     Route::get('/products/list/{categoryId}', [ProductController::class, 'list'])->name('salesdetail.list');
-    
-    Route::get('/sale/available', [SaleController::class, 'available'])->name('sales.available');    
-    Route::get('/sale/tablelist', [SaleController::class, 'tablelist'])->name('sales.tablelist');  
-    Route::post('/table/clean/{tableId}', [TableController::class, 'clean'])->name('table.clean'); 
-    Route::post('/sale/takeorder', [SaleController::class, 'takeorder'])->name('sales.takeorder'); 
-    Route::get('/table/clear/{saleId}', [TableController::class, 'clear'])->name('table.clear');   
-    
+
+    Route::get('/sale/available', [SaleController::class, 'available'])->name('sales.available');
+    Route::get('/sale/tablelist', [SaleController::class, 'tablelist'])->name('sales.tablelist');
+    Route::post('/table/clean/{tableId}', [TableController::class, 'clean'])->name('table.clean');
+    Route::post('/sale/takeorder', [SaleController::class, 'takeorder'])->name('sales.takeorder');
+    Route::get('/table/clear/{saleId}', [TableController::class, 'clear'])->name('table.clear');
+
     Route::get('/sale/{saleId}', [SaleController::class, 'show'])->name('sales.show');
     Route::get('/sale/pdf/{sale}/{discount}', [SaleController::class, 'pdf'])->name('sales.pdf');
     Route::get('/sale/print/{sale}/{discount}/{withcash}', [SaleController::class, 'print'])->name('sales.print');
@@ -90,7 +90,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/sale/sendfactura', [SaleController::class, 'sendfactura'])->name('sales.sendfactura');
     Route::post('/sale/addtips', [SaleController::class, 'addtips'])->name('sales.addtips');
     Route::post('/sale/reprint', [SaleController::class, 'reprint'])->name('sales.reprint');
-    
+
     Route::post('/salesdetail/add', [SalesDetailController::class, 'add'])->name('salesdetail.add');
     Route::post('/salesdetail/edit', [SalesDetailController::class, 'edit'])->name('salesdetail.edit');
     Route::post('/salesdetail/remove/{saleDetailId}', [SalesDetailController::class, 'remove'])->name('salesdetail.remove');
@@ -105,7 +105,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/salesdetail/senddocument', [SalesDetailController::class, 'senddocument'])->name('salesdetail.senddocument');
 
     Route::get('/salelist', [SaleController::class, 'list'])->name('salelist.list');
-    
+
     Route::get('/detail/{saleId}', [SaleController::class, 'detail'])->name('salelist.detail');
     Route::get('/report/detail/{saleId}', [SaleController::class, 'detailorder'])->name('reports.detail');
     Route::get('/report/detalle/{saleId}', [SaleController::class, 'detalleorder'])->name('reports.detalle');
@@ -124,6 +124,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/report/tips', [ReportController::class, 'tips'])->name('report.tips');
     Route::post('/report/tipslist', [ReportController::class, 'tipslist'])->name('report.tipslist');
     Route::get('/report/receivable', [ReportController::class, 'receivable'])->name('report.receivable');
+    Route::get('/report/receivabledetail/{saleId}', [ReportController::class, 'receivabledetail'])->name('report.receivabledetail');
     Route::post('/report/receivablelist', [ReportController::class, 'receivablelist'])->name('report.receivablelist');
     Route::post('/report/receivableadd', [ReportController::class, 'receivableadd'])->name('report.receivableadd');
     Route::post('/report/sunat/{saleId}/{sunat}', [ReportController::class, 'sunat'])->name('report.sunat');
@@ -144,7 +145,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/report/expenselist', [ReportController::class, 'expenselist'])->name('report.expenselist');
     Route::post('/report/topexpense', [ReportController::class, 'topexpense'])->name('report.topexpense');
     Route::post('/report/productdetaillist', [ReportController::class, 'productdetaillist'])->name('report.productdetaillist');
-    
+
     Route::get('/user', [UserController::class, 'index'])->name('user.index');
     Route::get('/user/list', [UserController::class, 'list'])->name('user.list');
     Route::post('/user/add', [UserController::class, 'add'])->name('user.add');
@@ -208,7 +209,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/company', [CompanyController::class, 'index'])->name('company.index');
     Route::post('/company/add', [CompanyController::class, 'add'])->name('company.add');
     Route::post('/company/store', [CompanyController::class, 'store'])->name('company.store');
-        
+
     Route::get('/companyserial/list/{serietype}', [CompanySerialController::class, 'list'])->name('companyserial.list');
     Route::post('/companyserial/store', [CompanySerialController::class, 'store'])->name('companyserial.store');
     Route::post('/companyserial/adddebug', [CompanySerialController::class, 'adddebug'])->name('companyserial.adddebug');
@@ -243,7 +244,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/otherpay/list', [OtherPayController::class, 'list'])->name('otherpay.list');
     Route::get('/otherpay/detail/{otherpayId}', [OtherPayController::class, 'detail'])->name('otherpay.detail');
     Route::post('/otherpay/listexpense', [OtherPayController::class, 'listexpense'])->name('otherpay.listexpense');
-    
+
     Route::post('/payboxincome/add', [PayBoxIncomeController::class, 'add'])->name('payboxincome.add');
     Route::post('/payboxincome/edit', [PayBoxIncomeController::class, 'edit'])->name('payboxincome.edit');
     Route::post('/payboxincome/remove/{payboxIncomeId}', [PayBoxIncomeController::class, 'remove'])->name('payboxincome.remove');

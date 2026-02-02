@@ -41,7 +41,7 @@
                                         <option value="{{ $companyPos->id }}">{{ $companyPos->pos }}</option>
                                     @endforeach
                                 </select>
-                            </div>    
+                            </div>
                             <div class="col-auto">
                                 <select class="form-control" name="filterpay" id="filterpay">
                                     <option value="1">Ventas Efectivas</option>
@@ -54,7 +54,7 @@
                                     <input type="checkbox" class="custom-control-input" id="currentPayBox" name="currentPayBox" checked>
                                     <label class="custom-control-label" for="currentPayBox">Caja Activa</label>
                                 </div>
-                            </div>    
+                            </div>
                             <div class="col">
                                 <button id="showReport" type="submit" class="btn btn-primary">Ver Reporte</button>
                             </div>
@@ -77,10 +77,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>    
-                </form>        
+                    </div>
+                </form>
             </div>
-        </div> 
+        </div>
     </div>
 
     <div class="row">
@@ -121,13 +121,13 @@
                 <div class="info-box-content">
                     <div class="row">
                         <div class="col col-vercent">
-                            <span id="sTipsTotal" class="text-muted">Tips: S/ 0.00</span>    
+                            <span id="sTipsTotal" class="text-muted">Tips: S/ 0.00</span>
                         </div>
                         <div class="col">
                             <span id="sTipsCash" class="info-box-number2 text-success">Efectivo: 0.00</span>
                             <span id="sTipsCard" class="info-box-number2 text-muted">Tarjeta: 0.00</span>
                         </div>
-                    </div>            
+                    </div>
                 </div>
             </div>
         </div>
@@ -157,15 +157,15 @@
                             </tr>
                         </thead>
                     </table>
-                </x-adminlte-card>    
-            </div>        
+                </x-adminlte-card>
+            </div>
         </div>
     </div>
-    @endrole   
-    
+    @endrole
+
     @role('Mozo')
     <p style="color: red">No tiene permisos para esta sección</p>
-    @endrole 
+    @endrole
 @stop
 
 @section('css')
@@ -206,7 +206,7 @@
     let _sTipsCash = $("#sTipsCash");
     let _sTipsCard = $("#sTipsCard");
     let _ds = null;
-    let _sTipsTotal = $("#sTipsTotal");    
+    let _sTipsTotal = $("#sTipsTotal");
 
     $(function() {
         $("#startDate").datepicker({
@@ -218,7 +218,7 @@
     });
 
     function fetchReport() {
-        let route = "{{ route('report.saleslist') }}";        
+        let route = "{{ route('report.saleslist') }}";
         let data = getFormParams('frmListOrders');
 
         fetch(route, {
@@ -229,7 +229,7 @@
         .then(result => {
             if(result.status=="success"){
                 _ds = result.sales;
-                _dtSales.DataTable().destroy();    
+                _dtSales.DataTable().destroy();
                 _dtSales.DataTable({
                     "data": result.sales,
                     "responsive": true,
@@ -281,10 +281,10 @@
                         {
                             "render": function(data, type, row, meta) {
                                 if(row.pos != null){
-                                    return "<small>" + row.pos + "</small>";    
+                                    return "<small>" + row.pos + "</small>";
                                 }else{
                                     return "";
-                                } 
+                                }
                             }
                         },
                         {
@@ -304,7 +304,7 @@
                                     }else{
                                         return '<span class="text-secondary"><i class="fas fa-coins"></i> ' + row.tips +'</span>';
                                     }
-                                    
+
                                 }else{
                                     return row.tips;
                                 }
@@ -323,7 +323,7 @@
                                 }else{
                                     return '<div class="custom-control custom-checkbox"><input class="custom-control-input custom-control-input-danger itemsunat" data-index="'+ix1+'" type="checkbox" id="cb1_'+ix1+'" checked><label for="cb1_'+ix1+'" class="custom-control-label"></label></div>';
                                 }
-                                
+
                             }
                         },
                         {
@@ -334,7 +334,7 @@
                                 }else{
                                     return '<div class="custom-control custom-checkbox"><input class="custom-control-input itemisforeign" data-index="'+ix2+'" type="checkbox" id="cb2_'+ix2+'" checked><label for="cb2_'+ix2+'" class="custom-control-label"></label></div>';
                                 }
-                                
+
                             }
                         },
                         {
@@ -353,7 +353,7 @@
                 $('#lCash').html('S/ ' + formatMoney(result.withCash));
                 $('#lCard').html('S/ ' + formatMoney(result.withCard));
                 $('#lYape').html('S/ ' + formatMoney(result.withYape));
-                
+
                 let _cashTips = 0.0;
                 let _cardTips = 0.0;
                 let _totalTips = 0.0;
@@ -371,7 +371,7 @@
                 _sTipsTotal.html('Tips: S/' + formatMoney(parseFloat(_totalTips)));
             }
         });
-    }    
+    }
 
     $(document).ready(function(){
         let dateRange = localStorage.getItem("sales_daterange");
@@ -392,7 +392,7 @@
             e.preventDefault();
             var isChecked = $(this).is(":checked");
             localStorage.setItem("sales_ischecked", isChecked);
-        });   
+        });
 
         $('#withCash').on('change', function(e) {
             e.preventDefault();
@@ -417,12 +417,12 @@
             var range = this.value;
             localStorage.setItem("sales_daterange", range);
             if(range=="custom"){
-                $("#rowDates").show();    
+                $("#rowDates").show();
             }else{
-                $("#rowDates").hide();    
+                $("#rowDates").hide();
             }
         });
-        
+
         $('#showReport').on('click', function(e) {
             e.preventDefault();
             var range = $("#dateRange").val();
@@ -434,7 +434,7 @@
                 } else {
                     $('#dtsales').DataTable().destroy();
                     fetchReport();
-                }    
+                }
             }else{
                 $('#dtsales').DataTable().destroy();
                 fetchReport();
@@ -447,10 +447,10 @@
             if(isChecked){
                 sunat = 1;
             }
-            
+
             let index = $(this).data('index');
             let saleId = _ds[index].id;
-            
+
             fetch("/report/sunat/" + saleId + "/" + sunat, {
                 method: 'post',
                 headers: {
@@ -466,7 +466,7 @@
                 if(result.status=="error"){
                     showErrorMsg(result.message);
                 }
-            });      
+            });
         });
 
         _dtSales.on('click', '.itemisforeign', function (e) {
@@ -475,10 +475,10 @@
             if(isChecked){
                 isforeign = 1;
             }
-            
+
             let index = $(this).data('index');
             let saleId = _ds[index].id;
-            
+
             fetch("/report/isforeign/" + saleId + "/" + isforeign, {
                 method: 'post',
                 headers: {
@@ -494,8 +494,8 @@
                 if(result.status=="error"){
                     showErrorMsg(result.message);
                 }
-            });      
+            });
         });
     });
-</script>    
-@stop    
+</script>
+@stop

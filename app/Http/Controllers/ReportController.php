@@ -187,7 +187,15 @@ class ReportController extends Controller
 
         $sales = $query->get();
 
-        return response()->json(['status'=>'success', 'sales' => $sales]);
+        $subtotalSum = $sales->sum('subtotal');
+        $totalSum = $sales->sum('total');
+
+        return response()->json([
+            'status'=>'success',
+            'sales' => $sales,
+            'sumSubtotal' => number_format($subtotalSum, 2, '.', ''),
+            'sumTotal' => number_format($totalSum, 2, '.', '')
+        ]);
     }
 
     public function lastorders(): View
@@ -344,6 +352,29 @@ class ReportController extends Controller
         $companyPosList = CompanyPos::all();
 
         return view('reports.receivable', ['list' => $list, 'companyPosList' => $companyPosList]);
+    }
+
+    public function receivabledetail(Request $request): View
+    {
+        $saleId = $request->saleId;
+        $query = Sale::select('sales.id', DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %h:%i %p') as createdDate"), 'clients.name as clientName', 'sales.discount as clientDiscount')
+            ->join('clients', 'clients.id', '=', 'sales.clientId')
+            ->where('sales.id', $saleId);
+
+        //listar el detalle de la venta
+        $saleDetails = SalesDetail::select('sales_detail.id', 'products.name', 'sales_detail.quantity', 'sales_detail.price', 'sales_detail.total')
+            ->join('products', 'products.id', '=', 'sales_detail.productId')
+            ->where('sales_detail.saleId', $saleId)
+            ->get();
+
+        return view('reports.receivabledetail', [
+            'saleId' => $saleId,
+            'saleDate' => $query->first()->createdDate,
+            'clientName' => $query->first()->clientName,
+            'clientDiscount' => $query->first()->clientDiscount,
+            'saleDetails' => $saleDetails,
+            'totalAmount' => $saleDetails->sum('total')
+        ]);
     }
 
     public function receivableadd(Request $request)
@@ -677,7 +708,7 @@ class ReportController extends Controller
         $services = Service::all();
         $otherpays = OtherPay::all();
 
-        $users = User::select('users.id', 'users.name', 'users.email', 'roles.name as role', 'roles.id as roleId') 
+        $users = User::select('users.id', 'users.name', 'users.email', 'roles.name as role', 'roles.id as roleId')
             ->join('model_has_roles', 'model_has_roles.model_id', '=', 'users.id')
             ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
             ->where('roles.name', '!=', 'Mozo')
@@ -709,7 +740,7 @@ class ReportController extends Controller
             if($withCash<4){
                 $query->where('sales.withCash','=', $withCash);
             }
-    
+
             if($withCash==1 && $companyPosId>0){
                 $query->where('sales.companyPosId','=', $companyPosId);
             }
@@ -720,7 +751,7 @@ class ReportController extends Controller
                 $query->where('sales.userId', '=', $userId);
             }
         }
-        
+
         // consulta de gastos
         $expense1 = MainBox::select('mainbox.created_at', 'expense')
                 ->where('mainbox.movementType', '=', 2)
@@ -729,7 +760,7 @@ class ReportController extends Controller
 
         if($expenseType > 0) {
             $expense1->where('mainbox.expenseType', '=', $expenseType);
-            
+
             if($staffId > 0) {
                 $expense1->where('mainbox.staffId', '=', $staffId);
             }
@@ -854,8 +885,8 @@ class ReportController extends Controller
                 ->where('sales.status', 1);
 
         if($userId > 0) {
-            $query->where('sales.userId', $userId);            
-        }       
+            $query->where('sales.userId', $userId);
+        }
 
         switch($dateFilter){
             case 'today':
@@ -928,14 +959,14 @@ class ReportController extends Controller
                 ->leftjoin('staff', 'staff.id', '=', 'mainbox.staffId')
                 ->leftjoin('provider', 'provider.id', '=', 'mainbox.providerId')
                 ->leftjoin('service', 'service.id', '=', 'mainbox.serviceId')
-                ->leftjoin('otherpay', 'otherpay.id', '=', 'mainbox.otherPayId')  
+                ->leftjoin('otherpay', 'otherpay.id', '=', 'mainbox.otherPayId')
                 ->where('mainbox.movementType', '=', 2)
                 ->where('mainbox.state', '=', 0)
                 ->where('mainbox.expenseType', '<>', 5);
 
         if($expenseType > 0) {
             $expense1->where('mainbox.expenseType', '=', $expenseType);
-            
+
             if($staffId > 0) {
                 $expense1->where('mainbox.staffId', '=', $staffId);
             }
@@ -1038,7 +1069,7 @@ class ReportController extends Controller
                 }
                 break;
         }
-        
+
         $query->orderBy('expense', 'desc')->limit(50);
         $list = $query->get();
 
@@ -1063,7 +1094,7 @@ class ReportController extends Controller
         $providerId = $request->providerId;
         $serviceId = $request->serviceId;
         $otherpayId = $request->otherpayId;
-        
+
         $expense1 = MainBox::select('mainbox.created_at', 'expense')
                 ->where('mainbox.movementType', '=', 2)
                 ->where('mainbox.state', '=', 0)
@@ -1071,7 +1102,7 @@ class ReportController extends Controller
 
         if($expenseType > 0) {
             $expense1->where('mainbox.expenseType', '=', $expenseType);
-            
+
             if($staffId > 0) {
                 $expense1->where('mainbox.staffId', '=', $staffId);
             }
@@ -1133,7 +1164,7 @@ class ReportController extends Controller
             case 'last_week':
                 $fromDate = Carbon::now()->subWeek()->startOfWeek(Carbon::MONDAY)->toDateString();
                 $toDate = Carbon::now()->subWeek()->endOfWeek(Carbon::MONDAY)->toDateString();
-           
+
                 $query->whereBetween('created_at', [$fromDate, $toDate]);
                 break;
             case 'this_month':
@@ -1173,9 +1204,9 @@ class ReportController extends Controller
         $dateFilter = $request->dateRange;
         $categoryId = $request->categoryId;
         $subCategoryId = $request->subCategoryId;
-        
+
         $expense1 = MainBox::select('mainbox.created_at', 'expense', DB::raw('1 as boxType'))
-                ->join('expensecategories', 'expensecategories.id', '=', 'mainbox.expensecategoryId') 
+                ->join('expensecategories', 'expensecategories.id', '=', 'mainbox.expensecategoryId')
                 ->where('mainbox.movementType', '=', 2)
                 ->where('mainbox.state', '=', 0);
 
@@ -1185,9 +1216,9 @@ class ReportController extends Controller
         if($subCategoryId > 0) {
             $expense1->where('mainbox.expensecategoryId', '=', $subCategoryId);
         }
-        
+
         $expense2 = PayBoxExpense::select('expenseDate as created_at', 'expense', DB::raw('2 as boxType'))
-                ->join('expensecategories', 'expensecategories.id', '=', 'payboxexpense.expensecategoryId'); 
+                ->join('expensecategories', 'expensecategories.id', '=', 'payboxexpense.expensecategoryId');
 
         if($categoryId > 0 && $subCategoryId == 0) {
             $expense2->where('expensecategories.parentId', '=', $categoryId);
@@ -1197,7 +1228,7 @@ class ReportController extends Controller
         }
 
         $expense3 = PosExpense::select('expenseDate as created_at', 'expense', DB::raw('3 as boxType'))
-                ->join('expensecategories', 'expensecategories.id', '=', 'posexpense.expensecategoryId'); 
+                ->join('expensecategories', 'expensecategories.id', '=', 'posexpense.expensecategoryId');
 
         if($categoryId > 0 && $subCategoryId == 0) {
             $expense3->where('expensecategories.parentId', '=', $categoryId);
@@ -1219,7 +1250,7 @@ class ReportController extends Controller
             case 'last_week':
                 $fromDate = Carbon::now()->subWeek()->startOfWeek(Carbon::MONDAY)->toDateString();
                 $toDate = Carbon::now()->subWeek()->endOfWeek(Carbon::MONDAY)->toDateString();
-                
+
                 $query->whereBetween('created_at', [$fromDate, $toDate]);
                 break;
             case 'this_month':
@@ -1246,7 +1277,7 @@ class ReportController extends Controller
 
         $list = [];
         $list = $query->get();
-    
+
         return response()->json(['status'=>'success', 'list' => $list]);
     }
 
@@ -1257,7 +1288,7 @@ class ReportController extends Controller
         $subCategoryId = $request->subCategoryId;
 
         $expense1 = MainBox::select('mainbox.created_at', 'expense', 'description', 'mainbox.expenseType', 'expensecategories.category', DB::raw('1 as boxType'))
-                ->join('expensecategories', 'expensecategories.id', '=', 'mainbox.expensecategoryId') 
+                ->join('expensecategories', 'expensecategories.id', '=', 'mainbox.expensecategoryId')
                 ->where('mainbox.movementType', '=', 2)
                 ->where('mainbox.state', '=', 0)
                 ->where('mainbox.expenseType', '<>', 5);
@@ -1270,7 +1301,7 @@ class ReportController extends Controller
         }
 
         $expense2 = PayBoxExpense::select('expenseDate as created_at', 'expense', 'description', 'payboxexpense.expenseType', 'expensecategories.category', DB::raw('2 as boxType'))
-                ->join('expensecategories', 'expensecategories.id', '=', 'payboxexpense.expensecategoryId'); 
+                ->join('expensecategories', 'expensecategories.id', '=', 'payboxexpense.expensecategoryId');
 
         if($categoryId > 0 && $subCategoryId == 0) {
             $expense2->where('expensecategories.parentId', '=', $categoryId);
@@ -1280,7 +1311,7 @@ class ReportController extends Controller
         }
 
         $expense3 = PosExpense::select('expenseDate as created_at', 'expense', 'description', 'posexpense.expenseType', 'expensecategories.category', DB::raw('3 as boxType'))
-                ->join('expensecategories', 'expensecategories.id', '=', 'posexpense.expensecategoryId'); 
+                ->join('expensecategories', 'expensecategories.id', '=', 'posexpense.expensecategoryId');
 
         if($categoryId > 0 && $subCategoryId == 0) {
             $expense3->where('expensecategories.parentId', '=', $categoryId);
@@ -1330,10 +1361,10 @@ class ReportController extends Controller
                 }
                 break;
         }
-        
+
         $query->orderBy('expense', 'desc')->limit(50);
         $list = $query->get();
 
-        return response()->json(['status'=>'success', 'list' => $list]);        
-    } 
+        return response()->json(['status'=>'success', 'list' => $list]);
+    }
 }
