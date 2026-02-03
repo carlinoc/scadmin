@@ -142,9 +142,10 @@ class ReportController extends Controller
         $clientId = $request->clientId;
 
         $query = Sale::select('sales.id', 'sales.subtotal', 'sales.discount', 'sales.total', 'sales.status', 'sales.withCash',
-            DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'tables.name as table', 'clients.name as client')
+            DB::raw("DATE_FORMAT(sales.created_at, '%d-%m-%Y %H:%i') as createdDate"), 'tables.name as table', 'clients.name as client', 'users.name as userName')
             ->join('tables', 'tables.id','=','sales.tableId')
             ->join('clients', 'clients.id', '=', 'sales.clientId')
+            ->join('users', 'users.id','=','sales.userId')
             ->where('sales.withCash','=', 3);
 
         if($clientId!=0){

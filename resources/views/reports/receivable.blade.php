@@ -90,13 +90,14 @@
                         <thead>
                             <tr>
                                 <th style="width: 80px;">Nro</th>
-                                <th>Fecha y Hora</th>
                                 <th>Cliente</th>
                                 <th>Mesa</th>
                                 <th>SubTotal</th>
                                 <th style="width: 100px;">Desc.</th>
                                 <th>Total</th>
                                 <th>Pago</th>
+                                <th>Cobrado Por</th>
+                                <th>Fecha y Hora</th>
                                 <th>Opciones</th>
                             </tr>
                         </thead>
@@ -208,11 +209,6 @@
                         },
                         {
                             "render": function(data, type, row, meta) {
-                                return row.createdDate;
-                            }
-                        },
-                        {
-                            "render": function(data, type, row, meta) {
                                 return row.table;
                             }
                         },
@@ -238,6 +234,16 @@
                         {
                             "render": function(data, type, row, meta) {
                                 return getPayType(row.withCash);
+                            }
+                        },
+                        {
+                            "render": function(data, type, row, meta) {
+                                return row.userName;
+                            }
+                        },
+                        {
+                            "render": function(data, type, row, meta) {
+                                return row.createdDate;
                             }
                         },
                         {
